@@ -95,11 +95,11 @@ const InstituteTable = (props) => {
                     <Row>
                         <Col className="mr-auto">
                             搜索结果<span className="annotation">（共 {institutes.length} 项）</span>
-                            <br />
                             <span className="annotation">
                                 第 {(currentPage - 1) * instPerPage + 1}~{(currentPage * instPerPage > institutes.length) ? institutes.length : (currentPage * instPerPage)} 项
                             </span>
                         </Col>
+                        
                         <Col xs="auto" sm="auto">
                             <Row>
                                 <span>
@@ -146,8 +146,8 @@ const InstituteTable = (props) => {
                                         </Col>
                                         <Col style={{ textAlign: "right" }} xs>
                                             <Badge>
-                                            <SVG variant="location" />
-                                            {i.location}
+                                                <SVG variant="location" />
+                                                {i.location}
                                             </Badge>
                                         </Col>
                                     </Row>
@@ -183,7 +183,7 @@ const InstituteTable = (props) => {
                                 <Col className="d-none d-lg-block">
                                     <Row>
                                         <span className="annotation">
-                                也就是说，我们将使用axios库来代替浏览器和服务器之间的通信。 它的功能类似于fetch，但是使用起来更友好。 使用 axios 的另一个很好的理由是，我们已经熟悉了为 React 项目添加外部库，即使用所谓的npm 包。
+                                            也就是说，我们将使用axios库来代替浏览器和服务器之间的通信。 它的功能类似于fetch，但是使用起来更友好。 使用 axios 的另一个很好的理由是，我们已经熟悉了为 React 项目添加外部库，即使用所谓的npm 包。
                                         </span>
                                     </Row>
                                     <Row>
