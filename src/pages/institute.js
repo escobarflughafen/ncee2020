@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../style.css'
 import { useState, useEffect } from 'react'
-import { Accordion, Card, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup } from 'react-bootstrap'
+import { ButtonGroup, ToggleButton, Accordion, Card, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, InputGroup } from 'react-bootstrap'
 import { Image, Badge, Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useParams, useRouteMatch, useHistory } from 'react-router-dom'
 import constants from '../utils/constants'
@@ -81,13 +81,14 @@ const fetchAllInstitutesInfo = async (queryParams, cb, port = constants.serverPo
 
 const queryInstitutesInfo = async (queryParams, cb, port = constants.serverPort) => {
     const url = `http://${document.domain}:${port}/institute/getinfo`
+
     try {
         let req = axios.post(url, {
             headers: {
                 'Access-Control-Allow-Origin': '*'
             },
             data: {
-                query: queryParams
+                ...queryParams
             }
         })
         cb(await req.then())
@@ -154,28 +155,14 @@ const InstituteTable = (props) => {
     const totalPageNum = Math.ceil(institutes.length / instPerPage)
 
     const [queryTags, setQueryTags] = useState([])
+    const [keyword, setKeyword] = useState("")
 
-    var queryParams = {
-        keyword: "",
-        location: "",
-        category: "",
-        labels: "",
-    }
 
     useEffect(() => {
-        fetchAllInstitutesInfo(queryParams, (res) => {
+        fetchAllInstitutesInfo({}, (res) => {
             setInstitutes([...res.data.institutes])
         })
     }, [])
-
-
-
-    const handleQuery = (e) => {
-        e.preventDefault();
-        queryInstitutesInfo(queryParams, (res) => {
-            setInstitutes([...res.data.institutes])
-        })
-    }
 
     const addTag = (category, label) => {
         if (!queryTags.find(t => (t.category === category) && (t.label === label))) {
@@ -189,9 +176,29 @@ const InstituteTable = (props) => {
         }
     }
 
+    const handleQuery = (e) => {
+        e.preventDefault();
+        queryInstitutesInfo({
+            keywordconj: keywordConjunction,
+            tags: queryTags
+        }, (res) => {
+            console.log(res.data.queryParams)
+            setInstitutes([...res.data.institutes])
+            setCurrentPage(1)
+        })
+    }
+
+    const addKeyword = (kw) => {
+        if (kw != '') {
+            addTag('keyword', kw)
+        }
+    }
+
     const removeTag = (category, label) => {
         setQueryTags(queryTags.filter((t) => !((t.category === category) && (t.label === label))))
     }
+
+    const [keywordConjunction, setKeywordConjunction] = useState(true)
 
     return (
         <div>
@@ -204,16 +211,24 @@ const InstituteTable = (props) => {
                         <Card.Body>
                             <Form onSubmit={handleQuery}>
                                 <Form.Row>
-                                    <Form.Group as={Col} controlId="instname">
+                                    <Form.Group as={Col} controlId="instname" >
                                         <Form.Label>院校名称</Form.Label>
-                                        <Form.Control type="text"
-                                            onChange={(e) => {
-                                                queryParams.keyword = e.target.value
-                                            }}
-                                            onClick={(e) => {
-                                                queryParams.keyword = e.target.value
-                                            }}
-                                        />
+                                        <InputGroup size="sm">
+                                            <Form.Control
+                                                type="text"
+                                                value={keyword}
+                                                onChange={(e) => { setKeyword(e.target.value) }}
+                                            />
+                                            <InputGroup.Append>
+                                                <Button
+                                                    variant="outline-dark"
+                                                    onClick={(e) => { addKeyword(keyword); setKeyword('') }}
+                                                >
+                                                    添加关键字
+                                                </Button>
+                                            </InputGroup.Append>
+                                        </InputGroup>
+
                                     </Form.Group>
                                 </Form.Row>
 
@@ -221,30 +236,34 @@ const InstituteTable = (props) => {
                                     <Form.Group as={Col} controlId="province">
                                         <Form.Label>地区</Form.Label>
                                         <Form.Control
+                                            size="sm"
                                             as="select"
                                             defaultValue="..."
                                             onChange={
                                                 (e) => {
                                                     if (e.target.value !== "...") {
                                                         addTag("region", e.target.value)
+                                                        e.target.value='...'
                                                     }
                                                 }
                                             }>
                                             <option>...</option>
-                                            {constants.provinces.map((p) => {
-                                                return (<option>{p}</option>)
+                                            {constants.regions.map((r) => {
+                                                return (<option>{r.region_name}</option>)
                                             })}
                                         </Form.Control>
                                     </Form.Group>
                                     <Form.Group as={Col} controlId="category">
                                         <Form.Label>类型</Form.Label>
                                         <Form.Control
+                                            size="sm"
                                             as="select"
                                             defaultValue="..."
                                             onChange={
                                                 (e) => {
                                                     if (e.target.value !== "...") {
                                                         addTag("category", e.target.value)
+                                                        e.target.value='...'
                                                     }
                                                 }
                                             }
@@ -258,12 +277,14 @@ const InstituteTable = (props) => {
                                     <Form.Group as={Col} controlId="label">
                                         <Form.Label>标签</Form.Label>
                                         <Form.Control
+                                            size="sm"
                                             as="select"
                                             defaultValue="..."
                                             onChange={
                                                 (e) => {
                                                     if (e.target.value !== "...") {
                                                         addTag("tag", e.target.value)
+                                                        e.target.value='...'
                                                     }
                                                 }
                                             }>
@@ -277,23 +298,49 @@ const InstituteTable = (props) => {
                                 <Row>
                                     <Col>
                                         {
-                                            queryTags.map((tag) => (
-                                                <Badge className="mr-2"
-                                                    variant={((tag.category === "region") && "success") || ((tag.category === "category") && "primary") || ((tag.category === "tag") && "info")}
-                                                    pill
-                                                    onClick={() => removeTag(tag.category, tag.label)}
-                                                >
-                                                    {tag.label}
-                                                    <SVG variant="x" />
-                                                </Badge>
-                                            ))
+                                            queryTags.map((tag) => {
+                                                let tagBadge = {
+                                                    'region': 'success',
+                                                    'category': 'primary',
+                                                    'tag': 'info',
+                                                    'keyword': 'secondary'
+                                                }
+                                                return (
+                                                    <Badge className="mr-2"
+                                                        variant={tagBadge[tag.category]}
+                                                        pill
+                                                        onClick={() => removeTag(tag.category, tag.label)}
+                                                    >
+                                                        {(tag.category === 'keyword') ? '关键字：' : ''}{tag.label}
+                                                        <SVG variant="x" />
+                                                    </Badge>
+                                                )
+                                            })
                                         }
                                     </Col>
                                 </Row>
                                 <hr />
-                                <Button variant="primary" type="submit">
-                                    查询
-                            </Button>
+                                <ButtonGroup>
+                                    <Button variant="primary" type="submit" size="sm">
+                                        查询
+                                </Button>
+                                    <ButtonGroup toggle>
+                                        <ToggleButton
+                                            size="sm"
+                                            type="checkbox"
+                                            variant="outline-dark"
+                                            checked={keywordConjunction}
+                                            value={(keywordConjunction) ? "conjunction" : "disjunction"}
+                                            onChange={(e) => {
+                                                console.log(e.currentTarget.checked)
+                                                setKeywordConjunction(!keywordConjunction)
+                                            }}
+                                        >
+                                            {((keywordConjunction) ? "合取" : "析取") + "关键字"}
+                                        </ToggleButton>
+                                    </ButtonGroup>
+
+                                </ButtonGroup>
                             </Form>
 
                         </Card.Body>
