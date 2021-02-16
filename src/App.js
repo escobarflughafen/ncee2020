@@ -166,8 +166,7 @@ const LoginForm = () => {
                         <Form.Label>届</Form.Label>
                         <Form.Control as="select">
                           {
-                            [2021, 2020, 2019, 2018, 2017, 2016, "2015前"
-                            ].map((year) => (<option>{year}</option>))
+                            [2021, 2020, 2019, 2018, 2017, 2016, "2016前"].map((year) => (<option>{year}</option>))
                           }
                         </Form.Control>
                       </Form.Group>
@@ -510,7 +509,7 @@ function App() {
             </Route>
 
             <Route path="/demo1">
-
+              <InfoTabs tabs={tabs} />
             </Route>
             <Route path="/demo2">
 

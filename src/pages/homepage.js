@@ -528,7 +528,7 @@ const Homepage = (props) => {
   return (
     <div style={{padding: "1em"}}>
       <Row>
-        <Col sm={12} md={8} lg={8} style={scrolloverflow}>
+        <Col lg={8} style={scrolloverflow}>
           {// TODO: UPDATE with <Card /> component
           }
           <Tabs defaultActiveKey="feeds" id="uncontrolled-tab-example" fill justify>
@@ -540,7 +540,7 @@ const Homepage = (props) => {
           </Tabs>
         </Col>
 
-        <Col sm={0} md={4} lg={4}>
+        <Col className="d-none d-lg-block" lg={4}>
               <Trends />
         </Col>
       </Row>
