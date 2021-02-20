@@ -14,3 +14,7 @@
   font-size: 1rem;
   font-family: serif;
 }
+
+.nav-button:hover{
+  background-color: rgba(0,0,0,0.05);
+}

@@ -1,10 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
-import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation } from 'react-router-dom'
+import SVG from './utils/svg'
 import Homepage from './pages/homepage'
 import InstitutePage from './pages/institute'
+import Statistics from './pages/statistics'
+import NavigationBar  from './pages/components/navigation-bar'
 
 // components
 const CNavbar = () => {
@@ -243,31 +246,6 @@ const LoginForm = () => {
 
 
 
-/*
-structure of directory:
-[
-  // home
-  {
-    name: "Home",
-    url: "/",
-    important: true
-  },
-  // next level
-  {
-    name: "Foo",
-    url: "/foo",
-    important: true
-  },
-  {
-    name: "Bar",
-    url: "/bar",
-    important: false
-  }
-]
-
-displayed as: Home / Foo / Bar
-
-*/
 const BreadcrumbNavigator = ({ path }) => {
   return (
     <Breadcrumb>
@@ -432,51 +410,49 @@ const tabs = [
 
 function App() {
   const [user, setUser] = useState(null);
-  const history = useHistory();
-
-  const [path, setPath] = useState([{
-    name: 'Home',
-    url: '/',
-    important: true
-  },
-  {
-    name: 'Foo',
-    url: '/login',
-    important: true
-  }
-  ]);
 
   return (
     <div>
       <Router>
-        <Navbar bg="dark" variant="dark" expand="lg">
+        <Navbar className="bg-dark" variant="dark" expand="lg">
           <Link className="navbar-brand" to="/">高校录取分数线</Link>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto">
-              <Link className="nav-link" to="/home">主页</Link>
-              <Link className="nav-link" to="/data">看数据</Link>
-              <Link className="nav-link" to="/institute">查学校</Link>
-              <Link className="nav-link" to="/forum">讨论区</Link>
-              <Link className="nav-link" to="/about">关于</Link>
+              <Nav.Item>
+                <Link className="nav-link" to="/home">主页</Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Link className="nav-link" to="/stats">看数据</Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Link className="nav-link" to="/institute">查学校</Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Link className="nav-link" to="/forum">讨论区</Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Link className="nav-link" to="/about">关于</Link>
+              </Nav.Item>
             </Nav>
-            <Form inline style={{ marginRight: 8 }}>
+            <Form inline className="mr-2 d-none d-lg-block">
               <FormControl type="text" placeholder="..." className="mr-sm-2" />
               <Button variant="outline-success">搜索</Button>
             </Form>
 
             <Nav>
-              <Link class="nav-link" to="/login">
-                登入
-              </Link>
+              <Nav.Item>
+                <Link className="nav-link d-lg-none" to="/search">搜索</Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Link className="nav-link" to="/login">登入</Link>
+              </Nav.Item>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
 
-        {/*<BreadcrumbNavigator path={[{ name: '', url: '' }]} />*/}
-
-        <div className="container my-3">
-          <Switch>
+        <Switch>
+          <div className="container mt-3">
             <Route path="/" exact={true}>
               <Homepage />
             </Route>
@@ -485,27 +461,27 @@ function App() {
               <Redirect to="/" />
             </Route>
 
-            <Route path="/data">
-              <Data path={[{ name: '看数据', url: '/data' }]} setPath={setPath} />
+            <Route path="/stats">
+              <Statistics />
             </Route>
 
             <Route path="/institute" component={() => (<InstitutePage />)}>
             </Route>
 
             <Route path="/forum">
-              <Forum path={[{ name: '讨论区', url: '/forum' }]} setPath={setPath} />
+              <Forum />
             </Route>
 
             <Route path="/about">
-              <About path={[{ name: '关于', url: '/about' }]} setPath={setPath} />
+              <About />
             </Route>
 
             <Route path="/login">
-              <Login path={[{ name: '登入', url: '/login' }]} setPath={setPath} />
+              <Login />
             </Route>
 
             <Route path="/account">
-              <Account path={[{ name: '账户', url: '/account' }]} setPath={setPath} />
+              <Account />
             </Route>
 
             <Route path="/demo1">
@@ -520,8 +496,8 @@ function App() {
             <Route path="/demo4">
 
             </Route>
-          </Switch>
-        </div>
+          </div>
+        </Switch>
       </Router>
     </div>
   );

@@ -7,21 +7,71 @@ import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, usePar
 import constants from '../utils/constants'
 import SVG from '../utils/svg'
 import axios from 'axios'
-import makePaginations from './components/pagination'
-import Comments from './components/comments'
-import Topics from './components/topics'
-import NavigationBar from './components/navigation-bar'
-
 
 // Utils
+const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNum) => {
+  var paginations = []
+  if (paginationNum < totalPageNum) {
+    if (currentPage + paginationNum > totalPageNum) {
+      for (let i = totalPageNum - paginationNum + 1; i <= totalPageNum; i++) {
+        paginations.push(
+          (
+            <Pagination.Item
+              key={i}
+              active={i === currentPage}
+              onClick={() => setCurrentPage(i)}>
+              {i}
+            </Pagination.Item>
+          )
+        )
+      }
+    } else {
+      for (let i = currentPage; i < currentPage + paginationNum; i++) {
+        paginations.push(
+          <Pagination.Item
+            key={i}
+            active={i === currentPage}
+            onClick={() => setCurrentPage(i)}>
+            {i}
+          </Pagination.Item>
+        )
+      }
+    }
+  } else {
+    for (let i = 1; i <= totalPageNum; i++) {
+      paginations.push(
+        (
+          <Pagination.Item
+            key={i}
+            active={i === currentPage}
+            onClick={() => setCurrentPage(i)}>
+            {i}
+          </Pagination.Item>
+        )
+      )
+    }
+  }
+  return (
+    <Pagination>
+      <Pagination.First onClick={() => setCurrentPage(1)} />
+      <Pagination.Prev onClick={() => setCurrentPage((currentPage === 1) ? 1 : currentPage - 1)} />
+      { paginations}
+      <Pagination.Next onClick={() => setCurrentPage((currentPage === totalPageNum) ? totalPageNum : currentPage + 1)} />
+      <Pagination.Last onClick={() => setCurrentPage(totalPageNum)} />
+    </Pagination>
+  )
+}
 
-const fetchAllInstitutesInfo = async (cb, port = constants.serverPort) => {
+const fetchAllInstitutesInfo = async (queryParams, cb, port = constants.serverPort) => {
   const url = `http://${document.domain}:${port}/institute/getallinfo`
   try {
     let req = axios.post(url, {
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
+      data: {
+        ...queryParams,
+      }
     })
     cb(await req.then())
   } catch (err) {
@@ -79,9 +129,6 @@ const InstituteTabs = (props) => {
               <Nav.Item>
                 <Nav.Link eventKey="data">数据</Nav.Link>
               </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="comments">讨论</Nav.Link>
-              </Nav.Item>
             </Nav>
           </Card.Header>
           <Tab.Content>
@@ -104,53 +151,14 @@ const InstituteTabs = (props) => {
                 <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Tab.Pane>
-
-            <Tab.Pane eventKey="comments">
-              <Card.Body>
-                <Card.Title>院校评价</Card.Title>
-                <Card.Text>
-                  <Comments itemperpage={8} />
-                  <ListGroup variant="flush">
-                    {['123', '666', '111'].map(p => (<ListGroup.Item>
-                      <Row>
-                        <Col>
-                          {p}
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col className="annotation">
-                          {Math.floor(Math.random() * 1000)}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>))}
-                  </ListGroup>
-                </Card.Text>
-                <Card.Title>相关讨论</Card.Title>
-                <Card.Text>
-                  <Topics itemperpage={8} />
-                  <ListGroup variant="flush">
-                    {['[讨论]123', '[讨论]666', '[讨论]111'].map(p => (<ListGroup.Item>
-                      <Row className="align-items-center">
-                        <Col xs="auto">
-                          {p}
-                        </Col>
-                        <Col>
-                        </Col>
-                        <Col xs="auto" className="annotation">
-                          {new Date().toUTCString()}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>))}
-                  </ListGroup>
-                </Card.Text>
-              </Card.Body>
-            </Tab.Pane>
           </Tab.Content>
         </Card>
       </Tab.Container>
     </div>
   )
+
 }
+
 
 const Labels = (props) => {
   const { path, url, params } = useRouteMatch()
@@ -189,7 +197,6 @@ const Detail = (props) => {
   useEffect(() => {
     fetchInstituteInfo(id, (res) => {
       setInstitute(res.data)
-      console.log(res.data)
     })
   }, [])
 
@@ -234,18 +241,18 @@ const Detail = (props) => {
                         {institute.address}
                       </span>
                     </div>
-                    {
-                      (institute.email) ? (
-                        <div className="annotation">
-                          <span className="mr-2">
-                            <SVG variant="email" />
-                          </span>
-                          <a href={`mailto:${institute.email}`}>
-                            {institute.email}
-                          </a>
-                        </div>
-                      ) : (<></>)
-                    }
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <div className="annotation">
+                      <span className="mr-2">
+                        <SVG variant="email" />
+                      </span>
+                      <a href={`mailto:${institute.email}`}>
+                        {institute.email}
+                      </a>
+                    </div>
                   </Col>
                 </Row>
               </p>
@@ -285,6 +292,8 @@ const Detail = (props) => {
   )
 }
 
+
+
 // TODO: InstituteCard
 
 const InstituteTable = (props) => {
@@ -297,50 +306,33 @@ const InstituteTable = (props) => {
   const instPerPage = props.instperpage
   const totalPageNum = Math.ceil(institutes.length / instPerPage)
 
-  const [queryTags, setQueryTags] = useState((location.state) ? location.state.queryParams : [])
+  const [queryTags, setQueryTags] = useState(location.state.queryParams || [])
   const [keyword, setKeyword] = useState("")
-
-  const [allInstituteInfo, setAllInstituteInfo] = useState([])
 
   const handleQuery = (e) => {
     if (e) e.preventDefault();
-    if (queryTags.length == 0) {
-      if (allInstituteInfo.length == 0) {
-        fetchAllInstitutesInfo((res) => {
-          console.log('fetching all data')
-          setAllInstituteInfo([...res.data.institutes])
-          setInstitutes([...res.data.institutes])
-          setCurrentPage(1)
-        })
-      } else {
-        console.log('getting data from cache')
-        setInstitutes([...allInstituteInfo])
-        setCurrentPage(1)
-      }
-    } else {
-      queryInstitutesInfo({
-        keywordconj: keywordConjunction,
-        tags: queryTags
-      }, (res) => {
-        console.log(res.data.queryParams)
-        setInstitutes([...res.data.institutes])
-        setCurrentPage(1)
-      })
-    }
+    queryInstitutesInfo({
+      keywordconj: keywordConjunction,
+      tags: queryTags
+    }, (res) => {
+      console.log(res.data.queryParams)
+      setInstitutes([...res.data.institutes])
+      setCurrentPage(1)
+    })
   }
-
-  useEffect(() => {
-    handleQuery()
-  }, [])
 
   const addTag = (category, label) => {
     if (!queryTags.find(t => (t.category === category) && (t.label === label))) {
       setQueryTags([
-        ...queryTags,
+        ...queryTags.slice(0, -1),
         {
           category: category,
           label: label
         },
+        {
+          category: 'removeAll',
+          label: '移除所有条件'
+        }
       ])
     }
   }
@@ -362,16 +354,17 @@ const InstituteTable = (props) => {
   const [keywordConjunction, setKeywordConjunction] = useState(true)
 
   useEffect(() => {
+    console.log(queryTags)
     handleQuery()
   }, [queryTags])
 
   return (
     <div>
-      <Card className="mb-3">
-        <Accordion defaultActiveKey="0">
+      <Accordion defaultActiveKey="0">
+        <Card>
           <Accordion.Toggle as={Card.Header} eventKey="0">
             搜索条件
-          </Accordion.Toggle>
+                    </Accordion.Toggle>
           <Accordion.Collapse eventKey="0">
             <Card.Body>
               <div>
@@ -397,6 +390,7 @@ const InstituteTable = (props) => {
 
                   </Form.Group>
                 </Form.Row>
+
                 <Form.Row>
                   <Form.Group as={Col} controlId="province">
                     <Form.Label>地区</Form.Label>
@@ -486,10 +480,7 @@ const InstituteTable = (props) => {
                     }
                     {
                       (queryTags.length > 0) ? (
-                        <Badge
-                          variant="danger"
-                          onClick={() => { removeTag({ category: 'removeAll' }) }}
-                          pill>
+                        <Badge variant="danger" pill>
                           移除搜索条件
                           <SVG variant="trash" />
                         </Badge>
@@ -524,9 +515,9 @@ const InstituteTable = (props) => {
               </div>
             </Card.Body>
           </Accordion.Collapse>
-        </Accordion>
-      </Card>
-
+        </Card>
+      </Accordion>
+      <hr />
       <ListGroup>
         <ListGroup.Item style={{ backgroundColor: "rgba(0,0,0,.03)" }}>
           <Row>
@@ -585,7 +576,7 @@ const InstituteTable = (props) => {
                     <Image fluid height={80} width={80} src={i.icon} />
                   </Col>
                   <Col sm>
-                    <Row >
+                    <Row>
                       <Col xs>
                         <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
                         <b>{i.name}</b>
@@ -598,25 +589,25 @@ const InstituteTable = (props) => {
                       </Col>
                     </Row>
                     <Row>
-                      <Col >
+                      <Col>
                         <Labels labels={i.labels} />
                       </Col>
                     </Row>
                     <Row>
                       <Col>
-                        <Nav fill onClick={(e) => { e.stopPropagation(); }}>
+                        <Nav fill>
                           <Nav.Item>
-                            <Nav.Link onClick={(e) => { alert(1234) }}>
+                            <Nav.Link className="" onClick={(e) => { e.stopPropagation(); alert(1234) }}>
                               <SVG variant="star" />
                             </Nav.Link>
                           </Nav.Item>
                           <Nav.Item>
-                            <Nav.Link>
+                            <Nav.Link className="">
                               <SVG variant="chat" />
                             </Nav.Link>
                           </Nav.Item>
                           <Nav.Item>
-                            <Nav.Link>
+                            <Nav.Link className="">
                               <SVG variant="share" />
                             </Nav.Link>
                           </Nav.Item>
@@ -667,9 +658,8 @@ const InstituteTable = (props) => {
   )
 }
 
-const InstitutePage = (props) => {
+const InstitutePage = ({ location }) => {
   const { path, url, params } = useRouteMatch()
-  const location = useLocation();
   const [instperpage, setInstperpage] = useState(Math.floor(window.innerHeight / 40))
 
   return (
@@ -679,12 +669,14 @@ const InstitutePage = (props) => {
           <Route path={`${path}/:id`}>
             <Detail />
           </Route>
-          <Route path={`${path}`} exact={true}>
+          <Route path={`${path}`} >
             <InstituteTable instperpage={instperpage} />
           </Route>
         </Switch>
+
       </div>
     </Router>
+
   )
 }
 
