@@ -62,6 +62,20 @@ const fetchInstituteInfo = async (instituteId, cb, port = constants.serverPort) 
 
 }
 
+const fetchInstituteMajors = async (instituteId, cb, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${port}/institute/${instituteId}/fetchmajors`
+  try {
+    let req = axios.post(url, {
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+    cb(await req.then())
+  } catch(err) {
+    console.log(err)
+  }
+}
+
 // Componenets
 
 const InstituteTabs = (props) => {
@@ -77,6 +91,9 @@ const InstituteTabs = (props) => {
                 <Nav.Link eventKey="general">概览</Nav.Link>
               </Nav.Item>
               <Nav.Item>
+                <Nav.Link eventKey="major">开设专业</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
                 <Nav.Link eventKey="data">数据</Nav.Link>
               </Nav.Item>
               <Nav.Item>
@@ -90,16 +107,27 @@ const InstituteTabs = (props) => {
                 <Card.Title>Special title treatment</Card.Title>
                 <Card.Text>
                   With supporting text below as a natural lead-in to additional content.
-            </Card.Text>
+                </Card.Text>
                 <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Tab.Pane>
 
-            <Tab.Pane eventKey="data">
+            <Tab.Pane eventKey="major">
               <Card.Body>
-                <Card.Title>DATA</Card.Title>
+                <Card.Title>Special title treatment</Card.Title>
                 <Card.Text>
                   With supporting text below as a natural lead-in to additional content.
+                </Card.Text>
+                <Button variant="primary">Go somewhere</Button>
+              </Card.Body>
+            </Tab.Pane>
+            <Tab.Pane eventKey="data">
+              <Card.Body>
+                <Card.Title>专业列表</Card.Title>
+                <Card.Text>
+                  <Table striped bordered hover size="sm">
+
+                  </Table>
                 </Card.Text>
                 <Button variant="primary">Go somewhere</Button>
               </Card.Body>
@@ -185,11 +213,16 @@ const Detail = (props) => {
   const id = useParams().id
 
   const [institute, setInstitute] = useState()
+  const [majors, setMajors] = useState()
 
   useEffect(() => {
-    fetchInstituteInfo(id, (res) => {
-      setInstitute(res.data)
-      console.log(res.data)
+    fetchInstituteInfo(id, (institute) => {
+      setInstitute(institute.data)
+      console.log(institute.data)
+      fetchInstituteMajors(id, (majors) => {
+        setMajors(majors.data)
+        console.log(majors.data)
+      })
     })
   }, [])
 
