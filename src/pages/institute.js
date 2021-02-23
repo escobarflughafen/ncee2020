@@ -71,22 +71,161 @@ const fetchInstituteMajors = async (instituteId, cb, port = constants.serverPort
       }
     })
     cb(await req.then())
-  } catch(err) {
+  } catch (err) {
     console.log(err)
   }
 }
 
 // Componenets
 
+const Faculty = (props) => {
+  const faculty = props.data
+
+  return (
+    <ListGroup.Item>
+      <Row>
+        <Col >
+          <p><b>{faculty.name}</b></p>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          {
+            <Table striped bordered hover size="sm">
+              <thead>
+                <tr>
+                  <th>系别</th>
+                  <th>年限</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  faculty.special.map((major) => (
+                    <tr>
+                      <td>{major.special_name}</td>
+                      <td>{major.limit_year}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </Table>
+          }
+        </Col>
+      </Row>
+    </ListGroup.Item>
+  )
+}
+
 const InstituteTabs = (props) => {
+  const { path, url, params } = useRouteMatch()
   const institute = props.institute
   const [key, setKey] = useState('home')
+  const [majors, setMajors] = useState()
+
+  const id = useParams().id
+
+  useEffect(() => {
+    fetchInstituteMajors(id, (majors) => {
+      setMajors(majors.data)
+      console.log(majors.data)
+    })
+  }, [])
+
+  const MajorTable = (props) => {
+
+    return (
+      <div>
+        <Table striped bordered hover size="sm">
+          <thead>
+            <tr>
+              <th>系别</th>
+              <th>院系</th>
+              <th>年限</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              (majors) ? majors.data.special.map(
+                (faculty) =>
+                  faculty.special.map((major) => (
+                    <tr>
+                      <td>
+                        {major.special_name}
+                        {
+                          (major.nation_feature === '1') ? (<Badge className="ml-1" variant="success">国家级特色专业</Badge>) : (<></>)
+                        }
+                      </td>
+                      <td>{faculty.name}</td>
+                      <td>{(major.limit_year) ? major.limit_year : "四年"}</td>
+                    </tr>
+                  ))
+              ) : (<></>)
+            }
+          </tbody>
+        </Table>
+      </div>
+    )
+  }
+
+  const ScoreTable = (props) => {
+    const [region, setRegion] = useState('44')
+    return (
+      <div>
+        <Row className="mb-2">
+          <Col>
+            <Card.Title>历年录取分数</Card.Title>
+          </Col>
+          <Col xs="auto">
+            <FormControl
+              as="select"
+              size="sm"
+              value={constants.regions.find(r => r.region_id === region).region_name}
+              onChange={(e) => {
+                setRegion(constants.regions.find(r => r.region_name === e.target.value).region_id)
+              }}
+            >
+              {constants.regions.map(region => (
+                <option>{region.region_name}</option>
+              ))}
+            </FormControl>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>年份</th>
+                  <th>理科</th>
+                  <th>文科</th>
+                </tr>
+              </thead>
+              <tbody>
+              {
+                (institute.raw.pro_type_min[region]) ?
+                  institute.raw.pro_type_min[region].map((score) => (
+                    <tr>
+                      <td>{score.year}</td>
+                      <td>{score.type['1'] || score.type['2'] || score.type['3']}</td>
+                      <td>{score.type['2'] || score.type['3']}</td>
+                    </tr>
+                  ))
+                  : (<tr><td colSpan={3}>暂无数据</td></tr>)
+              }
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+      </div>
+    )
+  }
+
   return (
     <div>
       <Tab.Container defaultActiveKey="general">
         <Card>
           <Card.Header>
-            <Nav variant="tabs" defaultActiveKey="#first">
+            <Nav variant="tabs" defaultActiveKey="general">
               <Nav.Item>
                 <Nav.Link eventKey="general">概览</Nav.Link>
               </Nav.Item>
@@ -104,31 +243,58 @@ const InstituteTabs = (props) => {
           <Tab.Content>
             <Tab.Pane eventKey="general">
               <Card.Body>
-                <Card.Title>Special title treatment</Card.Title>
+                <Card.Title>介绍</Card.Title>
                 <Card.Text>
-                  With supporting text below as a natural lead-in to additional content.
+                  {institute.raw.content}...
                 </Card.Text>
+                <hr />
+                <Card.Title>规模</Card.Title>
+                <Card.Text>
+                  <div>
+                    <Row>
+                      {
+                        [
+                          { variant: 'Primary', data: (majors) ? majors.data.special_detail["1"].length : institute.raw.num_subject, title: "开设专业" },
+                          { variant: 'Warning', data: institute.raw.num_master, title: "硕士点" },
+                          { variant: 'Success', data: institute.raw.num_doctor, title: "博士点" },
+                          { variant: 'Light', data: institute.raw.num_library + "册", title: "图书馆藏" },
+                          { variant: 'Dark', data: institute.raw.num_lab, title: "重点实验室" },
+                        ].map((feature, idx) => (
+                          <Col xs="auto">
+                            <Card
+                              bg={feature.variant.toLowerCase()}
+                              key={idx}
+                              text={feature.variant.toLowerCase() === 'light' ? 'dark' : 'white'}
+                              style={{ textAlign: "center", width: "fit-content" }}
+                              className="mt-2"
+                            >
+                              <Card.Header>{feature.title}</Card.Header>
+                              <Card.Body>
+                                <h3>{feature.data}</h3>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                        ))}
+
+                    </Row>
+                  </div>
+                </Card.Text>
+                <hr />
+                <ScoreTable />
+                <hr />
                 <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Tab.Pane>
-
             <Tab.Pane eventKey="major">
               <Card.Body>
-                <Card.Title>Special title treatment</Card.Title>
+                <Card.Title>专业列表</Card.Title>
                 <Card.Text>
-                  With supporting text below as a natural lead-in to additional content.
+                  <MajorTable />
                 </Card.Text>
-                <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Tab.Pane>
             <Tab.Pane eventKey="data">
               <Card.Body>
-                <Card.Title>专业列表</Card.Title>
-                <Card.Text>
-                  <Table striped bordered hover size="sm">
-
-                  </Table>
-                </Card.Text>
                 <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Tab.Pane>
@@ -207,22 +373,18 @@ const Labels = (props) => {
   )
 }
 
+
 const Detail = (props) => {
   const { path, url, params } = useRouteMatch()
   const history = useHistory()
   const id = useParams().id
 
   const [institute, setInstitute] = useState()
-  const [majors, setMajors] = useState()
 
   useEffect(() => {
     fetchInstituteInfo(id, (institute) => {
       setInstitute(institute.data)
       console.log(institute.data)
-      fetchInstituteMajors(id, (majors) => {
-        setMajors(majors.data)
-        console.log(majors.data)
-      })
     })
   }, [])
 
@@ -251,6 +413,9 @@ const Detail = (props) => {
                   <Col xs="auto">
                     <span className="institute-name-150">
                       {institute.name}
+                      <span className="annotation mx-1" style={{ fontFamily: 'monospace' }}>
+                        #{institute.raw.code_enroll}
+                      </span>
                       <a className="ml-1" href={institute.website}>
                         <SVG variant="link-45deg" />
                       </a>
@@ -296,6 +461,9 @@ const Detail = (props) => {
                   </u> 人关注
                 </Col>
               </Row>
+            </Col>
+            <Col className="d-none d-lg-block">
+              //desc
             </Col>
           </Row>
         </div>
@@ -373,7 +541,7 @@ const InstituteTable = (props) => {
         {
           category: category,
           label: label
-        },
+        }
       ])
     }
   }
