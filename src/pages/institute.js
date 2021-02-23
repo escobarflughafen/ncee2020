@@ -76,6 +76,23 @@ const fetchInstituteMajors = async (instituteId, cb, port = constants.serverPort
   }
 }
 
+const fetchInstitutesWithinScoreRange = async (instituteId, score, region, cb, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${port}/institute/${instituteId}/fetchsimilarity`
+  try {
+    let req = axios.post(url, {
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
+      score: score,
+      within: 5,
+      region: region
+    })
+    cb(await req.then())
+  } catch (err) {
+    console.log(err)
+  }
+}
+
 // Componenets
 
 const Faculty = (props) => {
@@ -131,6 +148,70 @@ const InstituteTabs = (props) => {
     })
   }, [])
 
+
+  /*
+  const InstituteCard = (props) => {
+    return (
+              <ListGroup.Item action onClick={() => { history.push(`${path}/${i.id}`) }}>
+                <Row>
+                  <Col xs="auto" className="d-none d-sm-block">
+                    <Image fluid height={80} width={80} src={i.icon} />
+                  </Col>
+                  <Col sm>
+                    <Row >
+                      <Col xs>
+                        <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
+                        <b>{i.name}</b>
+                      </Col>
+                      <Col style={{ textAlign: "right" }} xs="auto">
+                        <span className="annotation">
+                          <SVG variant="location" />
+                          {i.location}
+                        </span>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col >
+                        <Labels labels={i.labels} />
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        <Nav fill onClick={(e) => { e.stopPropagation(); }}>
+                          <Nav.Item>
+                            <Nav.Link onClick={(e) => { alert(1234) }}>
+                              <SVG variant="star" />
+                            </Nav.Link>
+                          </Nav.Item>
+                          <Nav.Item>
+                            <Nav.Link>
+                              <SVG variant="chat" />
+                            </Nav.Link>
+                          </Nav.Item>
+                          <Nav.Item>
+                            <Nav.Link>
+                              <SVG variant="share" />
+                            </Nav.Link>
+                          </Nav.Item>
+                        </Nav>
+                      </Col>
+                    </Row>
+                  </Col>
+                  <Col className="d-none d-lg-block">
+                    <Row>
+                      <span className="annotation">
+                        {i.brief}...
+                      </span>
+                    </Row>
+                    <Row>
+
+                    </Row>
+                  </Col>
+                </Row>
+              </ListGroup.Item>
+    )
+  }
+*/
   const MajorTable = (props) => {
 
     return (
@@ -169,6 +250,15 @@ const InstituteTabs = (props) => {
 
   const ScoreTable = (props) => {
     const [region, setRegion] = useState('44')
+    const [relatedInstitutes, setRelatedInstitutes] = useState([])
+    useEffect(() => {
+      fetchInstitutesWithinScoreRange(id, institute.raw.province_score_min[region].min, region, (res) => {
+        console.log(res)
+        setRelatedInstitutes([...res.data.institutes])
+
+      })
+    }, [region])
+
     return (
       <div>
         <Row className="mb-2">
@@ -201,19 +291,30 @@ const InstituteTabs = (props) => {
                 </tr>
               </thead>
               <tbody>
-              {
-                (institute.raw.pro_type_min[region]) ?
-                  institute.raw.pro_type_min[region].map((score) => (
-                    <tr>
-                      <td>{score.year}</td>
-                      <td>{score.type['1'] || score.type['2'] || score.type['3']}</td>
-                      <td>{score.type['2'] || score.type['3']}</td>
-                    </tr>
-                  ))
-                  : (<tr><td colSpan={3}>暂无数据</td></tr>)
-              }
+                {
+                  (institute.raw.pro_type_min[region]) ?
+                    institute.raw.pro_type_min[region].map((score) => (
+                      <tr>
+                        <td>{score.year}</td>
+                        <td>{score.type['1'] || score.type['2'] || score.type['3']}</td>
+                        <td>{score.type['2'] || score.type['3']}</td>
+                      </tr>
+                    ))
+                    : (<tr><td colSpan={3}>暂无数据</td></tr>)
+                }
               </tbody>
             </Table>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+          <p><b>分数相近院校</b></p>
+          <ListGroup>
+          {relatedInstitutes.map((i) => (
+            <ListGroup.Item>{i.name}|({(i.scores[region])?i.scores[region].min.split('.')[0]:'600'}分)</ListGroup.Item>
+          ))}
+
+          </ListGroup>
           </Col>
         </Row>
       </div>
@@ -255,9 +356,10 @@ const InstituteTabs = (props) => {
                       {
                         [
                           { variant: 'Primary', data: (majors) ? majors.data.special_detail["1"].length : institute.raw.num_subject, title: "开设专业" },
-                          { variant: 'Warning', data: institute.raw.num_master, title: "硕士点" },
+                          { variant: 'Warning', data: (majors) ? majors.data.nation_feature.length : 0, title: "国家级特色专业" },
+                          { variant: 'Secondary', data: institute.raw.num_master, title: "硕士点" },
                           { variant: 'Success', data: institute.raw.num_doctor, title: "博士点" },
-                          { variant: 'Light', data: institute.raw.num_library + "册", title: "图书馆藏" },
+                          { variant: 'Info', data: institute.raw.num_library + "册", title: "图书馆藏" },
                           { variant: 'Dark', data: institute.raw.num_lab, title: "重点实验室" },
                         ].map((feature, idx) => (
                           <Col xs="auto">
