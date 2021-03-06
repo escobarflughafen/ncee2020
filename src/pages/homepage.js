@@ -1,9 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Tabs, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup } from 'react-bootstrap'
 import { Badge, Card, Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect } from 'react-router-dom'
 import SVG from '../utils/svg'
+import constants from '../utils/constants'
 
 
 const feeddata = [
@@ -525,8 +526,13 @@ const Trends = (props) => {
 
 
 const Homepage = (props) => {
+
+  useEffect(() => {
+    document.title = `${constants.title.homepage} - ${constants.appName}`
+   }, [])
+
   return (
-    <div>
+    <div className="container-fluid">
       <Row>
         <Col lg={8}>
           {// TODO: UPDATE with <Card /> component

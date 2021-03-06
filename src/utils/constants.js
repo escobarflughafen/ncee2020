@@ -1,6 +1,17 @@
 
 const constants = {
   serverPort: "3001",
+  appName: '高校录取分数线查询',
+  title: {
+    homepage: "首页",
+    stats: "看数据",
+    institute: "查学校",
+    forum: "讨论区",
+    about: "关于",
+    search: "搜索",
+    login: "登入",
+    account: "个人帐户"
+  },
   regions: [
     { region_name: '北京市', region_id: '11' },
     { region_name: '天津市', region_id: '12' },
@@ -369,11 +380,10 @@ const constants = {
     { "city_id": "4414", "city_name": "梅州市" },
   ],
 
-  types: {
-    '1': '理科',
-    '2': '文科',
-  },
-
+  types: [
+    {type_id: '1', type_name: '理科'},
+    {type_id: '2', type_name: '文科'}
+  ],
   instituteCategories: [
     "综合类",
     "理工类",

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ButtonGroup, ToggleButton, Accordion, Card, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, InputGroup } from 'react-bootstrap'
 import { Tabs, Image, Badge, Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useParams, useRouteMatch, useHistory, useLocation } from 'react-router-dom'
+import { withRouter } from "react-router-dom"
 import constants from '../utils/constants'
 import SVG from '../utils/svg'
 import axios from 'axios'
@@ -76,16 +77,42 @@ const fetchInstituteMajors = async (instituteId, cb, port = constants.serverPort
   }
 }
 
-const fetchInstitutesWithinScoreRange = async (instituteId, score, region, cb, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${port}/institute/${instituteId}/fetchsimilarity`
+/*
+  instituteId: 学校ID,
+  type: 文理科, 在utils/constants.js 有定义,
+  score: 分数,
+  region: 区域,
+  cb: 回调函数,
+  port: 服务器端口
+*/
+
+const fetchInstitutesWithinScoreRange = async (instituteId, type, region, cb, range = 5, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${port}/institute/${instituteId}/fetchinstitutebyscore`
   try {
     let req = axios.post(url, {
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
-      score: score,
-      within: 5,
+      id: instituteId,
+      range: range,
+      type: type,
       region: region
+    })
+    cb(await req.then())
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+
+const fetchInstituteEnrollData = async (instituteId, cb, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${port}/institute/${instituteId}/fetchenrolldata`
+  try {
+    let req = axios.post(url, {
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
+      id: instituteId,
     })
     cb(await req.then())
   } catch (err) {
@@ -97,7 +124,6 @@ const fetchInstitutesWithinScoreRange = async (instituteId, score, region, cb, p
 
 const Faculty = (props) => {
   const faculty = props.data
-
   return (
     <ListGroup.Item>
       <Row>
@@ -133,10 +159,89 @@ const Faculty = (props) => {
   )
 }
 
+
+const InstituteCard = (props) => {
+  const { path, url, params } = useRouteMatch()
+  const i = props.institute
+  const history = useHistory()
+
+  return (
+    <ListGroup.Item action onClick={() => { history.push(`/institute/${i.id}`); history.go() }}>
+      <Row>
+        {
+          (props.size === "sm") ? (<></>) : (
+            <Col xs="auto" className="d-none d-sm-block">
+              <Image fluid height={80} width={80} src={i.icon} />
+            </Col>
+          )
+        }
+        <Col sm>
+          <Row >
+            <Col xs>
+              {
+                (props.size === "sm") ? (
+                  <Image className="mr-2" fluid height={24} width={24} src={i.icon} />
+                ) : (
+                    <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
+                  )
+              }
+              <b className="mr-1">{i.name}</b>
+              {(props.score) ? (<Badge variant="info">{props.score}分</Badge>) : (<></>)}
+            </Col>
+            <Col style={{ textAlign: "right" }} xs="auto">
+              <span className="annotation">
+                <SVG variant="location" />
+                {i.location}
+              </span>
+            </Col>
+          </Row>
+          <Row>
+            <Col >
+              <Labels labels={i.labels} />
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <Nav fill onClick={(e) => { e.stopPropagation(); }}>
+                <Nav.Item>
+                  <Nav.Link onClick={(e) => { alert(1234) }}>
+                    <SVG variant="star" />
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link>
+                    <SVG variant="chat" />
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link>
+                    <SVG variant="share" />
+                  </Nav.Link>
+                </Nav.Item>
+              </Nav>
+            </Col>
+          </Row>
+        </Col>
+        {
+          (props.size === 'sm') ? (<></>) : (
+            <Col className="d-none d-lg-block">
+              <Row>
+                <span className="annotation">
+                  {i.brief}...
+                      </span>
+              </Row>
+              <Row>
+              </Row>
+            </Col>)
+        }
+      </Row>
+    </ListGroup.Item>
+  )
+}
+
 const InstituteTabs = (props) => {
   const { path, url, params } = useRouteMatch()
   const institute = props.institute
-  const [key, setKey] = useState('home')
   const [majors, setMajors] = useState()
 
   const id = useParams().id
@@ -149,69 +254,6 @@ const InstituteTabs = (props) => {
   }, [])
 
 
-  /*
-  const InstituteCard = (props) => {
-    return (
-              <ListGroup.Item action onClick={() => { history.push(`${path}/${i.id}`) }}>
-                <Row>
-                  <Col xs="auto" className="d-none d-sm-block">
-                    <Image fluid height={80} width={80} src={i.icon} />
-                  </Col>
-                  <Col sm>
-                    <Row >
-                      <Col xs>
-                        <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
-                        <b>{i.name}</b>
-                      </Col>
-                      <Col style={{ textAlign: "right" }} xs="auto">
-                        <span className="annotation">
-                          <SVG variant="location" />
-                          {i.location}
-                        </span>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col >
-                        <Labels labels={i.labels} />
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <Nav fill onClick={(e) => { e.stopPropagation(); }}>
-                          <Nav.Item>
-                            <Nav.Link onClick={(e) => { alert(1234) }}>
-                              <SVG variant="star" />
-                            </Nav.Link>
-                          </Nav.Item>
-                          <Nav.Item>
-                            <Nav.Link>
-                              <SVG variant="chat" />
-                            </Nav.Link>
-                          </Nav.Item>
-                          <Nav.Item>
-                            <Nav.Link>
-                              <SVG variant="share" />
-                            </Nav.Link>
-                          </Nav.Item>
-                        </Nav>
-                      </Col>
-                    </Row>
-                  </Col>
-                  <Col className="d-none d-lg-block">
-                    <Row>
-                      <span className="annotation">
-                        {i.brief}...
-                      </span>
-                    </Row>
-                    <Row>
-
-                    </Row>
-                  </Col>
-                </Row>
-              </ListGroup.Item>
-    )
-  }
-*/
   const MajorTable = (props) => {
 
     return (
@@ -248,30 +290,37 @@ const InstituteTabs = (props) => {
     )
   }
 
-  const ScoreTable = (props) => {
-    const [region, setRegion] = useState('44')
-    const [relatedInstitutes, setRelatedInstitutes] = useState([])
-    useEffect(() => {
-      fetchInstitutesWithinScoreRange(id, institute.raw.province_score_min[region].min, region, (res) => {
-        console.log(res)
-        setRelatedInstitutes([...res.data.institutes])
+  const [key, setKey] = useState('general')
 
+  const ScoreTable = (props) => {
+    const [region, setRegion] = useState(constants.regions.find(r => r.region_id === '44'))
+    const [relatedInstitutes, setRelatedInstitutes] = useState([])
+    const [relatedType, setRelatedType] = useState(constants.types[0])
+
+    useEffect(() => {
+      fetchInstitutesWithinScoreRange(id, relatedType.type_id, region.region_id, (res) => {
+        if (res.data) {
+          console.log(res.data)
+          setRelatedInstitutes([...(res.data.institutes.filter(i => i.id != id))])
+        } else {
+          setRelatedInstitutes([])
+        }
       })
-    }, [region])
+    }, [region, relatedType])
 
     return (
       <div>
         <Row className="mb-2">
           <Col>
-            <Card.Title>历年录取分数</Card.Title>
+            <Card.Title>历年最低录取分数</Card.Title>
           </Col>
           <Col xs="auto">
             <FormControl
               as="select"
               size="sm"
-              value={constants.regions.find(r => r.region_id === region).region_name}
+              value={region.region_name}
               onChange={(e) => {
-                setRegion(constants.regions.find(r => r.region_name === e.target.value).region_id)
+                setRegion(constants.regions.find(r => r.region_name === e.target.value))
               }}
             >
               {constants.regions.map(region => (
@@ -292,8 +341,8 @@ const InstituteTabs = (props) => {
               </thead>
               <tbody>
                 {
-                  (institute.raw.pro_type_min[region]) ?
-                    institute.raw.pro_type_min[region].map((score) => (
+                  (institute.raw.pro_type_min[region.region_id]) ?
+                    institute.raw.pro_type_min[region.region_id].map((score) => (
                       <tr>
                         <td>{score.year}</td>
                         <td>{score.type['1'] || score.type['2'] || score.type['3']}</td>
@@ -304,26 +353,141 @@ const InstituteTabs = (props) => {
                 }
               </tbody>
             </Table>
+            <Button variant="outline-success" size="sm" className="mb-3" onClick={(e) => {
+              if (props.setKey) {
+                props.setKey('data')
+              }
+            }}>各专业数据→</Button>
           </Col>
         </Row>
         <Row>
           <Col>
-          <p><b>分数相近院校</b></p>
-          <ListGroup>
-          {relatedInstitutes.map((i) => (
-            <ListGroup.Item>{i.name}|({(i.scores[region])?i.scores[region].min.split('.')[0]:'600'}分)</ListGroup.Item>
-          ))}
+            <Row>
+              <Col>
+                <p><b>分数相近院校</b></p>
+              </Col>
+              <Col xs="auto">
+                <FormControl
+                  as="select"
+                  size="sm"
+                  value={relatedType.type_name}
+                  onChange={(e) => {
+                    setRelatedType(constants.types.find(t => t.type_name === e.target.value))
+                  }}
+                >
+                  {['理科', '文科'].map(type => (
+                    <option>{type}</option>
+                  ))}
+                </FormControl>
 
-          </ListGroup>
+              </Col>
+            </Row>
+            <ListGroup>
+              {(relatedInstitutes.length > 0) ?
+                relatedInstitutes.map((i) => (
+                  <InstituteCard institute={i} size="sm" score={i.score.split(".")[0]} />
+                )) : (<span>未找到符合条件的院校</span>)}
+
+            </ListGroup>
           </Col>
         </Row>
       </div>
     )
   }
 
+
+  const EnrollTable = (props) => {
+    const [region, setRegion] = useState(constants.regions.find((r) => r.region_id === '44'))
+    const [year, setYear] = useState('2019')
+    const [enroll, setEnroll] = useState({})
+
+    useEffect(() => {
+      fetchInstituteEnrollData(id, (res) => {
+        if (res.data) {
+          console.log(res.data)
+          setEnroll(res.data)
+        }
+      })
+    }, [])
+
+    return (
+      <div>
+        <Row className="mb-2">
+          <Col>
+            <Card.Title>各专业录取数据</Card.Title>
+          </Col>
+          <Col xs="auto">
+            <FormControl
+              as="select"
+              size="sm"
+              value={year}
+              onChange={(e) => {
+                setYear(e.target.value)
+              }}
+            >
+              {['2019', '2018', '2017', '2016'].map(yr => (
+                <option>{yr}</option>
+              ))}
+            </FormControl>
+          </Col>
+          <Col xs="auto">
+            <FormControl
+              as="select"
+              size="sm"
+              value={region.region_name}
+              onChange={(e) => {
+                setRegion(constants.regions.find(r => r.region_name === e.target.value))
+              }}
+            >
+              {constants.regions.map(region => (
+                <option>{region.region_name}</option>
+              ))}
+            </FormControl>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>专业</th>
+                  <th>录取批次</th>
+                  <th>平均分</th>
+                  <th>最低分</th>
+                  <th>最低名次</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  (enroll.scores) ?
+                    enroll.scores.map(
+                      (score) => (
+                        <tr>
+                          <td>{score.major_name.split('（')[0]}</td>
+                          <td>{score.enroll_batch}</td>
+                          <td>{score.score_avg}</td>
+                          <td>{score.score_min}</td>
+                          <td>{score.rank_min}</td>
+                        </tr>
+                      )
+                    )
+                    : (<tr><td colSpan={5}>暂无数据</td></tr>)
+                }
+              </tbody>
+            </Table>
+
+          </Col>
+        </Row >
+
+      </div >
+    )
+  }
+
+  // tab control
+
   return (
     <div>
-      <Tab.Container defaultActiveKey="general">
+      <Tab.Container defaultActiveKey="general" activeKey={key} onSelect={(k) => setKey(k)}>
         <Card>
           <Card.Header>
             <Nav variant="tabs" defaultActiveKey="general">
@@ -341,6 +505,7 @@ const InstituteTabs = (props) => {
               </Nav.Item>
             </Nav>
           </Card.Header>
+
           <Tab.Content>
             <Tab.Pane eventKey="general">
               <Card.Body>
@@ -382,9 +547,8 @@ const InstituteTabs = (props) => {
                   </div>
                 </Card.Text>
                 <hr />
-                <ScoreTable />
+                <ScoreTable setKey={setKey} />
                 <hr />
-                <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Tab.Pane>
             <Tab.Pane eventKey="major">
@@ -397,6 +561,7 @@ const InstituteTabs = (props) => {
             </Tab.Pane>
             <Tab.Pane eventKey="data">
               <Card.Body>
+                <EnrollTable />
                 <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Tab.Pane>
@@ -563,9 +728,6 @@ const Detail = (props) => {
                   </u> 人关注
                 </Col>
               </Row>
-            </Col>
-            <Col className="d-none d-lg-block">
-              //desc
             </Col>
           </Row>
         </div>
@@ -860,10 +1022,19 @@ const InstituteTable = (props) => {
                           setInstitutes([...institutes.sort((a, b) => a.name.localeCompare(b.name, 'zh'))])
                           break;
                         case "地区":
-                          setInstitutes([...institutes.sort((a, b) => a.location.localeCompare(b.location, 'zh'))])
+                          setInstitutes([...institutes.sort((a, b) => {
+                            if (parseInt(a.region.province) - parseInt(b.region.province) == 0) {
+                              return parseInt(a.region.city) - parseInt(b.region.city)
+                            } else {
+                              return parseInt(a.region.province) - parseInt(b.region.province)
+                            }
+                          })])
                           break;
                         case "类别":
                           setInstitutes([...institutes.sort((a, b) => a.labels.join(',').localeCompare(b.labels.join(','), 'zh'))])
+                          break;
+                        case "理科最低分数":
+                        case "文科最低分数":
                           break;
                         default:
                           return 0
@@ -873,6 +1044,8 @@ const InstituteTable = (props) => {
                     <option>校名</option>
                     <option>地区</option>
                     <option>类别</option>
+                    <option>理科最低分数</option>
+                    <option>文科最低分数</option>
                   </Form.Control>
                 </Col>
               </Row>
@@ -882,63 +1055,7 @@ const InstituteTable = (props) => {
         {
           institutes.slice((currentPage - 1) * instPerPage, currentPage * instPerPage).map((i, idx) => {
             return (
-              <ListGroup.Item action onClick={() => { history.push(`${path}/${i.id}`) }}>
-                <Row>
-                  <Col xs="auto" className="d-none d-sm-block">
-                    <Image fluid height={80} width={80} src={i.icon} />
-                  </Col>
-                  <Col sm>
-                    <Row >
-                      <Col xs>
-                        <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
-                        <b>{i.name}</b>
-                      </Col>
-                      <Col style={{ textAlign: "right" }} xs="auto">
-                        <span className="annotation">
-                          <SVG variant="location" />
-                          {i.location}
-                        </span>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col >
-                        <Labels labels={i.labels} />
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <Nav fill onClick={(e) => { e.stopPropagation(); }}>
-                          <Nav.Item>
-                            <Nav.Link onClick={(e) => { alert(1234) }}>
-                              <SVG variant="star" />
-                            </Nav.Link>
-                          </Nav.Item>
-                          <Nav.Item>
-                            <Nav.Link>
-                              <SVG variant="chat" />
-                            </Nav.Link>
-                          </Nav.Item>
-                          <Nav.Item>
-                            <Nav.Link>
-                              <SVG variant="share" />
-                            </Nav.Link>
-                          </Nav.Item>
-                        </Nav>
-                      </Col>
-                    </Row>
-                  </Col>
-                  <Col className="d-none d-lg-block">
-                    <Row>
-                      <span className="annotation">
-                        {i.brief}...
-                      </span>
-                    </Row>
-                    <Row>
-
-                    </Row>
-                  </Col>
-                </Row>
-              </ListGroup.Item>
+              <InstituteCard institute={i} />
             )
           }
           )
@@ -975,14 +1092,19 @@ const InstitutePage = (props) => {
   const location = useLocation();
   const [instperpage, setInstperpage] = useState(Math.floor(window.innerHeight / 40))
 
+
+  useEffect(() => {
+    document.title = `${constants.title.institute} - ${constants.appName}`
+  }, [])
+
   return (
     <Router>
-      <div>
+      <div className="container">
         <Switch>
-          <Route path={`${path}/:id`}>
+          <Route path={`/institute/:id`} exact={true}>
             <Detail />
           </Route>
-          <Route path={`${path}`} exact={true}>
+          <Route path={`/institute`} exact={true}>
             <InstituteTable instperpage={instperpage} />
           </Route>
         </Switch>
