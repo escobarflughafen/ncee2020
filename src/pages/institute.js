@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../style.css'
 import { useState, useEffect } from 'react'
-import { ButtonGroup, ToggleButton, Accordion, Card, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, InputGroup } from 'react-bootstrap'
+import { ButtonGroup, ToggleButton, Accordion, Card, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, InputGroup, CardColumns } from 'react-bootstrap'
 import { Tabs, Image, Badge, Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useParams, useRouteMatch, useHistory, useLocation } from 'react-router-dom'
 import { withRouter } from "react-router-dom"
@@ -413,10 +413,10 @@ const InstituteTabs = (props) => {
     return (
       <div>
         <Row className="mb-2">
-          <Col>
+          <Col md={6}>
             <Card.Title>各专业录取数据</Card.Title>
           </Col>
-          <Col xs="auto">
+          <Col md={3} xs={6}>
             <FormControl
               as="select"
               size="sm"
@@ -430,7 +430,7 @@ const InstituteTabs = (props) => {
               ))}
             </FormControl>
           </Col>
-          <Col xs="auto">
+          <Col md={3} xs={6}>
             <FormControl
               as="select"
               size="sm"
@@ -447,7 +447,7 @@ const InstituteTabs = (props) => {
         </Row>
         <Row>
           <Col>
-            <Table striped bordered hover>
+            <Table striped bordered hover size="sm">
               <thead>
                 <tr>
                   <th>专业</th>
@@ -515,37 +515,31 @@ const InstituteTabs = (props) => {
                 </Card.Text>
                 <hr />
                 <Card.Title>规模</Card.Title>
-                <Card.Text>
-                  <div>
-                    <Row>
-                      {
-                        [
-                          { variant: 'Primary', data: (majors) ? majors.data.special_detail["1"].length : institute.raw.num_subject, title: "开设专业" },
-                          { variant: 'Warning', data: (majors) ? majors.data.nation_feature.length : 0, title: "国家级特色专业" },
-                          { variant: 'Secondary', data: institute.raw.num_master, title: "硕士点" },
-                          { variant: 'Success', data: institute.raw.num_doctor, title: "博士点" },
-                          { variant: 'Info', data: institute.raw.num_library + "册", title: "图书馆藏" },
-                          { variant: 'Dark', data: institute.raw.num_lab, title: "重点实验室" },
-                        ].map((feature, idx) => (
-                          <Col xs="auto">
-                            <Card
-                              bg={feature.variant.toLowerCase()}
-                              key={idx}
-                              text={feature.variant.toLowerCase() === 'light' ? 'dark' : 'white'}
-                              style={{ textAlign: "center", width: "fit-content" }}
-                              className="mt-2"
-                            >
-                              <Card.Header>{feature.title}</Card.Header>
-                              <Card.Body>
-                                <h3>{feature.data}</h3>
-                              </Card.Body>
-                            </Card>
-                          </Col>
-                        ))}
-
-                    </Row>
-                  </div>
-                </Card.Text>
+                <CardColumns>
+                  {
+                    [
+                      { variant: 'Primary', data: (majors) ? majors.data.special_detail["1"].length : institute.raw.num_subject, title: "开设专业" },
+                      { variant: 'Warning', data: (majors) ? majors.data.nation_feature.length : 0, title: "国家级特色专业" },
+                      { variant: 'Secondary', data: institute.raw.num_master, title: "硕士点" },
+                      { variant: 'Success', data: institute.raw.num_doctor, title: "博士点" },
+                      { variant: 'Info', data: institute.raw.num_library + "册", title: "图书馆藏" },
+                      { variant: 'Dark', data: institute.raw.num_lab, title: "重点实验室" },
+                    ].map((feature, idx) => (
+                      <>
+                        <Card
+                          bg={feature.variant.toLowerCase()}
+                          text={feature.variant.toLowerCase() === 'light' ? 'dark' : 'white'}
+                          style={{ textAlign: "center" }}
+                          className=""
+                        >
+                          <Card.Header>{feature.title}</Card.Header>
+                          <Card.Body>
+                            <h3>{feature.data}</h3>
+                          </Card.Body>
+                        </Card>
+                      </>
+                    ))}
+                </CardColumns>
                 <hr />
                 <ScoreTable setKey={setKey} />
                 <hr />
@@ -992,8 +986,8 @@ const InstituteTable = (props) => {
         </Accordion>
       </Card>
 
-      <ListGroup>
-        <ListGroup.Item style={{ backgroundColor: "rgba(0,0,0,.03)" }}>
+      <Card>
+        <Card.Header>
           <Row>
             <Col className="mr-auto">
               搜索结果<span className="annotation">（共 {institutes.length} 项）</span>
@@ -1028,6 +1022,7 @@ const InstituteTable = (props) => {
                             } else {
                               return parseInt(a.region.province) - parseInt(b.region.province)
                             }
+
                           })])
                           break;
                         case "类别":
@@ -1051,16 +1046,18 @@ const InstituteTable = (props) => {
               </Row>
             </Col>
           </Row>
-        </ListGroup.Item>
-        {
-          institutes.slice((currentPage - 1) * instPerPage, currentPage * instPerPage).map((i, idx) => {
-            return (
-              <InstituteCard institute={i} />
+        </Card.Header>
+        <ListGroup variant="flush">
+          {
+            institutes.slice((currentPage - 1) * instPerPage, currentPage * instPerPage).map((i, idx) => {
+              return (
+                <InstituteCard institute={i} />
+              )
+            }
             )
           }
-          )
-        }
-      </ListGroup>
+        </ListGroup>
+      </Card>
       <br />
       <Row>
         <Col>
