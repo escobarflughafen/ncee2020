@@ -641,7 +641,14 @@ const constants = {
       labels: ["本科", "综合类", "公办", "211", "985", "一流大学建设高校"],
       location: "北京，海淀区"
     },
-  ]
+  ],
+  topicTypes: [
+    '讨论',
+    '经验',
+    '咨询',
+    '闲谈',
+  ],
+  
 }
 
 export default constants;

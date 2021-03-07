@@ -8,9 +8,9 @@ import { withRouter } from "react-router-dom"
 import constants from '../utils/constants'
 import SVG from '../utils/svg'
 import axios from 'axios'
-import makePaginations from './components/pagination'
+import { makePaginations } from './components/pagination'
 import Comments from './components/comments'
-import Topics from './components/topics'
+import { TopicCard } from './components/topic'
 import NavigationBar from './components/navigation-bar'
 
 
@@ -182,8 +182,8 @@ const InstituteCard = (props) => {
                 (props.size === "sm") ? (
                   <Image className="mr-2" fluid height={24} width={24} src={i.icon} />
                 ) : (
-                    <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
-                  )
+                  <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
+                )
               }
               <b className="mr-1">{i.name}</b>
               {(props.score) ? (<Badge variant="info">{props.score}分</Badge>) : (<></>)}
@@ -582,7 +582,9 @@ const InstituteTabs = (props) => {
                 </Card.Text>
                 <Card.Title>相关讨论</Card.Title>
                 <Card.Text>
-                  <Topics itemperpage={8} />
+                  {
+                    //<Topics itemperpage={8} />
+                  }
                   <ListGroup variant="flush">
                     {['[讨论]123', '[讨论]666', '[讨论]111'].map(p => (<ListGroup.Item>
                       <Row className="align-items-center">
@@ -644,6 +646,7 @@ const Detail = (props) => {
 
   useEffect(() => {
     fetchInstituteInfo(id, (institute) => {
+      document.title = `${institute.data.name} - ${constants.title.institute} - ${constants.appName}`
       setInstitute(institute.data)
       console.log(institute.data)
     })
@@ -760,6 +763,10 @@ const InstituteTable = (props) => {
   const [keyword, setKeyword] = useState("")
 
   const [allInstituteInfo, setAllInstituteInfo] = useState([])
+
+  useEffect(() => {
+    document.title = `${constants.title.institute} - ${constants.appName}`
+  }, [])
 
   const handleQuery = (e) => {
     if (e) e.preventDefault();
@@ -953,8 +960,8 @@ const InstituteTable = (props) => {
                           <SVG variant="trash" />
                         </Badge>
                       ) : (
-                          <></>
-                        )
+                        <></>
+                      )
                     }
                   </Col>
                 </Row>
@@ -1059,27 +1066,12 @@ const InstituteTable = (props) => {
         </ListGroup>
       </Card>
       <br />
-      <Row>
-        <Col>
-          {makePaginations(currentPage, setCurrentPage, totalPageNum, 4)}
-        </Col>
-        <Col xs={4}>
-          <Form.Control
-            as="select"
-            onChange={(e) => {
-              setCurrentPage(parseInt(e.target.value))
-            }}
-            value={currentPage}>
-            {
-              [...Array(totalPageNum).keys()].map((n, idx) => {
-                return (
-                  <option>{idx + 1}</option>
-                )
-              })
-            }
-          </Form.Control>
-        </Col>
-      </Row>
+      <div className="d-md-none">
+        {makePaginations(currentPage, setCurrentPage, totalPageNum, 3)}
+      </div>
+      <div className="d-none d-md-block">
+        {makePaginations(currentPage, setCurrentPage, totalPageNum, 4)}
+      </div>
     </div>
   )
 }

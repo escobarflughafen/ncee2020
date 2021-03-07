@@ -1,12 +1,18 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation } from 'react-router-dom'
 import constants from '../utils/constants'
 import SVG from '../utils/svg'
-import makePagination from './components/pagination'
-import {timeStringConverter} from '../utils/util'
+import {makePaginations} from './components/pagination'
+import { timeStringConverter } from '../utils/util'
+import { TopicCard, TopicList } from './components/topic'
+import axios from 'axios'
+
+
+//requests
+
 
 const demoTopics = [
   {
@@ -20,7 +26,7 @@ const demoTopics = [
     tags: ['理科', '分数线'],
     viewCount: 1231,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -33,7 +39,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -46,7 +52,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -59,7 +65,7 @@ const demoTopics = [
     tags: ['理科', '分数线'],
     viewCount: 1231,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -72,7 +78,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -85,7 +91,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -98,7 +104,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -111,7 +117,7 @@ const demoTopics = [
     tags: ['理科', '分数线'],
     viewCount: 1231,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -124,7 +130,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -137,7 +143,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -150,7 +156,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -163,7 +169,7 @@ const demoTopics = [
     tags: ['理科', '分数线'],
     viewCount: 1231,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -176,7 +182,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
   {
     id: 125,
@@ -189,7 +195,7 @@ const demoTopics = [
     tags: ['文科', '分数线'],
     viewCount: 1124,
     createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random()*1000*60*60*24*2)
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
   },
 ]
 
@@ -234,68 +240,6 @@ const ListDemo = (props) => {
   const TopicTabs = (props) => {
     const [key, setKey] = useState('topics')
 
-    const TopicTab = (props) => {
-      return (
-        <>
-          <ListGroup variant="flush">
-            {demoTopics.map((topic) => {
-              return (
-                <ListGroup.Item action>
-                  <Row>
-                    <Col xs="auto" style={{ textAlign: "center" }}>
-                      <small>{topic.category}</small>
-                    </Col>
-                    <Col className="">
-                      <Row>
-                        <Col className="">
-                          <a><b>{topic.title}</b></a>
-                        </Col>
-                        <Col xs="auto">
-                          <Row>
-                            <Col>
-                              <small>
-                                <SVG variant="mic" />
-                                <span className="ml-1">
-                                  <a><b>{topic.host}</b></a>
-                                </span>
-                              </small>
-                            </Col>
-                          </Row>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          {
-                            (topic.relatedInstitute) ? (
-                              <Badge variant="primary" className="mr-1">
-                                {topic.relatedInstitute.name}
-                              </Badge>
-                            ) : (<></>)
-                          }
-                          {
-                            (topic.region) ? (
-                              <Badge variant="success" className="mr-1">
-                                {topic.region}
-                              </Badge>
-                            ) : (<></>)
-                          }
-                          <small>
-                            <span className="mr-1">{topic.viewCount}次浏览</span>
-                            <span className="mr-1">{topic.contents.length}条回复</span>
-                            <span className="mr-1">最后回复于 {timeStringConverter(topic.lastUpdated)}</span>
-                          </small>
-                        </Col>
-                      </Row>
-                    </Col>
-                  </Row>
-                </ListGroup.Item>
-              )
-            })}
-          </ListGroup>
-
-        </>
-      )
-    }
 
     const ReplyTab = (props) => {
       return (
@@ -324,6 +268,9 @@ const ListDemo = (props) => {
           </Col>
           <Col xs="auto">
             <ButtonGroup>
+              {
+                // TODO: create compose post view by react-bootstrap.Modal
+              }
               <Button variant="success">发起新讨论</Button>
               <DropdownButton as={ButtonGroup} variant="success" id="bg-nested-dropdown">
                 <Dropdown.Item eventKey="1">Dropdown link</Dropdown.Item>
@@ -342,19 +289,11 @@ const ListDemo = (props) => {
                 <Nav.Item>
                   <Nav.Link eventKey="replies">互动</Nav.Link>
                 </Nav.Item>
-                <Nav.Item className="ml-auto">
-                  <FormControl as="select" size="sm">
-                    <option>最后回复</option>
-                    <option>发布时间</option>
-                    <option>地区</option>
-                    <option>相关院校</option>
-                  </FormControl>
-                </Nav.Item>
               </Nav>
             </Card.Header>
             <Tab.Content>
               <Tab.Pane eventKey="topics">
-                <TopicTab />
+                <TopicList topics={demoTopics} />
               </Tab.Pane>
               <Tab.Pane eventKey="replies">
                 <ReplyTab />
@@ -363,9 +302,11 @@ const ListDemo = (props) => {
           </Card>
         </Tab.Container>
         <br />
+        {
+            /*
         <Row>
           <Col xs="auto">
-            {makePagination(currentPage, setCurrentPage, 10, 4)}
+            {makePaginations(currentPage, setCurrentPage, 10, 4)}
           </Col>
           <Col>
             <Form.Control as="select">
@@ -375,6 +316,9 @@ const ListDemo = (props) => {
             </Form.Control>
           </Col>
         </Row>
+
+            */
+        }
       </>
     )
   }

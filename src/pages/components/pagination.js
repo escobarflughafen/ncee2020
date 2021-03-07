@@ -1,4 +1,4 @@
-import { Pagination } from 'react-bootstrap'
+import { Form, Pagination, Row, Col } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 /*
@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
   totalPageNum: 总页数
   paginationNum: 导览按钮个数
 */
-const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNum) => {
+const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNum, size = false) => {
   var paginations = []
   if (paginationNum < totalPageNum) {
     if (currentPage + paginationNum > totalPageNum) {
@@ -49,15 +49,36 @@ const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNu
       )
     }
   }
+
   return (
-    <Pagination>
-      <Pagination.First onClick={() => setCurrentPage(1)} />
-      <Pagination.Prev onClick={() => setCurrentPage((currentPage === 1) ? 1 : currentPage - 1)} />
-      { paginations}
-      <Pagination.Next onClick={() => setCurrentPage((currentPage === totalPageNum) ? totalPageNum : currentPage + 1)} />
-      <Pagination.Last onClick={() => setCurrentPage(totalPageNum)} />
-    </Pagination>
+    <Row>
+      <Col>
+        <Pagination size={(size) ? size : ""}>
+          <Pagination.First onClick={() => setCurrentPage(1)} />
+          <Pagination.Prev onClick={() => setCurrentPage((currentPage === 1) ? 1 : currentPage - 1)} />
+          {paginations}
+          <Pagination.Next onClick={() => setCurrentPage((currentPage === totalPageNum) ? totalPageNum : currentPage + 1)} />
+          <Pagination.Last onClick={() => setCurrentPage(totalPageNum)} />
+        </Pagination>
+      </Col>
+      <Col xs="auto">
+        <Form.Control
+          as="select"
+          size={(size) ? size : ""}
+          onChange={(e) => {
+            setCurrentPage(parseInt(e.target.value))
+          }}
+          value={currentPage}
+        >
+          {
+            [...Array(totalPageNum).keys()].map((p) => {
+              return (<option>{p + 1}</option>)
+            })
+          }
+        </Form.Control>
+      </Col>
+    </Row>
   )
 }
 
-export default makePaginations;
+export { makePaginations };

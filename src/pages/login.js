@@ -108,38 +108,6 @@ const SignupForm = (props) => {
 
 }
 
-/*
-const LoginForm = () => {
-  return (
-    <Row>
-      <Col>
-        <Form style={{ maxWidth: "67%" }}>
-          <Form.Group controlId="formUsername">
-            <Form.Label>用户名</Form.Label>
-            <Form.Control type="text" placeholder="" />
-          </Form.Group>
-
-          <Form.Group controlId="formPassword">
-            <Form.Label>密码</Form.Label>
-            <Form.Control type="password" placeholder="" />
-            <hr />
-            <Row>
-              <Col>
-                <a href="/forgotpassword">忘记密码</a>
-              </Col>
-              <Col>
-                <Button variant="primary" onClick={() => { alert("登入失败") }} style={{ display: "block", margin: "0 0 0 auto" }}>
-                  登入
-                              </Button>
-              </Col>
-            </Row>
-          </Form.Group>
-        </Form>
-      </Col>
-    </Row>
-  )
-}
-*/
 const LoginForm = () => {
   return (
     <div className="container">
