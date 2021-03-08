@@ -12,6 +12,12 @@ const constants = {
     login: "登入",
     account: "个人帐户"
   },
+  topicType: [
+    {id: 0, name: "讨论"},
+    {id: 1, name: "咨询"},
+    {id: 2, name: "求助"},
+    {id: 3, name: "经验"},
+  ],
   regions: [
     { region_name: '北京市', region_id: '11' },
     { region_name: '天津市', region_id: '12' },

@@ -383,7 +383,7 @@ const ListPage = (props) => {
             <Form>
               <Form.Row>
                 <Col>
-                  <InputGroup className="mb-3">
+                  <InputGroup className="mb-3" size="sm">
                     <InputGroup.Prepend>
                       <InputGroup.Text>标题</InputGroup.Text>
                     </InputGroup.Prepend>
@@ -392,6 +392,20 @@ const ListPage = (props) => {
                       aria-describedby="basic-addon1"
                       required
                     />
+                  </InputGroup>
+                </Col>
+                <Col xs="auto">
+                  <InputGroup className="mb-3" size="sm">
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>类型</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <FormControl as="select">
+                      {
+                        constants.topicType.map((type) => (
+                          <option value={type.id}>{type.name}</option>
+                        ))
+                      }
+                    </FormControl>
                   </InputGroup>
                 </Col>
               </Form.Row>
@@ -406,33 +420,35 @@ const ListPage = (props) => {
                   />
                 </Form.Group>
               </Form.Row>
-              <Form.Row>
+              <Form.Row className="mb-3">
                 <Col>
-                <div style={{ textAlign: "right" }}>
-                  <Button
-                    variant="outline-dark"
-                    size="sm"
+                  <InputGroup size="sm">
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>地区</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control as="select">
+                      <option value={false}>...</option>
+                      {
+                        constants.regions.map((region) => (<option value={region.region_id}>{region.region_name}</option>))
+                      }
+                    </Form.Control>
+                  </InputGroup>
+                </Col>
+                <Col xs="auto">
+                    <Button
+                      variant="outline-dark"
+                      size="sm"
                     >上传图片</Button>
-                </div>
                 </Col>
               </Form.Row>
               <Form.Row controlId="replyTo">
                 <Col>
-                  <Form.Label>相关学校</Form.Label>
-                  <Form.Control as="input" size="sm" />
-                </Col>
-                <Col>
-                  <Form.Label>地区</Form.Label>
-                  <Form.Control as="select" size="sm">
-                    <option value={false}>...</option>
-                    {
-                      constants.regions.map((region) => (<option value={region.region_id}>{region.region_name}</option>))
-                    }
-                  </Form.Control>
-                </Col>
-                <Col xs="auto">
-                  <Form.Group>
-                  </Form.Group>
+                  <InputGroup size="sm">
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>相关院校</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control as="input" />
+                  </InputGroup>
                 </Col>
               </Form.Row>
             </Form>
@@ -627,6 +643,11 @@ const TopicPage = (props) => {
                         <Badge
                           variant="primary"
                           className="mr-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            history.push(`/institute/${topic.relatedInstitute.id}`);
+                            history.go()
+                          }}
                         >
                           {topic.relatedInstitute.name}
                         </Badge>
