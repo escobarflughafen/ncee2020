@@ -1063,15 +1063,18 @@ const InstituteTable = (props) => {
             }
             )
           }
-        </ListGroup>
-      </Card>
-      <br />
+          <ListGroup.Item>
       <div className="d-md-none">
         {makePaginations(currentPage, setCurrentPage, totalPageNum, 3)}
       </div>
       <div className="d-none d-md-block">
         {makePaginations(currentPage, setCurrentPage, totalPageNum, 4)}
       </div>
+
+          </ListGroup.Item>
+        </ListGroup>
+      </Card>
+      <br />
     </div>
   )
 }
@@ -1093,7 +1096,7 @@ const InstitutePage = (props) => {
           <Route path={`/institute/:id`} exact={true}>
             <Detail />
           </Route>
-          <Route path={`/institute`} exact={true}>
+          <Route path={`/institute/`} exact={true}>
             <InstituteTable instperpage={instperpage} />
           </Route>
         </Switch>

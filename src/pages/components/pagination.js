@@ -52,8 +52,8 @@ const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNu
 
   return (
     <Row>
-      <Col>
-        <Pagination size={(size) ? size : ""}>
+      <Col xs="auto">
+        <Pagination className="mb-0" size={(size) ? size : ""}>
           <Pagination.First onClick={() => setCurrentPage(1)} />
           <Pagination.Prev onClick={() => setCurrentPage((currentPage === 1) ? 1 : currentPage - 1)} />
           {paginations}
@@ -61,7 +61,7 @@ const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNu
           <Pagination.Last onClick={() => setCurrentPage(totalPageNum)} />
         </Pagination>
       </Col>
-      <Col xs="auto">
+      <Col xs="auto" className="ml-auto">
         <Form.Control
           as="select"
           size={(size) ? size : ""}
@@ -69,6 +69,7 @@ const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNu
             setCurrentPage(parseInt(e.target.value))
           }}
           value={currentPage}
+          className="mb-0"
         >
           {
             [...Array(totalPageNum).keys()].map((p) => {

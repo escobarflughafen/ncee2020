@@ -532,7 +532,7 @@ const Homepage = (props) => {
    }, [])
 
   return (
-    <div className="container-fluid">
+    <div className="container">
       <Row>
         <Col lg={8}>
           {// TODO: UPDATE with <Card /> component

@@ -11,16 +11,8 @@ import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import axios from 'axios'
 
-const PostCard = (props) => {
-  const detail = props.detail
 
-  return (
-    <>
-    </>
-  )
-}
-
-const PostList = (props) => {
+const PostPage = (props) => {
 
   return (
     <>
@@ -29,4 +21,4 @@ const PostList = (props) => {
 }
 
 
-export {PostCard, PostList};
+export default PostPage;

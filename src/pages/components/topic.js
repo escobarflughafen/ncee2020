@@ -3,13 +3,14 @@ import { ButtonGroup, ToggleButton, Accordion, Card, Alert, Form, FormControl, B
 import { Tabs, Image, Badge, Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useParams, useRouteMatch, useHistory, useLocation } from 'react-router-dom'
 import constants from '../../utils/constants'
-import {timeStringConverter} from '../../utils/util'
+import { timeStringConverter } from '../../utils/util'
 import SVG from '../../utils/svg'
 import axios from 'axios'
+import { makePaginations } from './pagination'
 
 const TopicCard = (props) => {
   const history = useHistory()
-  
+
   const topic = props.topic
   const viewMode = props.viewMode
   return (
@@ -84,54 +85,59 @@ const TopicCard = (props) => {
 }
 
 const TopicList = (props) => {
-      const topics = props.topics
-      const [viewMode, setViewMode] = useState('详细')
-      return (
-        <>
-          <ListGroup variant="flush">
-            <ListGroup.Item>
-              <Row className="ml-auto">
-                <Col></Col>
-                <Col xs="auto">
-                  <Row>
-                    <SVG variant="column-gap" />
-                    <Col className="pl-2">
-                      <FormControl
-                        as="select"
-                        size="sm"
-                        value={viewMode}
-                        onChange={e => { setViewMode(e.target.value) }}>
-                        <option>详细</option>
-                        <option>紧凑</option>
-                      </FormControl>
-                    </Col>
-                  </Row>
-
-                </Col>
-                <Col xs="auto">
-                  <Row>
-                    <SVG variant="sort" />
-                    <Col className="pl-2">
-                      <FormControl as="select" size="sm">
-                        <option>最后回复</option>
-                        <option>发布时间</option>
-                        <option>地区</option>
-                        <option>相关院校</option>
-                      </FormControl>
-                    </Col>
-                  </Row>
+  const topics = props.topics
+  const [viewMode, setViewMode] = useState('详细')
+  const topicPerPage = props.topicPerPage || 12
+  const [currentPage, setCurrentPage] = useState(1)
+  return (
+    <>
+      <ListGroup variant="flush">
+        <ListGroup.Item>
+          <Row className="ml-auto">
+            <Col></Col>
+            <Col xs="auto">
+              <Row>
+                <SVG variant="column-gap" />
+                <Col className="pl-2">
+                  <FormControl
+                    as="select"
+                    size="sm"
+                    value={viewMode}
+                    onChange={e => { setViewMode(e.target.value) }}>
+                    <option>详细</option>
+                    <option>紧凑</option>
+                  </FormControl>
                 </Col>
               </Row>
-            </ListGroup.Item>
-            {topics.map((topic) => {
-              return (
-                <TopicCard topic={topic} viewMode={viewMode} />
-              )
-            })}
-          </ListGroup>
 
-        </>
-      )
+            </Col>
+            <Col xs="auto">
+              <Row>
+                <SVG variant="sort" />
+                <Col className="pl-2">
+                  <FormControl as="select" size="sm">
+                    <option>最后回复</option>
+                    <option>发布时间</option>
+                    <option>地区</option>
+                    <option>相关院校</option>
+                  </FormControl>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+        {topics.slice((currentPage - 1) * topicPerPage, (currentPage) * topicPerPage).map((topic) => {
+          return (
+            <TopicCard topic={topic} viewMode={viewMode} />
+          )
+        })}
+        <ListGroup.Item>
+          {makePaginations(currentPage, setCurrentPage, Math.ceil(topics.length / topicPerPage), 4)}
+        </ListGroup.Item>
+      </ListGroup>
+
+    </>
+  )
 }
 
-export {TopicCard, TopicList};
+export { TopicCard, TopicList };
