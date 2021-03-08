@@ -9,6 +9,7 @@ import SVG from '../utils/svg'
 import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
+import { PostCard } from './components/post'
 import axios from 'axios'
 
 // utils
@@ -28,6 +29,49 @@ const fetchPost = async (id, cb, port = constants.serverPort) => {
   } catch (err) {
     console.log(err)
   }
+}
+
+const demoData = {
+      id:123,
+  author: 'jack',
+  content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+  relatedInstitute: 104,
+  relatedTopic: 123,
+  region: '44',
+  viewCount: 1234,
+  createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  replies: [
+    {
+      id:123,
+      author: 'alice',
+      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+      relatedInstitute: 104,
+      relatedTopic: 123,
+      region: '44',
+      viewCount: 1234,
+      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+    },
+    {
+      id:123,
+      author: 'bob',
+      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+      relatedInstitute: 104,
+      relatedTopic: 123,
+      region: '44',
+      viewCount: 1234,
+      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+    },
+    {
+      id:123,
+      author: 'douglas',
+      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+      relatedInstitute: 104,
+      relatedTopic: 123,
+      region: '44',
+      viewCount: 1234,
+      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+    },
+  ]
 }
 
 const PostView = (props) => {
@@ -64,21 +108,52 @@ const PostView = (props) => {
               }}
             >←返回</Button>
           </Col>
-          <Col className="mb-0" xs="auto">
-            <Button
-              variant="info"
-              size="sm"
-              href="#replytextarea"
-            >
-              回复
-            </Button>
-          </Col>
         </Row>
         <Card>
           <ListGroup variant="flush">
-            <ListGroup.Item></ListGroup.Item>
-            <ListGroup.Item></ListGroup.Item>
-            <ListGroup.Item></ListGroup.Item>
+            <PostCard
+              post={demoData}
+              expanded={true}
+            />
+            <ListGroup.Item>
+              <Form>
+                <Form.Row>
+                  <Form.Group as={Col} controlId="content">
+                    <Form.Control as="textarea" placeholder="..." rows={3} id="replytextarea" />
+                  </Form.Group>
+                </Form.Row>
+                <Form.Row controlId="replyTo">
+                  <Col>
+                  </Col>
+                  <Col xs="auto">
+                    <ButtonGroup aria-label="reply" size="sm">
+                      <Button variant="outline-dark">添加图片</Button>
+                      <Button variant="primary" type="submit">
+                        回复
+                      </Button>
+                    </ButtonGroup>
+                  </Col>
+                </Form.Row>
+              </Form>
+            </ListGroup.Item>
+            <ListGroup.Item variant="light">
+              <Row>
+                <Col>
+                  回复（{demoData.replies.length}）
+                  </Col>
+              </Row>
+            </ListGroup.Item>
+            {
+              demoData.replies.map((reply, idx) => {
+                return (
+                  <PostCard
+                    post={reply}
+                    index={idx + 1}
+                    expanded={false}
+                  />
+                )
+              })
+            }
           </ListGroup>
         </Card>
       </div>
@@ -91,7 +166,7 @@ const PostPage = (props) => {
   return (
     <>
       <Router>
-        <div className="container">
+        <div className="container mb-3">
           <Switch>
             <Route path={`/post/:id`} exact={true}>
               <PostView />

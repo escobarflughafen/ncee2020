@@ -59,7 +59,7 @@ const PostCard = (props) => {
 
   return (
     <>
-      <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post.id}`);history.go() }}>
+      <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post.id}`); history.go() }}>
         <Row>
           <Col xs="auto" className="pr-0">
             <Image width={48} height={48} />
@@ -76,9 +76,13 @@ const PostCard = (props) => {
                 </small>
               </Col>
               <Col xs="auto">
-                <code>
-                  #{index}
-                </code>
+                {
+                  (index) ? (
+                    <code>
+                      #{index}
+                    </code>
+                  ) : null
+                }
               </Col>
             </Row>
             <Row>
@@ -124,7 +128,6 @@ const PostCard = (props) => {
               (expanded) ? (
                 <Row>
                   <Col>
-                    123
                   </Col>
                 </Row>
               ) : null

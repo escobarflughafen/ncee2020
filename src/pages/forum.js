@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../style.css'
 import React, { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Modal, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation, useParams } from 'react-router-dom'
 import constants from '../utils/constants'
@@ -365,6 +365,90 @@ const ListPage = (props) => {
       )
     }
 
+    const NewTopicModal = (props) => {
+
+      return (
+        <Modal
+          {...props}
+          size="lg"
+          aria-labelledby="contained-modal-title-vcenter"
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title id="contained-modal-title-vcenter">
+              发起新讨论
+          </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Row>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>标题</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <FormControl
+                      aria-label="title"
+                      aria-describedby="basic-addon1"
+                      required
+                    />
+                  </InputGroup>
+                </Col>
+              </Form.Row>
+              <Form.Row>
+                <Form.Group as={Col} controlId="content">
+                  <Form.Control
+                    as="textarea"
+                    placeholder="内容"
+                    rows={3}
+                    required
+                    id="topiccontent"
+                  />
+                </Form.Group>
+              </Form.Row>
+              <Form.Row>
+                <Col>
+                <div style={{ textAlign: "right" }}>
+                  <Button
+                    variant="outline-dark"
+                    size="sm"
+                    >上传图片</Button>
+                </div>
+                </Col>
+              </Form.Row>
+              <Form.Row controlId="replyTo">
+                <Col>
+                  <Form.Label>相关学校</Form.Label>
+                  <Form.Control as="input" size="sm" />
+                </Col>
+                <Col>
+                  <Form.Label>地区</Form.Label>
+                  <Form.Control as="select" size="sm">
+                    <option value={false}>...</option>
+                    {
+                      constants.regions.map((region) => (<option value={region.region_id}>{region.region_name}</option>))
+                    }
+                  </Form.Control>
+                </Col>
+                <Col xs="auto">
+                  <Form.Group>
+                  </Form.Group>
+                </Col>
+              </Form.Row>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <ButtonGroup>
+              <Button variant="success">发布</Button>
+              <Button variant="secondary" onClick={props.onHide}>取消</Button>
+            </ButtonGroup>
+          </Modal.Footer>
+        </Modal>
+      )
+    }
+
+    const [newTopicModalShow, setNewTopicModalShow] = useState(false)
+
     return (
       <>
         <Row className="mb-3">
@@ -385,7 +469,13 @@ const ListPage = (props) => {
               {
                 // TODO: create compose post view by react-bootstrap.Modal
               }
-              <Button variant="success">发起新讨论</Button>
+              <Button
+                variant="outline-success"
+                onClick={() => setNewTopicModalShow(true)}>发起新讨论</Button>
+              <NewTopicModal
+                show={newTopicModalShow}
+                onHide={() => setNewTopicModalShow(false)}
+              />
               <DropdownButton as={ButtonGroup} variant="success" id="bg-nested-dropdown">
                 <Dropdown.Item eventKey="1">Dropdown link</Dropdown.Item>
                 <Dropdown.Item eventKey="2">Dropdown link</Dropdown.Item>
@@ -537,11 +627,6 @@ const TopicPage = (props) => {
                         <Badge
                           variant="primary"
                           className="mr-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            history.push(`/institute/${topic.relatedInstitute.id}`);
-                            history.go()
-                          }}
                         >
                           {topic.relatedInstitute.name}
                         </Badge>
@@ -613,7 +698,7 @@ const TopicPage = (props) => {
                   </Col>
 
                   <Col xs="auto">
-                    <ButtonGroup aria-label="Basic example">
+                    <ButtonGroup aria-label="reply" >
                       <Button variant="outline-dark">添加图片</Button>
                       <Button variant="primary" type="submit">
                         发布
