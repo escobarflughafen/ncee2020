@@ -11,6 +11,7 @@ import LoginPage from './pages/login'
 import ForumPage from './pages/forum'
 import AboutPage from './pages/about'
 import UserPage from './pages/user'
+import PostPage from './pages/post'
 import NavigationBar from './pages/components/navigation-bar'
 import constants from './utils/constants'
 import AppNavbar from './pages/components/navbar'
@@ -276,6 +277,10 @@ function App() {
 
             <Route path="/user">
               <UserPage />
+            </Route>
+
+            <Route path="/post">
+              <PostPage />
             </Route>
 
             <Route path="/demo1">

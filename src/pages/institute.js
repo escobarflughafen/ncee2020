@@ -756,6 +756,7 @@ const InstituteTable = (props) => {
 
   const [institutes, setInstitutes] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
+
   const instPerPage = props.instperpage
   const totalPageNum = Math.ceil(institutes.length / instPerPage)
 
@@ -1064,12 +1065,12 @@ const InstituteTable = (props) => {
             )
           }
           <ListGroup.Item>
-      <div className="d-md-none">
-        {makePaginations(currentPage, setCurrentPage, totalPageNum, 3)}
-      </div>
-      <div className="d-none d-md-block">
-        {makePaginations(currentPage, setCurrentPage, totalPageNum, 4)}
-      </div>
+            <div className="d-md-none">
+              {makePaginations(currentPage, setCurrentPage, totalPageNum, 3)}
+            </div>
+            <div className="d-none d-md-block">
+              {makePaginations(currentPage, setCurrentPage, totalPageNum, 4)}
+            </div>
 
           </ListGroup.Item>
         </ListGroup>
