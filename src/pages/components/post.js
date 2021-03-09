@@ -11,6 +11,8 @@ import { timeStringConverter } from '../../utils/util'
 import { TopicCard, TopicList } from './topic'
 import axios from 'axios'
 
+
+
 const PostCard = (props) => {
   const expanded = props.expanded || false
   const index = props.index
@@ -186,8 +188,8 @@ const NewPostForm = (props) => {
 
   // states
   const [content, setContent] = useState()
-  const [relatedInstitute, setRelatedInstitute] = useState()
-  const [relatedTopic, setRelatedTopic] = useState()
+  const [relatedInstitute, setRelatedInstitute] = useState(props.relatedInstitute)
+  const [relatedTopic, setRelatedTopic] = useState(props.relatedTopic)
   const [replyTo, setReplyTo] = useState(props.replyTo)
   const [region, setRegion] = useState()
   const [tags, setTags] = useState()
@@ -195,8 +197,21 @@ const NewPostForm = (props) => {
 
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log(content, relatedInstitute, relatedTopic, replyTo, region, tags, photos)
+
+    const url = `http://${document.domain}:${constants.serverPort}/post/newpost`
+    const body = {
+      content: content,
+      relatedInstitute: relatedInstitute,
+      relatedTopic: relatedTopic,
+      region: region,
+      replyTo: replyTo,
+      tags: tags,
+      photos: photos
+    }
+
+    axios.post(url, body).then((res) => {
+      console.log(res)
+    })
   }
 
   return (

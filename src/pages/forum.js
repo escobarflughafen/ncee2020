@@ -217,6 +217,15 @@ const ListPage = (props) => {
 
   const TopicTabs = (props) => {
     const [key, setKey] = useState('topics')
+    const [topics, setTopics] = useState([])
+
+    useEffect(() => {
+      const url = `http://${document.domain}:${constants.serverPort}/forum/fetchall`
+      axios.post(url).then((res) => {
+        console.log(res)
+        setTopics(res.data.topics)
+      })
+    },[])
 
     const ReplyTab = (props) => {
       return (
@@ -245,7 +254,6 @@ const ListPage = (props) => {
           </Modal.Body>
           <Modal.Footer>
             <ButtonGroup>
-              <Button variant="success">发布</Button>
               <Button variant="secondary" onClick={props.onHide}>取消</Button>
             </ButtonGroup>
           </Modal.Footer>
@@ -303,7 +311,7 @@ const ListPage = (props) => {
             </Card.Header>
             <Tab.Content>
               <Tab.Pane eventKey="topics">
-                <TopicList topics={demoTopics} />
+                <TopicList topics={topics} />
               </Tab.Pane>
               <Tab.Pane eventKey="replies">
                 <ReplyTab />

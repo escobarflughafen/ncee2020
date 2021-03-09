@@ -823,9 +823,6 @@ const InstituteTable = (props) => {
     }
   }
 
-  useEffect(() => {
-    handleQuery()
-  }, [])
 
   const addTag = (category, label) => {
     if (!queryTags.find(t => (t.category === category) && (t.label === label))) {

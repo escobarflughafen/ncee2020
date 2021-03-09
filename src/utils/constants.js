@@ -12,11 +12,11 @@ const constants = {
     login: "登入",
     account: "个人帐户"
   },
-  topicType: [
-    {id: 0, name: "讨论"},
-    {id: 1, name: "咨询"},
-    {id: 2, name: "闲谈"},
-    {id: 3, name: "经验"},
+  topicTypes: [
+    {id: '0', name: "讨论"},
+    {id: '1', name: "咨询"},
+    {id: '2', name: "闲谈"},
+    {id: '3', name: "经验"},
   ],
   regions: [
     { region_name: '北京市', region_id: '11' },
@@ -647,12 +647,6 @@ const constants = {
       labels: ["本科", "综合类", "公办", "211", "985", "一流大学建设高校"],
       location: "北京，海淀区"
     },
-  ],
-  topicTypes: [
-    '讨论',
-    '经验',
-    '咨询',
-    '闲谈',
   ],
   
 }

@@ -17,13 +17,13 @@ const TopicCard = (props) => {
     <ListGroup.Item
       action
       onClick={(e) => {
-        history.push(`/forum/${topic.id}`);
+        history.push(`/forum/${topic._id}`);
         history.go()
       }}
     >
       <Row>
         <Col xs="auto" style={{ textAlign: "center" }}>
-          <small>{topic.category}</small>
+          <small>{constants.topicTypes.find(t => topic.category === t.id).name}</small>
         </Col>
         <Col className="">
           <Row>
@@ -36,7 +36,7 @@ const TopicCard = (props) => {
                   <small>
                     <SVG variant="person" fill />
                     <span className="ml-1">
-                      <a><b>{topic.host}</b></a>
+                      <a><b>{topic.host.name}</b></a>
                     </span>
                   </small>
                 </Col>
@@ -52,7 +52,7 @@ const TopicCard = (props) => {
                       variant="primary"
                       className="mr-1"
                     >
-                      {topic.relatedInstitute.name}
+                      {topic.relatedInstitute.data.name}
                     </Badge>
                   </>
                 ) : (<></>)
@@ -61,7 +61,7 @@ const TopicCard = (props) => {
                 (topic.region) ? (
                   <>
                     <Badge variant="success" className="mr-1">
-                      {topic.region}
+                      {constants.regions.find(r => r.region_id === topic.region).region_name}
                     </Badge>
                   </>
                 ) : (<></>)
@@ -144,9 +144,26 @@ const NewTopicForm = (props) => {
   const [tags, setTags] = useState()
   const [content, setContent] = useState()
 
+  const handleSubmit = (e) => {
+    const url = `http://${document.domain}:${constants.serverPort}/forum/newtopic`
+
+    const body = {
+      title: title,
+      category: category,
+      content: content,
+      relatedInstitute: relatedInstitute,
+      region: region,
+      tags: tags,
+    }
+
+    axios.post(url, body).then((res) => {
+      console.log(res)
+    })
+  }
+
   return (
     <>
-      <Form>
+      <Form onSubmit={handleSubmit}>
         <Form.Row>
           <Col>
             <InputGroup className="mb-3" size="sm">
@@ -173,7 +190,7 @@ const NewTopicForm = (props) => {
                 onChange={(e) => { setCategory(e.target.value) }}
               >
                 {
-                  constants.topicType.map((type) => (
+                  constants.topicTypes.map((type) => (
                     <option value={type.id}>{type.name}</option>
                   ))
                 }
@@ -227,6 +244,9 @@ const NewTopicForm = (props) => {
               </InputGroup.Prepend>
               <Form.Control as="input" value={relatedInstitute} onChange={(e) => { setRelatedInstitute(e.target.value) }} />
             </InputGroup>
+          </Col>
+          <Col xs="auto">
+            <Button variant="success" type="submit" size="sm">发布</Button>
           </Col>
         </Form.Row>
       </Form>
