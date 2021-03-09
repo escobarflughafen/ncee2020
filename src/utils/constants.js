@@ -15,7 +15,7 @@ const constants = {
   topicType: [
     {id: 0, name: "讨论"},
     {id: 1, name: "咨询"},
-    {id: 2, name: "求助"},
+    {id: 2, name: "闲谈"},
     {id: 3, name: "经验"},
   ],
   regions: [

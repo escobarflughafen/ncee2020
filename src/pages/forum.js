@@ -8,8 +8,8 @@ import constants from '../utils/constants'
 import SVG from '../utils/svg'
 import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
-import { TopicCard, TopicList } from './components/topic'
-import { PostCard } from './components/post'
+import { TopicCard, TopicList, NewTopicForm } from './components/topic'
+import { PostCard, NewPostForm } from './components/post'
 import axios from 'axios'
 
 
@@ -24,6 +24,7 @@ const demoContents = [
     relatedInstitute: 104,
     relatedTopic: 123,
     region: '44',
+    replyTo: '回复内容',
     viewCount: 1234,
     createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
   },
@@ -145,9 +146,9 @@ const demoTopics = [
     title: "689分能不能上北大",
     host: "haskell",
     category: "提问",
-    contents: ["1", "2", "3", "4"],
     relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
     region: '广州',
+    posts: demoContents,
     tags: ['理科', '分数线'],
     viewCount: 1231,
     createdAt: Date.now(),
@@ -158,7 +159,7 @@ const demoTopics = [
     title: "中大有什么文科专业推荐",
     host: "Joel",
     category: "提问",
-    contents: ["1", "2", "3", "4"],
+    posts: demoContents,
     relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
     region: '广州',
     tags: ['文科', '分数线'],
@@ -171,150 +172,7 @@ const demoTopics = [
     title: "中大还是华工",
     host: "admin",
     category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '广东工业大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "689分能不能上北大",
-    host: "haskell",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['理科', '分数线'],
-    viewCount: 1231,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大有什么文科专业推荐",
-    host: "Joel",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大还是华工",
-    host: "admin",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '广东工业大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大还是华工",
-    host: "admin",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '广东工业大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "689分能不能上北大",
-    host: "haskell",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['理科', '分数线'],
-    viewCount: 1231,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大有什么文科专业推荐",
-    host: "Joel",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大还是华工",
-    host: "admin",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '广东工业大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大还是华工",
-    host: "admin",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '广东工业大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "689分能不能上北大",
-    host: "haskell",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['理科', '分数线'],
-    viewCount: 1231,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大有什么文科专业推荐",
-    host: "Joel",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大还是华工",
-    host: "admin",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
+    posts: demoContents,
     relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '广东工业大学' },
     region: '广州',
     tags: ['文科', '分数线'],
@@ -336,21 +194,24 @@ const ListPage = (props) => {
     const topic = props.topic
 
     return (
+      <></>
+      /*
       <Card border='dark' text="dark">
         <Card.Body>
           <Card.Title>{topic.title}</Card.Title>
           <Card.Text>
-            {topic.contents[0]}
+            {JSON.stringify(topic.posts)}
           </Card.Text>
         </Card.Body>
         <Card.Footer>
-          <small className="text-muted">{topic.viewCount}点击，{topic.contents.length - 1}回复</small>
+          <small className="text-muted">{topic.viewCount}点击，{topic.posts.length}回复</small>
           <br />
           {
             topic.tags.map((tag, idx) => (<Badge className="mr-1" variant={['primary', 'secondary', 'success', 'danger', 'dark'][idx % 5]}>{tag}</Badge>))
           }
         </Card.Footer>
       </Card>
+      */
     )
   }
 
@@ -380,78 +241,7 @@ const ListPage = (props) => {
           </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Form>
-              <Form.Row>
-                <Col>
-                  <InputGroup className="mb-3" size="sm">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>标题</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <FormControl
-                      aria-label="title"
-                      aria-describedby="basic-addon1"
-                      required
-                    />
-                  </InputGroup>
-                </Col>
-                <Col xs="auto">
-                  <InputGroup className="mb-3" size="sm">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>类型</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <FormControl as="select">
-                      {
-                        constants.topicType.map((type) => (
-                          <option value={type.id}>{type.name}</option>
-                        ))
-                      }
-                    </FormControl>
-                  </InputGroup>
-                </Col>
-              </Form.Row>
-              <Form.Row>
-                <Form.Group as={Col} controlId="content">
-                  <Form.Control
-                    as="textarea"
-                    placeholder="内容"
-                    rows={3}
-                    required
-                    id="topiccontent"
-                  />
-                </Form.Group>
-              </Form.Row>
-              <Form.Row className="mb-3">
-                <Col>
-                  <InputGroup size="sm">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>地区</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <Form.Control as="select">
-                      <option value={false}>...</option>
-                      {
-                        constants.regions.map((region) => (<option value={region.region_id}>{region.region_name}</option>))
-                      }
-                    </Form.Control>
-                  </InputGroup>
-                </Col>
-                <Col xs="auto">
-                    <Button
-                      variant="outline-dark"
-                      size="sm"
-                    >上传图片</Button>
-                </Col>
-              </Form.Row>
-              <Form.Row controlId="replyTo">
-                <Col>
-                  <InputGroup size="sm">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>相关院校</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <Form.Control as="input" />
-                  </InputGroup>
-                </Col>
-              </Form.Row>
-            </Form>
+            <NewTopicForm />
           </Modal.Body>
           <Modal.Footer>
             <ButtonGroup>
@@ -588,16 +378,12 @@ const TopicPage = (props) => {
 
   // demo
   const topic = demoTopics.find((t) => t.id == parseInt(id))
-  const contents = demoContents
 
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     document.title = `${topic.title} - ${constants.title.forum} - ${constants.appName}`
   }, [])
-
-
-  const [replyTo, setReplyTo] = useState(-1)
 
   return (
     <>
@@ -668,67 +454,31 @@ const TopicPage = (props) => {
                   <small>
                     <span className="d-inline-block">由 <a href={`/user/${topic.host}`}><b>{topic.host}</b></a> 在 {new Date(topic.createdAt).toLocaleDateString('zh')} 发起</span>
                     ・
-                    <span className="d-inline-block">{topic.contents.length} 条回复</span>
+                    <span className="d-inline-block">{topic.posts.length} 条回复</span>
                     ・
                     <span className="d-inline-block">{topic.viewCount} 次浏览</span>
                   </small>
                 </Col>
               </Row>
             </ListGroup.Item>
-            {contents.slice((currentPage - 1) * postPerPage, currentPage * postPerPage).map(
+            {topic.posts.slice((currentPage - 1) * postPerPage, currentPage * postPerPage).map(
               (post, idx) => {
                 return (<PostCard
                   post={post}
                   index={(currentPage - 1) * postPerPage + idx + 1}
                   host={post.author === topic.host}
-                  setReplyTo={setReplyTo}
                   expanded={false}
                 />)
               }
             )}
             <ListGroup.Item>
-              {makePaginations(currentPage, setCurrentPage, Math.ceil(contents.length / postPerPage), 4)}
+              {makePaginations(currentPage, setCurrentPage, Math.ceil(topic.posts.length / postPerPage), 4)}
             </ListGroup.Item>
             {
               //  reply use popup(modal) 
             }
             <ListGroup.Item id="replyform">
-              <Form>
-                <Form.Row>
-                  <Form.Group as={Col} controlId="content">
-                    <Form.Label>留言</Form.Label>
-                    <Form.Control as="textarea" placeholder="..." rows={3} id="replytextarea" />
-                  </Form.Group>
-                </Form.Row>
-
-                <Form.Group as={Row} controlId="replyTo">
-                  <Form.Label column xs="auto">回复</Form.Label>
-                  <Col>
-                    <Form.Control
-                      as="select"
-                      defaultValue={replyTo}
-                      onChange={(e) => { setReplyTo(e.target.value) }}
-                    >
-                      <option value={-1}>...</option>
-                      {contents.map((post, idx) => {
-                        return (
-                          <option value={post.id}>{idx + 1} - {post.content}</option>
-                        )
-                      })}
-                    </Form.Control>
-                  </Col>
-
-                  <Col xs="auto">
-                    <ButtonGroup aria-label="reply" >
-                      <Button variant="outline-dark">添加图片</Button>
-                      <Button variant="primary" type="submit">
-                        发布
-                      </Button>
-                    </ButtonGroup>
-                  </Col>
-                </Form.Group>
-
-              </Form>
+              <NewPostForm topic={topic} />
             </ListGroup.Item>
           </ListGroup>
         </Card>

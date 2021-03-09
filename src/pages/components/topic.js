@@ -68,7 +68,7 @@ const TopicCard = (props) => {
               }
               <small>
                 <span className="mr-1 d-inline-block">{topic.viewCount}次浏览・</span>
-                <span className="mr-1 d-inline-block">{topic.contents.length}条回复・</span>
+                <span className="mr-1 d-inline-block">{topic.posts.length}条回复・</span>
                 <span className="mr-1 d-inline-block">最后回复于 {timeStringConverter(topic.lastUpdated)}</span>
               </small>
             </Col>
@@ -135,4 +135,103 @@ const TopicList = (props) => {
   )
 }
 
-export { TopicCard, TopicList };
+
+const NewTopicForm = (props) => {
+  const [title, setTitle] = useState()
+  const [category, setCategory] = useState(0)
+  const [relatedInstitute, setRelatedInstitute] = useState(props.relatedInstitute)
+  const [region, setRegion] = useState()
+  const [tags, setTags] = useState()
+  const [content, setContent] = useState()
+
+  return (
+    <>
+      <Form>
+        <Form.Row>
+          <Col>
+            <InputGroup className="mb-3" size="sm">
+              <InputGroup.Prepend>
+                <InputGroup.Text>标题</InputGroup.Text>
+              </InputGroup.Prepend>
+              <FormControl
+                aria-label="title"
+                aria-describedby="basic-addon1"
+                required
+                value={title}
+                onChange={(e) => { setTitle(e.target.value) }}
+              />
+            </InputGroup>
+          </Col>
+          <Col xs="auto">
+            <InputGroup className="mb-3" size="sm">
+              <InputGroup.Prepend>
+                <InputGroup.Text>类型</InputGroup.Text>
+              </InputGroup.Prepend>
+              <FormControl
+                as="select"
+                value={category}
+                onChange={(e) => { setCategory(e.target.value) }}
+              >
+                {
+                  constants.topicType.map((type) => (
+                    <option value={type.id}>{type.name}</option>
+                  ))
+                }
+              </FormControl>
+            </InputGroup>
+          </Col>
+        </Form.Row>
+        <Form.Row>
+          <Form.Group as={Col}>
+            <Form.Control
+              as="textarea"
+              placeholder="内容"
+              rows={3}
+              required
+              id="topiccontent"
+              value={content}
+              onChange={(e) => { setContent(e.target.value) }}
+            />
+          </Form.Group>
+        </Form.Row>
+        <Form.Row className="mb-3">
+          <Col>
+            <InputGroup size="sm">
+              <InputGroup.Prepend>
+                <InputGroup.Text>地区</InputGroup.Text>
+              </InputGroup.Prepend>
+              <Form.Control
+                as="select"
+                value={region}
+                onChange={(e) => { setRegion(e.target.value) }}
+              >
+                <option value={false}>...</option>
+                {
+                  constants.regions.map((region) => (<option value={region.region_id}>{region.region_name}</option>))
+                }
+              </Form.Control>
+            </InputGroup>
+          </Col>
+          <Col xs="auto">
+            <Button
+              variant="outline-dark"
+              size="sm"
+            >上传图片</Button>
+          </Col>
+        </Form.Row>
+        <Form.Row controlId="replyTo">
+          <Col>
+            <InputGroup size="sm">
+              <InputGroup.Prepend>
+                <InputGroup.Text>相关院校</InputGroup.Text>
+              </InputGroup.Prepend>
+              <Form.Control as="input" value={relatedInstitute} onChange={(e) => { setRelatedInstitute(e.target.value) }} />
+            </InputGroup>
+          </Col>
+        </Form.Row>
+      </Form>
+    </>
+  )
+}
+
+export { TopicCard, TopicList, NewTopicForm };

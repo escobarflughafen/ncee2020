@@ -59,6 +59,15 @@ const PostCard = (props) => {
 
   return (
     <>
+      {(expanded && post.replyTo) ? (
+        <ListGroup.Item variant="info">
+          <Row>
+            <Col>
+              回复：<a href="#" onClick={() => { history.push(`/post/${post.replyTo.id}`); history.go() }}><b>{post.replyTo.content}</b></a>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+      ) : null}
       <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post.id}`); history.go() }}>
         <Row>
           <Col xs="auto" className="pr-0">
@@ -172,4 +181,80 @@ const PostList = (props) => {
   )
 }
 
-export { PostCard, PostList };
+const NewPostForm = (props) => {
+  const expanded = props.expanded
+
+  // states
+  const [content, setContent] = useState()
+  const [relatedInstitute, setRelatedInstitute] = useState()
+  const [relatedTopic, setRelatedTopic] = useState()
+  const [replyTo, setReplyTo] = useState(props.replyTo)
+  const [region, setRegion] = useState()
+  const [tags, setTags] = useState()
+  const [photos, setPhotos] = useState()
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    console.log(content, relatedInstitute, relatedTopic, replyTo, region, tags, photos)
+  }
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Form.Row>
+        <Form.Group as={Col} >
+          <Form.Label>回复内容</Form.Label>
+          <Form.Control
+            as="textarea"
+            placeholder="..."
+            rows={3}
+            id="replytextarea"
+            value={content}
+            onChange={(e) => { setContent(e.target.value) }} />
+        </Form.Group>
+      </Form.Row>
+
+      <Form.Group as={Row} controlId="replyTo">
+        <Col>
+          {
+            (props.topic) ? (
+              <>
+                <InputGroup className="mb-3" size="sm">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>回复</InputGroup.Text>
+                  </InputGroup.Prepend>
+                <Form.Control
+                  as="select"
+                  defaultValue={replyTo}
+                  onChange={(e) => { setReplyTo(e.target.value) }}
+                >
+                  <option value={-1}>...</option>
+                  {props.topic.posts.map((post, idx) => {
+                    return (
+                      <option value={post.id}>{idx + 1} - {post.content}</option>
+                    )
+                  })}
+                </Form.Control>
+                </InputGroup>
+              </>
+            ) : null
+          }
+        </Col>
+
+        <Col xs="auto">
+          <ButtonGroup aria-label="reply" size="sm">
+            <Button variant="outline-dark">添加图片</Button>
+            <Button variant="primary" type="submit">
+              发布
+          </Button>
+          </ButtonGroup>
+        </Col>
+      </Form.Group>
+
+    </Form>
+  )
+
+
+}
+
+export { PostCard, PostList, NewPostForm };
