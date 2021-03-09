@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../../style.css'
 import React, { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup, ListGroupItem } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation, useParams } from 'react-router-dom'
 import constants from '../../utils/constants'
@@ -12,7 +12,7 @@ import { TopicCard, TopicList } from './topic'
 import axios from 'axios'
 
 const PostCard = (props) => {
-  const expanded = props.expanded
+  const expanded = props.expanded || false
   const index = props.index
   const host = props.host
   const setReplyTo = props.setReplyTo
@@ -70,9 +70,13 @@ const PostCard = (props) => {
                 <small>
                   {(host) ? (<SVG className="mr-2" variant="person" fill />) : (<></>)}
                   <a href={`/user/${post.author}`}><b>{post.author}</b></a>
-                  <span className="d-inline-block">
-                    ・{timeStringConverter(post.createdAt)}
-                  </span>
+                  {
+                    (expanded) ? null : (
+                      <span className="d-inline-block">
+                        ・{timeStringConverter(post.createdAt)}
+                      </span>
+                    )
+                  }
                 </small>
               </Col>
               <Col xs="auto">
@@ -128,6 +132,9 @@ const PostCard = (props) => {
               (expanded) ? (
                 <Row>
                   <Col>
+                    <small>
+                      {new Date(post.createdAt).toString()}
+                    </small>
                   </Col>
                 </Row>
               ) : null
@@ -139,5 +146,30 @@ const PostCard = (props) => {
   )
 }
 
+const PostList = (props) => {
+  const posts = props.posts
+  const postPerPage = props.postPerPage || 12
+  const [currentPage, setCurrentPage] = useState(1)
+  const paginationNum = props.paginationNum || 3
 
-export { PostCard };
+  return (
+    <>
+      <ListGroup variant="flush">
+        {posts.slice((currentPage - 1) * postPerPage, (currentPage) * postPerPage).map((post, idx) => {
+          return (
+            <PostCard
+              post={post}
+              index={(currentPage - 1) * postPerPage + idx + 1}
+              expanded={false}
+            />
+          )
+        })}
+        <ListGroupItem>
+          {makePaginations(currentPage, setCurrentPage, Math.ceil(posts.length / postPerPage), paginationNum)}
+        </ListGroupItem>
+      </ListGroup>
+    </>
+  )
+}
+
+export { PostCard, PostList };

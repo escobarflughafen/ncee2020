@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
   totalPageNum: 总页数
   paginationNum: 导览按钮个数
 */
-const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNum, size = false) => {
+const makePaginations = (currentPage, setCurrentPage, totalPageNum, paginationNum, size = 'sm') => {
   var paginations = []
   if (paginationNum < totalPageNum) {
     if (currentPage + paginationNum > totalPageNum) {

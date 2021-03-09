@@ -51,11 +51,6 @@ const TopicCard = (props) => {
                     <Badge
                       variant="primary"
                       className="mr-1"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        history.push(`/institute/${topic.relatedInstitute.id}`);
-                        history.go()
-                      }}
                     >
                       {topic.relatedInstitute.name}
                     </Badge>
@@ -86,7 +81,7 @@ const TopicCard = (props) => {
 
 const TopicList = (props) => {
   const topics = props.topics
-  const [viewMode, setViewMode] = useState('详细')
+  const [viewMode, setViewMode] = useState(props.viewMode || '详细')
   const topicPerPage = props.topicPerPage || 12
   const [currentPage, setCurrentPage] = useState(1)
   return (

@@ -10,10 +10,65 @@ import SVG from '../utils/svg'
 import axios from 'axios'
 import { makePaginations } from './components/pagination'
 import Comments from './components/comments'
-import { TopicCard } from './components/topic'
+import { TopicList } from './components/topic'
+import { PostList } from './components/post'
 import NavigationBar from './components/navigation-bar'
 
 
+
+//demo data
+
+const demoTopics = [
+  {
+    id: 125,
+    title: "689分能不能上北大",
+    host: "haskell",
+    category: "提问",
+    contents: ["1", "2", "3", "4"],
+    relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
+    region: '广州',
+    tags: ['理科', '分数线'],
+    viewCount: 1231,
+    createdAt: Date.now(),
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
+  },
+  {
+    id: 125,
+    title: "中大有什么文科专业推荐",
+    host: "Joel",
+    category: "提问",
+    contents: ["1", "2", "3", "4"],
+    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
+    region: '广州',
+    tags: ['文科', '分数线'],
+    viewCount: 1124,
+    createdAt: Date.now(),
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
+  },
+]
+
+const demoComments = [
+  {
+    id: 1,
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    id: 1,
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+]
 // Utils
 
 const fetchAllInstitutesInfo = async (cb, port = constants.serverPort) => {
@@ -564,41 +619,15 @@ const InstituteTabs = (props) => {
               <Card.Body>
                 <Card.Title>院校评价</Card.Title>
                 <Card.Text>
-                  <Comments itemperpage={8} />
-                  <ListGroup variant="flush">
-                    {['123', '666', '111'].map(p => (<ListGroup.Item>
-                      <Row>
-                        <Col>
-                          {p}
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col className="annotation">
-                          {Math.floor(Math.random() * 1000)}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>))}
-                  </ListGroup>
+                  <Card>
+                    <PostList posts={demoComments} />
+                  </Card>
                 </Card.Text>
                 <Card.Title>相关讨论</Card.Title>
                 <Card.Text>
-                  {
-                    //<Topics itemperpage={8} />
-                  }
-                  <ListGroup variant="flush">
-                    {['[讨论]123', '[讨论]666', '[讨论]111'].map(p => (<ListGroup.Item>
-                      <Row className="align-items-center">
-                        <Col xs="auto">
-                          {p}
-                        </Col>
-                        <Col>
-                        </Col>
-                        <Col xs="auto" className="annotation">
-                          {new Date().toUTCString()}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>))}
-                  </ListGroup>
+                  <Card>
+                    <TopicList topics={demoTopics} />
+                  </Card>
                 </Card.Text>
               </Card.Body>
             </Tab.Pane>
@@ -746,8 +775,6 @@ const Detail = (props) => {
     </div>
   )
 }
-
-// TODO: InstituteCard
 
 const InstituteTable = (props) => {
   const { path, url, params } = useRouteMatch()
@@ -1092,7 +1119,7 @@ const InstitutePage = (props) => {
 
   return (
     <Router>
-      <div className="container">
+      <div className="container mb-3">
         <Switch>
           <Route path={`/institute/:id`} exact={true}>
             <Detail />
