@@ -292,7 +292,7 @@ const InstituteTabs = (props) => {
     )
   }
 
-  const [key, setKey] = useState('general')
+  const [key, setKey] = useState(useParams().eventKey)
 
   const ScoreTable = (props) => {
     const [region, setRegion] = useState(constants.regions.find(r => r.region_id === '44'))
@@ -509,6 +509,7 @@ const InstituteTabs = (props) => {
       setTopics(res.data.topics)
     })
   }, [])
+  
   return (
     <div>
       <Tab.Container defaultActiveKey="general" activeKey={key} onSelect={(k) => setKey(k)}>
@@ -590,14 +591,14 @@ const InstituteTabs = (props) => {
                 <Card.Text>
                   <Card>
                     <PostList posts={posts} />
+                    <NewPostForm className="p-3" relatedInstitute={institute._id} />
                   </Card>
                 </Card.Text>
                 <Card.Title>相关讨论</Card.Title>
                 <Card.Text>
                   <Card>
-                    {
-                      <TopicList topics={topics} />
-                    }
+                    <TopicList topics={topics} />
+                    <NewTopicForm className="p-3" relatedInstitute={institute._id} />
                   </Card>
                 </Card.Text>
               </Card.Body>
@@ -641,6 +642,7 @@ const Detail = (props) => {
   const { path, url, params } = useRouteMatch()
   const history = useHistory()
   const id = useParams().id
+  const eventKey = useParams().id
 
   const [institute, setInstitute] = useState()
 
@@ -741,7 +743,7 @@ const Detail = (props) => {
           (
             <>
               <Header />
-              <InstituteTabs institute={institute} />
+              <InstituteTabs institute={institute} eventKey={eventKey}/>
             </>
           ) : null
       }
@@ -1091,9 +1093,16 @@ const InstitutePage = (props) => {
     <Router>
       <div className="container mb-3">
         <Switch>
-          <Route path={`/institute/:id`} exact={true}>
+          <Route path={`/institute/:id/`} exact={true}>
             <Detail />
           </Route>
+          {
+            /*
+          <Route path={`/institute/:id`} exact={true} render={props => (
+            <Redirect to={`/institute/${props.match.params.id}/general`} />
+          )} />
+            */
+          }
           <Route path={`/institute/`} exact={true}>
             <InstituteTable instperpage={instperpage} />
           </Route>

@@ -214,6 +214,7 @@ const NewPostForm = (props) => {
   }
 
   return (
+    <div className={props.className}>
     <Form onSubmit={handleSubmit}>
       <Form.Row>
         <Form.Group as={Col} >
@@ -268,6 +269,7 @@ const NewPostForm = (props) => {
       </Form.Group>
 
     </Form>
+    </div>
   )
 
 
