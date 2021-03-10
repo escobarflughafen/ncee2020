@@ -12,68 +12,6 @@ import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm } from './components/post'
 import axios from 'axios'
 
-// utils
-const fetchPost = async (id, cb, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${port}/post/${id}/fetchpost`
-
-  try {
-    let req = axios.post(url, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
-      data: {
-        id: id
-      }
-    })
-    cb(await req.then())
-  } catch (err) {
-    console.log(err)
-  }
-}
-
-const demoData = {
-  id: 123,
-  author: 'jack',
-  content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
-  relatedInstitute: 104,
-  relatedTopic: 123,
-  region: '44',
-  viewCount: 1234,
-  createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  replyTo: { content: "123", id: 123 },
-  replies: [
-    {
-      id: 123,
-      author: 'alice',
-      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
-      relatedInstitute: 104,
-      relatedTopic: 123,
-      region: '44',
-      viewCount: 1234,
-      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-    },
-    {
-      id: 123,
-      author: 'bob',
-      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
-      relatedInstitute: 104,
-      relatedTopic: 123,
-      region: '44',
-      viewCount: 1234,
-      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-    },
-    {
-      id: 123,
-      author: 'douglas',
-      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
-      relatedInstitute: 104,
-      relatedTopic: 123,
-      region: '44',
-      viewCount: 1234,
-      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-    },
-  ]
-}
 
 const PostView = (props) => {
   const { path, url, params } = useRouteMatch()
@@ -95,56 +33,68 @@ const PostView = (props) => {
   }, [post])
   */
 
+  useEffect(() => {
+    const url = `http://${document.domain}:${constants.serverPort}/post/${id}/fetch`
+    axios.post(url).then(res => {
+      console.log(res)
+      document.title = `${res.data.post.content} - ${constants.title.post} - ${constants.appName}`
+      setPost(res.data.post)
+    })
+  }, [])
 
-
-  useEffect(()=>{
-    setPost(demoData)
-  },[])
   return (
     <>
-      <div>
-
-        <Row className="mb-3">
-          <Col>
-            <Button
-              variant="outline-success"
-              size="sm"
-              onClick={() => {
-                history.goBack()
-              }}
-            >←返回</Button>
-          </Col>
-        </Row>
-        <Card>
-          <ListGroup variant="flush">
-            <PostCard
-              post={demoData}
-              expanded={true}
-            />
-            <ListGroup.Item>
-              <NewPostForm replyTo={demoData.id} />
-            </ListGroup.Item>
-            <ListGroup.Item variant="light">
-              <Row>
-                <Col>
-                  回复（{demoData.replies.length}）
-                  </Col>
-              </Row>
-            </ListGroup.Item>
-            {
-              demoData.replies.map((reply, idx) => {
-                return (
-                  <PostCard
-                    post={reply}
-                    index={idx + 1}
-                    expanded={false}
-                  />
-                )
-              })
-            }
-          </ListGroup>
-        </Card>
-      </div>
+      {(post) ? (
+        <>
+          <div>
+            <Row className="mb-3">
+              <Col>
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  onClick={() => {
+                    history.goBack()
+                  }}
+                >←返回</Button>
+              </Col>
+            </Row>
+            <Card>
+              <ListGroup variant="flush">
+                <PostCard
+                  post={post}
+                  expanded={true}
+                />
+                <ListGroup.Item>
+                  <NewPostForm replyTo={post._id} />
+                </ListGroup.Item>
+                {
+                  (post.replies.length > 0) ? (
+                    <>
+                      <ListGroup.Item variant="light">
+                        <Row>
+                          <Col>
+                            回复（{post.replies.length}）
+                          </Col>
+                        </Row>
+                      </ListGroup.Item>
+                      {
+                        post.replies.map((reply, idx) => {
+                          return (
+                            <PostCard
+                              post={reply}
+                              index={idx + 1}
+                              expanded={false}
+                            />
+                          )
+                        })
+                      }
+                    </>) : null
+                }
+              </ListGroup>
+            </Card>
+          </div>
+        </>
+      ) : null}
     </>
   )
 }

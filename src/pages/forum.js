@@ -13,176 +13,6 @@ import { PostCard, NewPostForm } from './components/post'
 import axios from 'axios'
 
 
-//requests
-
-
-const demoContents = [
-  {
-    id: 1,
-    author: 'jack',
-    content: 'lorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    replyTo: '回复内容',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    id: 1,
-    author: 'jack',
-    content: 'lorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    id: 1,
-    author: 'jack',
-    content: 'lorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorem ipsum dolorlorem ipsum dolorlorem ipsum dolorlorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorem ipslorem ipsum dolorlorem ipsum dolorum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorelorem ipsum dolorlorem ipsum dolorlorem ipsum dolorm ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorem ipsum dolorlorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorelorem ipsum dolorlorem ipsum dolorm ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'lorem ipsum dollorem ipsum doloror',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    author: 'jack',
-    content: 'llorem ipsum dolorlorem ipsum dolorlorem ipsum dolorlorem ipsum dolororem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-]
-
-const demoTopics = [
-  {
-    id: 125,
-    title: "689分能不能上北大",
-    host: "haskell",
-    category: "提问",
-    relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
-    region: '广州',
-    posts: demoContents,
-    tags: ['理科', '分数线'],
-    viewCount: 1231,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大有什么文科专业推荐",
-    host: "Joel",
-    category: "提问",
-    posts: demoContents,
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大还是华工",
-    host: "admin",
-    category: "提问",
-    posts: demoContents,
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '广东工业大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-]
-
-
 const ListPage = (props) => {
   const history = useHistory();
 
@@ -220,12 +50,12 @@ const ListPage = (props) => {
     const [topics, setTopics] = useState([])
 
     useEffect(() => {
-      const url = `http://${document.domain}:${constants.serverPort}/forum/fetchall`
+      const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
       axios.post(url).then((res) => {
         console.log(res)
         setTopics(res.data.topics)
       })
-    },[])
+    }, [])
 
     const ReplyTab = (props) => {
       return (
@@ -348,11 +178,14 @@ const ListPage = (props) => {
       <div className="container d-none d-md-block">
         <h5>热门话题</h5>
         <CardGroup>
-          {demoTopics.slice(0, 3).map((topic) => {
+
+          {/*
+          demoTopics.slice(0, 3).map((topic) => {
             return (
               <HotTopicCard topic={topic} />
             )
-          })}
+          })
+        */}
         </CardGroup>
         <br />
       </div>
@@ -380,117 +213,123 @@ const ListPage = (props) => {
 
 const TopicPage = (props) => {
   const history = useHistory()
-  const id = useParams().id
+  const [id, setId] = useState(useParams().id)
 
   const postPerPage = props.postPerPage || 12
 
   // demo
-  const topic = demoTopics.find((t) => t.id == parseInt(id))
+  const [topic, setTopic] = useState()
 
   const [currentPage, setCurrentPage] = useState(1)
 
+
   useEffect(() => {
-    document.title = `${topic.title} - ${constants.title.forum} - ${constants.appName}`
-  }, [])
+    const url = `http://${document.domain}:${constants.serverPort}/forum/${id}/fetch`
+    axios.post(url).then((res) => {
+      console.log(res)
+      document.title = `${res.data.topic.title} - ${constants.title.forum} - ${constants.appName}`
+      setTopic(res.data.topic)
+    })
+  }, [id])
 
   return (
     <>
-      <div className="container">
-        <Row className="mb-3">
-          <Col>
-            <Button
-              variant="outline-success"
-              size="sm"
-              onClick={() => {
-                history.goBack();
-              }}
-            >←返回</Button>
-          </Col>
-          <Col className="mb-0" xs="auto">
-            <Button
-              variant="info"
-              size="sm"
-              href="#replytextarea"
-            >
-              回复
+      {(topic) ? (<>
+        <div className="container">
+          <Row className="mb-3">
+            <Col>
+              <Button
+                variant="outline-success"
+                size="sm"
+                onClick={() => {
+                  history.goBack();
+                }}
+              >←返回</Button>
+            </Col>
+            <Col className="mb-0" xs="auto">
+              <Button
+                variant="info"
+                size="sm"
+                href="#replytextarea"
+              >
+                回复
             </Button>
-          </Col>
-        </Row>
-        <Card>
-          <Card.Header>
-            <Row>
-              <Col xs="auto">
-                <small>{topic.category}</small>
-              </Col>
-              <Col>
-                <b>{topic.title}</b>
-              </Col>
-            </Row>
-          </Card.Header>
-          <ListGroup variant="flush">
-            <ListGroup.Item>
+            </Col>
+          </Row>
+          <Card>
+            <Card.Header>
               <Row>
-                <Col xs={12} sm="auto" className="mr-sm-auto">
-                  {
-                    (topic.relatedInstitute) ? (
-                      <>
-                        <Badge
-                          variant="primary"
-                          className="mr-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            history.push(`/institute/${topic.relatedInstitute.id}`);
-                            history.go()
-                          }}
-                        >
-                          {topic.relatedInstitute.name}
-                        </Badge>
-                      </>
-                    ) : (<></>)
-                  }
-                  {
-                    (topic.region) ? (
-                      <>
-                        <Badge variant="success" className="mr-1">
-                          {topic.region}
-                        </Badge>
-                      </>
-                    ) : (<></>)
-                  }
+                <Col xs="auto">
+                  <small>{constants.topicTypes.find(t => t.id === topic.category).name}</small>
                 </Col>
-                <Col sm="auto">
-                  <small>
-                    <span className="d-inline-block">由 <a href={`/user/${topic.host}`}><b>{topic.host}</b></a> 在 {new Date(topic.createdAt).toLocaleDateString('zh')} 发起</span>
+                <Col>
+                  <b>{topic.title}</b>
+                </Col>
+              </Row>
+            </Card.Header>
+            <ListGroup variant="flush">
+              <ListGroup.Item>
+                <Row>
+                  <Col xs={12} sm="auto" className="mr-sm-auto">
+                    {
+                      (topic.relatedInstitute) ? (
+                        <>
+                          <Badge
+                            variant="primary"
+                            className="mr-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              history.push(`/institute/${topic.relatedInstitute.data.school_id}`);
+                              history.go()
+                            }}
+                          >
+                            {topic.relatedInstitute.data.name}
+                          </Badge>
+                        </>
+                      ) : (<></>)
+                    }
+                    {
+                      (topic.region) ? (
+                        <>
+                          <Badge variant="success" className="mr-1">
+                            {constants.regions.find(r => r.region_id === topic.region).region_name}
+                          </Badge>
+                        </>
+                      ) : (<></>)
+                    }
+                  </Col>
+                  <Col sm="auto">
+                    <small>
+                      <span className="d-inline-block">由 <a href={`/user/${topic.host.username}`}><b>{topic.host.name}</b></a> 在 {new Date(topic.createdAt).toLocaleDateString('zh')} 发起</span>
                     ・
                     <span className="d-inline-block">{topic.posts.length} 条回复</span>
                     ・
                     <span className="d-inline-block">{topic.viewCount} 次浏览</span>
-                  </small>
-                </Col>
-              </Row>
-            </ListGroup.Item>
-            {topic.posts.slice((currentPage - 1) * postPerPage, currentPage * postPerPage).map(
-              (post, idx) => {
-                return (<PostCard
-                  post={post}
-                  index={(currentPage - 1) * postPerPage + idx + 1}
-                  host={post.author === topic.host}
-                  expanded={false}
-                />)
-              }
-            )}
-            <ListGroup.Item>
-              {makePaginations(currentPage, setCurrentPage, Math.ceil(topic.posts.length / postPerPage), 4)}
-            </ListGroup.Item>
-            {
-              //  reply use popup(modal) 
-            }
-            <ListGroup.Item id="replyform">
-              <NewPostForm topic={topic} />
-            </ListGroup.Item>
-          </ListGroup>
-        </Card>
-      </div>
+                    </small>
+                  </Col>
+                </Row>
+              </ListGroup.Item>
+              {topic.posts.slice((currentPage - 1) * postPerPage, currentPage * postPerPage).map(
+                (post, idx) => {
+                  return (<PostCard
+                    post={post}
+                    index={(currentPage - 1) * postPerPage + idx + 1}
+                    host={post.author.id === topic.host.id}
+                    expanded={false}
+                  />)
+                }
+              )}
+              <ListGroup.Item>
+                {makePaginations(currentPage, setCurrentPage, Math.ceil(topic.posts.length / postPerPage), 4)}
+              </ListGroup.Item>
+              <ListGroup.Item id="replyform">
+                <NewPostForm relatedTopic={topic._id} />
+              </ListGroup.Item>
+            </ListGroup>
+          </Card>
+        </div>
+      </>
+      ) : null}
     </>
   )
 }

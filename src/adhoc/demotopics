@@ -1,0 +1,286 @@
+
+
+//requests
+
+
+const demoContents = [
+  {
+    id: 1,
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    replyTo: '回复内容',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    id: 1,
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    id: 1,
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorem ipsum dolorlorem ipsum dolorlorem ipsum dolorlorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorem ipslorem ipsum dolorlorem ipsum dolorum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorelorem ipsum dolorlorem ipsum dolorlorem ipsum dolorm ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorem ipsum dolorlorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorelorem ipsum dolorlorem ipsum dolorm ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'lorem ipsum dollorem ipsum doloror',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    author: 'jack',
+    content: 'llorem ipsum dolorlorem ipsum dolorlorem ipsum dolorlorem ipsum dolororem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+]
+
+const demoTopics = [
+  {
+    id: 125,
+    title: "689分能不能上北大",
+    host: "haskell",
+    category: "提问",
+    relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
+    region: '广州',
+    posts: demoContents,
+    tags: ['理科', '分数线'],
+    viewCount: 1231,
+    createdAt: Date.now(),
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
+  },
+  {
+    id: 125,
+    title: "中大有什么文科专业推荐",
+    host: "Joel",
+    category: "提问",
+    posts: demoContents,
+    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
+    region: '广州',
+    tags: ['文科', '分数线'],
+    viewCount: 1124,
+    createdAt: Date.now(),
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
+  },
+  {
+    id: 125,
+    title: "中大还是华工",
+    host: "admin",
+    category: "提问",
+    posts: demoContents,
+    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '广东工业大学' },
+    region: '广州',
+    tags: ['文科', '分数线'],
+    viewCount: 1124,
+    createdAt: Date.now(),
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
+  },
+]
+
+// utils
+const fetchPost = async (id, cb, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${port}/post/${id}/fetchpost`
+
+  try {
+    let req = axios.post(url, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      data: {
+        id: id
+      }
+    })
+    cb(await req.then())
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+const demoData = {
+  id: 123,
+  author: 'jack',
+  content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+  relatedInstitute: 104,
+  relatedTopic: 123,
+  region: '44',
+  viewCount: 1234,
+  createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  replyTo: { content: "123", id: 123 },
+  replies: [
+    {
+      id: 123,
+      author: 'alice',
+      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+      relatedInstitute: 104,
+      relatedTopic: 123,
+      region: '44',
+      viewCount: 1234,
+      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+    },
+    {
+      id: 123,
+      author: 'bob',
+      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+      relatedInstitute: 104,
+      relatedTopic: 123,
+      region: '44',
+      viewCount: 1234,
+      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+    },
+    {
+      id: 123,
+      author: 'douglas',
+      content: 'lorem iplorem ipsum dolorlorem ipsum dolorsum dolor',
+      relatedInstitute: 104,
+      relatedTopic: 123,
+      region: '44',
+      viewCount: 1234,
+      createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+    },
+  ]
+}
+//demo data
+
+const demoTopics = [
+  {
+    id: 125,
+    title: "689分能不能上北大",
+    host: "haskell",
+    category: "提问",
+    contents: ["1", "2", "3", "4"],
+    relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
+    region: '广州',
+    tags: ['理科', '分数线'],
+    viewCount: 1231,
+    createdAt: Date.now(),
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
+  },
+  {
+    id: 125,
+    title: "中大有什么文科专业推荐",
+    host: "Joel",
+    category: "提问",
+    contents: ["1", "2", "3", "4"],
+    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
+    region: '广州',
+    tags: ['文科', '分数线'],
+    viewCount: 1124,
+    createdAt: Date.now(),
+    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
+  },
+]
+
+const demoComments = [
+  {
+    id: 1,
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+  {
+    id: 1,
+    author: 'jack',
+    content: 'lorem ipsum dolor',
+    relatedInstitute: 104,
+    relatedTopic: 123,
+    region: '44',
+    viewCount: 1234,
+    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
+  },
+]

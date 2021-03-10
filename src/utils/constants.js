@@ -7,6 +7,7 @@ const constants = {
     stats: "看数据",
     institute: "查学校",
     forum: "讨论区",
+    post: "贴文",
     about: "关于",
     search: "搜索",
     login: "登入",

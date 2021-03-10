@@ -10,65 +10,12 @@ import SVG from '../utils/svg'
 import axios from 'axios'
 import { makePaginations } from './components/pagination'
 import Comments from './components/comments'
-import { TopicList } from './components/topic'
-import { PostList } from './components/post'
+import { TopicList, NewTopicForm } from './components/topic'
+import { PostList, NewPostForm } from './components/post'
 import NavigationBar from './components/navigation-bar'
 
 
 
-//demo data
-
-const demoTopics = [
-  {
-    id: 125,
-    title: "689分能不能上北大",
-    host: "haskell",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '31', img: 'https://static-data.eol.cn/upload/logo/31.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['理科', '分数线'],
-    viewCount: 1231,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-  {
-    id: 125,
-    title: "中大有什么文科专业推荐",
-    host: "Joel",
-    category: "提问",
-    contents: ["1", "2", "3", "4"],
-    relatedInstitute: { id: '104', img: 'https://static-data.eol.cn/upload/logo/104.jpg', name: '北京大学' },
-    region: '广州',
-    tags: ['文科', '分数线'],
-    viewCount: 1124,
-    createdAt: Date.now(),
-    lastUpdated: Date.now() - Math.ceil(Math.random() * 1000 * 60 * 60 * 24 * 2)
-  },
-]
-
-const demoComments = [
-  {
-    id: 1,
-    author: 'jack',
-    content: 'lorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-  {
-    id: 1,
-    author: 'jack',
-    content: 'lorem ipsum dolor',
-    relatedInstitute: 104,
-    relatedTopic: 123,
-    region: '44',
-    viewCount: 1234,
-    createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
-  },
-]
 // Utils
 
 const fetchAllInstitutesInfo = async (cb, port = constants.serverPort) => {
@@ -237,8 +184,8 @@ const InstituteCard = (props) => {
                 (props.size === "sm") ? (
                   <Image className="mr-2" fluid height={24} width={24} src={i.icon} />
                 ) : (
-                  <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
-                )
+                    <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
+                  )
               }
               <b className="mr-1">{i.name}</b>
               {(props.score) ? (<Badge variant="info">{props.score}分</Badge>) : (<></>)}
@@ -538,8 +485,30 @@ const InstituteTabs = (props) => {
     )
   }
 
-  // tab control
+  const [posts, setPosts] = useState([])
+  const [topics, setTopics] = useState([])
 
+  useEffect(() => {
+    const url = `http://${document.domain}:${constants.serverPort}/post/fetch`
+    console.log(institute._id)
+    axios.post(url, {
+      relatedInstitute: institute._id
+    }).then((res) => {
+      console.log(res)
+      setPosts(res.data.posts)
+    })
+  }, [])
+
+  useEffect(() => {
+    const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
+    console.log(institute._id)
+    axios.post(url, {
+      relatedInstitute: institute._id
+    }).then((res) => {
+      console.log(res)
+      setTopics(res.data.topics)
+    })
+  }, [])
   return (
     <div>
       <Tab.Container defaultActiveKey="general" activeKey={key} onSelect={(k) => setKey(k)}>
@@ -620,13 +589,15 @@ const InstituteTabs = (props) => {
                 <Card.Title>院校评价</Card.Title>
                 <Card.Text>
                   <Card>
-                    <PostList posts={demoComments} />
+                    <PostList posts={posts} />
                   </Card>
                 </Card.Text>
                 <Card.Title>相关讨论</Card.Title>
                 <Card.Text>
                   <Card>
-                    <TopicList topics={demoTopics} />
+                    {
+                      <TopicList topics={topics} />
+                    }
                   </Card>
                 </Card.Text>
               </Card.Body>
@@ -674,10 +645,12 @@ const Detail = (props) => {
   const [institute, setInstitute] = useState()
 
   useEffect(() => {
-    fetchInstituteInfo(id, (institute) => {
-      document.title = `${institute.data.name} - ${constants.title.institute} - ${constants.appName}`
-      setInstitute(institute.data)
-      console.log(institute.data)
+    fetchInstituteInfo(id, (res) => {
+      document.title = `${res.data.name} - ${constants.title.institute} - ${constants.appName}`
+      setInstitute(
+        res.data,
+      )
+      console.log(res.data)
     })
   }, [])
 
@@ -770,7 +743,7 @@ const Detail = (props) => {
               <Header />
               <InstituteTabs institute={institute} />
             </>
-          ) : (<></>)
+          ) : null
       }
     </div>
   )
@@ -985,8 +958,8 @@ const InstituteTable = (props) => {
                           <SVG variant="trash" />
                         </Badge>
                       ) : (
-                        <></>
-                      )
+                          <></>
+                        )
                     }
                   </Col>
                 </Row>

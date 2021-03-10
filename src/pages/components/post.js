@@ -65,12 +65,12 @@ const PostCard = (props) => {
         <ListGroup.Item variant="info">
           <Row>
             <Col>
-              回复：<a href="#" onClick={() => { history.push(`/post/${post.replyTo.id}`); history.go() }}><b>{post.replyTo.content}</b></a>
+              回复：<a href="#" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><b>{post.replyTo.content}</b></a>
             </Col>
           </Row>
         </ListGroup.Item>
       ) : null}
-      <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post.id}`); history.go() }}>
+      <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post._id}`); history.go() }}>
         <Row>
           <Col xs="auto" className="pr-0">
             <Image width={48} height={48} />
@@ -80,7 +80,7 @@ const PostCard = (props) => {
               <Col>
                 <small>
                   {(host) ? (<SVG className="mr-2" variant="person" fill />) : (<></>)}
-                  <a href={`/user/${post.author}`}><b>{post.author}</b></a>
+                  <a href={`/user/${post.author.username}`}><b>{post.author.name}</b></a>
                   {
                     (expanded) ? null : (
                       <span className="d-inline-block">
@@ -123,7 +123,7 @@ const PostCard = (props) => {
                       <Dropdown.Menu as={CustomMenu}>
                         <Dropdown.Item eventKey="1"
                           href="#replytextarea"
-                          onClick={(e) => { e.stopPropagation(); setReplyTo(post.id) }}
+                          onClick={(e) => { e.stopPropagation(); setReplyTo(post._id) }}
                         >
                           回复
                                   </Dropdown.Item>
@@ -189,7 +189,7 @@ const NewPostForm = (props) => {
   // states
   const [content, setContent] = useState()
   const [relatedInstitute, setRelatedInstitute] = useState(props.relatedInstitute)
-  const [relatedTopic, setRelatedTopic] = useState(props.relatedTopic)
+  const [relatedTopic, setRelatedTopic] = useState((props.topic) ? props.topic._id : props.relatedTopic)
   const [replyTo, setReplyTo] = useState(props.replyTo)
   const [region, setRegion] = useState()
   const [tags, setTags] = useState()
@@ -197,7 +197,6 @@ const NewPostForm = (props) => {
 
 
   const handleSubmit = (e) => {
-
     const url = `http://${document.domain}:${constants.serverPort}/post/newpost`
     const body = {
       content: content,
@@ -232,27 +231,29 @@ const NewPostForm = (props) => {
       <Form.Group as={Row} controlId="replyTo">
         <Col>
           {
+            /*
             (props.topic) ? (
               <>
                 <InputGroup className="mb-3" size="sm">
                   <InputGroup.Prepend>
                     <InputGroup.Text>回复</InputGroup.Text>
                   </InputGroup.Prepend>
-                <Form.Control
-                  as="select"
-                  defaultValue={replyTo}
-                  onChange={(e) => { setReplyTo(e.target.value) }}
-                >
-                  <option value={-1}>...</option>
-                  {props.topic.posts.map((post, idx) => {
-                    return (
-                      <option value={post.id}>{idx + 1} - {post.content}</option>
-                    )
-                  })}
-                </Form.Control>
+                  <Form.Control
+                    as="select"
+                    defaultValue={replyTo}
+                    onChange={(e) => { setReplyTo(e.target.value) }}
+                  >
+                    <option value={-1}>...</option>
+                    {props.topic.posts.map((post, idx) => {
+                      return (
+                        <option value={post.id}>{idx + 1} - {post.content}</option>
+                      )
+                    })}
+                  </Form.Control>
                 </InputGroup>
               </>
             ) : null
+            */
           }
         </Col>
 

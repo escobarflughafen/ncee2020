@@ -97,6 +97,20 @@ const TopicList = (props) => {
                   <FormControl
                     as="select"
                     size="sm"
+                  >
+                    {constants.topicTypes.map((t) => (<option value={t.id}>{t.name}</option>))}
+                  </FormControl>
+                </Col>
+              </Row>
+
+            </Col>
+            <Col xs="auto">
+              <Row>
+                <SVG variant="column-gap" />
+                <Col className="pl-2">
+                  <FormControl
+                    as="select"
+                    size="sm"
                     value={viewMode}
                     onChange={e => { setViewMode(e.target.value) }}>
                     <option>详细</option>
@@ -238,12 +252,16 @@ const NewTopicForm = (props) => {
         </Form.Row>
         <Form.Row controlId="replyTo">
           <Col>
-            <InputGroup size="sm">
-              <InputGroup.Prepend>
-                <InputGroup.Text>相关院校</InputGroup.Text>
-              </InputGroup.Prepend>
-              <Form.Control as="input" value={relatedInstitute} onChange={(e) => { setRelatedInstitute(e.target.value) }} />
-            </InputGroup>
+            {
+              (props.relatedInstitute) ? (
+                <InputGroup size="sm">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>相关院校</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control as="input" value={relatedInstitute} onChange={(e) => { setRelatedInstitute(e.target.value) }} />
+                </InputGroup>
+              ) : null
+            }
           </Col>
           <Col xs="auto">
             <Button variant="success" type="submit" size="sm">发布</Button>
