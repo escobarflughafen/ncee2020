@@ -168,7 +168,7 @@ const InstituteCard = (props) => {
   const history = useHistory()
 
   return (
-    <ListGroup.Item action onClick={() => { history.push(`/institute/${i.id}`); history.go() }}>
+    <ListGroup.Item action href="#header" onClick={() => { history.push(`/institute/${i.id}`);  }}>
       <Row>
         {
           (props.size === "sm") ? (<></>) : (
@@ -654,11 +654,13 @@ const Detail = (props) => {
       )
       console.log(res.data)
     })
-  }, [])
+  }, [useParams().id])
 
   const Header = () => {
     return (
-      <div className="mb-3">
+      <div className="mb-3"
+        id="header"
+      >
         <div className="container">
           <Row>
             <Col xs="auto">

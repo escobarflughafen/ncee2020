@@ -222,6 +222,14 @@ const TopicPage = (props) => {
 
   const [currentPage, setCurrentPage] = useState(1)
 
+  useEffect(() => {
+    const url = `http://${document.domain}:${constants.serverPort}/forum/${id}/fetch`
+    axios.post(url).then((res) => {
+      console.log(res)
+      document.title = `${res.data.topic.title} - ${constants.title.forum} - ${constants.appName}`
+      setTopic(res.data.topic)
+    })
+  }, [])
 
   useEffect(() => {
     const url = `http://${document.domain}:${constants.serverPort}/forum/${id}/fetch`

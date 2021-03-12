@@ -21,18 +21,6 @@ const PostView = (props) => {
 
   const [post, setPost] = useState()
 
-  /*
-  useEffect(()=>{
-    fetchPost(id, ((res) => {
-      setPost(res.data) 
-    }))     
-  },[])
-
-  useEffect(()=> {
-    document.title = `${post.content} - ${constants.appName}`
-  }, [post])
-  */
-
   useEffect(() => {
     const url = `http://${document.domain}:${constants.serverPort}/post/${id}/fetch`
     axios.post(url).then(res => {
@@ -41,6 +29,15 @@ const PostView = (props) => {
       setPost(res.data.post)
     })
   }, [])
+
+  useEffect(() => {
+    const url = `http://${document.domain}:${constants.serverPort}/post/${id}/fetch`
+    axios.post(url).then(res => {
+      console.log(res)
+      document.title = `${res.data.post.content} - ${constants.title.post} - ${constants.appName}`
+      setPost(res.data.post)
+    })
+  }, [id])
 
   return (
     <>
@@ -65,7 +62,9 @@ const PostView = (props) => {
                   expanded={true}
                 />
                 <ListGroup.Item>
-                  <NewPostForm replyTo={post._id} />
+                  {
+                    <NewPostForm reply />
+                  }
                 </ListGroup.Item>
                 {
                   (post.replies.length > 0) ? (

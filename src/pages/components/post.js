@@ -65,7 +65,24 @@ const PostCard = (props) => {
         <ListGroup.Item variant="info">
           <Row>
             <Col>
-              回复：<a href="#" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><b>{post.replyTo.content}</b></a>
+              回复：<a onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><b>{post.replyTo.content}</b></a>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+      ) : null}
+      {(expanded && post.relatedTopic) ? (
+        <ListGroup.Item variant="success">
+          <Row>
+            <Col>
+              回复：<a onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go()}}><b>{post.relatedTopic.title}</b></a>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+      ) : null}
+      {(expanded && post.relatedInstitute) ? (
+        <ListGroup.Item variant="primary">
+          <Row>
+            <Col>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -184,19 +201,20 @@ const PostList = (props) => {
 }
 
 const NewPostForm = (props) => {
-  const expanded = props.expanded
 
+  const id = useParams().id
   // states
   const [content, setContent] = useState()
   const [relatedInstitute, setRelatedInstitute] = useState(props.relatedInstitute)
   const [relatedTopic, setRelatedTopic] = useState((props.topic) ? props.topic._id : props.relatedTopic)
-  const [replyTo, setReplyTo] = useState(props.replyTo)
+  const [replyTo, setReplyTo] = useState((props.reply) ? id : null)
   const [region, setRegion] = useState()
   const [tags, setTags] = useState()
   const [photos, setPhotos] = useState()
 
 
   const handleSubmit = (e) => {
+    console.log(replyTo)
     const url = `http://${document.domain}:${constants.serverPort}/post/newpost`
     const body = {
       content: content,
@@ -212,6 +230,10 @@ const NewPostForm = (props) => {
       console.log(res)
     })
   }
+
+  useEffect(()=>{
+    setReplyTo(id)
+  }, [id])
 
   return (
     <div className={props.className}>

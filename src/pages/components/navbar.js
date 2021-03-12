@@ -13,7 +13,7 @@ const AppNavbar = (props) => {
 
   return (
     <Navbar className="bg-dark" variant="dark" expand="lg">
-      <Navbar.Brand onClick={() => { history.push('/'); history.go() }}>
+      <Navbar.Brand href="#" onClick={() => { history.push('/'); history.go() }}>
         高校录取分数线
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
