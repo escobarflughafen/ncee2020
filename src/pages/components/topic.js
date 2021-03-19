@@ -97,20 +97,6 @@ const TopicList = (props) => {
                   <FormControl
                     as="select"
                     size="sm"
-                  >
-                    {constants.topicTypes.map((t) => (<option value={t.id}>{t.name}</option>))}
-                  </FormControl>
-                </Col>
-              </Row>
-
-            </Col>
-            <Col xs="auto">
-              <Row>
-                <SVG variant="column-gap" />
-                <Col className="pl-2">
-                  <FormControl
-                    as="select"
-                    size="sm"
                     value={viewMode}
                     onChange={e => { setViewMode(e.target.value) }}>
                     <option>详细</option>

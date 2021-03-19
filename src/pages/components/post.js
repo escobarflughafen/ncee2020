@@ -232,7 +232,9 @@ const NewPostForm = (props) => {
   }
 
   useEffect(()=>{
-    setReplyTo(id)
+    if(!props.relatedInstitute) {
+      setReplyTo(id)
+    }
   }, [id])
 
   return (

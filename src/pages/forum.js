@@ -160,12 +160,39 @@ const ListPage = (props) => {
         <ListGroup>
           <ListGroup.Item>
             关键字
+             <InputGroup className="mb-3" size="sm">
+              <FormControl
+                aria-label="Recipient's username"
+                aria-describedby="basic-addon2"
+              />
+              <InputGroup.Append>
+                <Button variant="outline-secondary">添加</Button>
+              </InputGroup.Append>
+            </InputGroup>
           </ListGroup.Item>
           <ListGroup.Item>
             相关院校
+             <InputGroup className="mb-3" size="sm">
+              <FormControl
+                aria-label="Recipient's username"
+                aria-describedby="basic-addon2"
+              />
+              <InputGroup.Append>
+                <Button variant="outline-secondary">添加</Button>
+              </InputGroup.Append>
+            </InputGroup>
           </ListGroup.Item>
           <ListGroup.Item>
             地区
+             <InputGroup className="mb-3" size="sm">
+              <FormControl
+                aria-label="Recipient's username"
+                aria-describedby="basic-addon2"
+              />
+              <InputGroup.Append>
+                <Button variant="outline-secondary">添加</Button>
+              </InputGroup.Append>
+            </InputGroup>
           </ListGroup.Item>
         </ListGroup>
       </>

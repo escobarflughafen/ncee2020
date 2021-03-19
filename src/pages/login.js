@@ -4,9 +4,15 @@ import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup 
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect } from 'react-router-dom'
 import constants from '../utils/constants'
+import { LoginInForm, SignUpForm } from './components/user'
 
 
 const SignupForm = (props) => {
+
+  const handleSubmit = (e) => {
+
+  }
+
   return (
     <Form>
       <Form.Row>
@@ -157,71 +163,8 @@ const LoginForm = () => {
                   </Tab.Pane>
 
                   <Tab.Pane eventKey="signup">
-                    <Form>
-                      <Form.Row>
-                        <Form.Group as={Col} controlId="formGridUsername">
-                          <Form.Label>用户名</Form.Label>
-                          <Form.Control type="text" placeholder="..." />
-                        </Form.Group>
 
-                        <Form.Group as={Col} controlId="formGridPassword">
-                          <Form.Label>密码</Form.Label>
-                          <Form.Control type="password" placeholder="..." />
-                        </Form.Group>
-                      </Form.Row>
-
-                      <Form.Group controlId="formGridConfirmPassword">
-                        <Form.Label>确认密码</Form.Label>
-                        <Form.Control type="password" placeholder="..." />
-                      </Form.Group>
-
-                      <Form.Group controlId="formGridEmail">
-                        <Form.Label>电子邮箱</Form.Label>
-                        <Form.Control type="email" placeholder="address@example.com" />
-                      </Form.Group>
-
-                      <Form.Row>
-                        {
-                          // data from https://github.com/wecatch/china_regions
-                        }
-
-                        <Form.Group as={Col} controlId="formGridYear">
-                          <Form.Label>届</Form.Label>
-                          <Form.Control as="select">
-                            {
-                              [2021, 2020, 2019, 2018, 2017, 2016, "2016前"].map((year) => (<option>{year}</option>))
-                            }
-                          </Form.Control>
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridProvince">
-                          <Form.Label>省份</Form.Label>
-                          <Form.Control as="select">
-                            {
-                              constants.regions.map((region) => (<option>{region.region_name}</option>))
-                            }
-                          </Form.Control>
-                        </Form.Group>
-
-                        <Form.Group as={Col} controlId="formGridCity">
-                          <Form.Label>城市</Form.Label>
-                          <Form.Control />
-                        </Form.Group>
-                      </Form.Row>
-
-                      {
-                        /*
-                        (
-                      <Form.Group id="formGridCheckbox">
-                        <Form.Check type="checkbox" label="Check me out" />
-                      </Form.Group>
-                        )
-                        */
-                      }
-
-                      <Button variant="primary" type="submit" style={{ display: "block", margin: "0 0 0 auto" }} >
-                        注册
-                    </Button>
-                    </Form>
+                    <SignUpForm />
                   </Tab.Pane>
                 </Tab.Content>
               </Col>
@@ -258,7 +201,7 @@ const Tabs = (props) => {
                 </Tab.Pane>
 
                 <Tab.Pane eventKey="signup">
-                  <SignupForm />
+                  <SignUpForm />
                 </Tab.Pane>
               </Tab.Content>
             </Col>

@@ -168,7 +168,7 @@ const InstituteCard = (props) => {
   const history = useHistory()
 
   return (
-    <ListGroup.Item action href="#header" onClick={() => { history.push(`/institute/${i.id}`);  }}>
+    <ListGroup.Item action href="#header" onClick={() => { history.push(`/institute/${i.id}`); }}>
       <Row>
         {
           (props.size === "sm") ? (<></>) : (
@@ -184,8 +184,8 @@ const InstituteCard = (props) => {
                 (props.size === "sm") ? (
                   <Image className="mr-2" fluid height={24} width={24} src={i.icon} />
                 ) : (
-                    <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
-                  )
+                  <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
+                )
               }
               <b className="mr-1">{i.name}</b>
               {(props.score) ? (<Badge variant="info">{props.score}分</Badge>) : (<></>)}
@@ -399,26 +399,39 @@ const InstituteTabs = (props) => {
 
 
   const EnrollTable = (props) => {
+    const [data, setData] = useState([])
     const [region, setRegion] = useState(constants.regions.find((r) => r.region_id === '44'))
     const [year, setYear] = useState('2019')
-    const [enroll, setEnroll] = useState({})
+    const [type, setType] = useState()
+    const [enroll, setEnroll] = useState()
 
     useEffect(() => {
       fetchInstituteEnrollData(id, (res) => {
         if (res.data) {
           console.log(res.data)
-          setEnroll(res.data)
+          setData(res.data)
+          setType([...res.data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)][0])
         }
       })
     }, [])
 
+    useEffect(() => {
+      if (data.length) {
+        setType([...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)][0])
+      }
+    }, [year, region])
+
+    useEffect(() => {
+      setEnroll(data.find(d => d.region === region.region_id && d.type === type && d.year === year))
+    }, [region, year, type])
+
     return (
       <div>
         <Row className="mb-2">
-          <Col md={6}>
+          <Col md={3}>
             <Card.Title>各专业录取数据</Card.Title>
           </Col>
-          <Col md={3} xs={6}>
+          <Col md={3} xs={4}>
             <FormControl
               as="select"
               size="sm"
@@ -432,7 +445,21 @@ const InstituteTabs = (props) => {
               ))}
             </FormControl>
           </Col>
-          <Col md={3} xs={6}>
+          <Col md={3} xs={4}>
+            <FormControl
+              as="select"
+              size="sm"
+              value={type}
+              onChange={(e) => {
+                setType(e.target.value)
+              }}
+            >
+              {[...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)].map(t => (
+                <option>{t}</option>
+              ))}
+            </FormControl>
+          </Col>
+          <Col md={3} xs={4}>
             <FormControl
               as="select"
               size="sm"
@@ -461,18 +488,32 @@ const InstituteTabs = (props) => {
               </thead>
               <tbody>
                 {
-                  (enroll.scores) ?
-                    enroll.scores.map(
-                      (score) => (
-                        <tr>
-                          <td>{score.major_name.split('（')[0]}</td>
-                          <td>{score.enroll_batch}</td>
-                          <td>{score.score_avg}</td>
-                          <td>{score.score_min}</td>
-                          <td>{score.rank_min}</td>
-                        </tr>
+                  (enroll) ?
+                      enroll
+                      .scores.map(
+                        (score) => (
+                          <tr>
+                            <td>{score.major_name.split('（')[0]}</td>
+                            <td>{score.enroll_batch}</td>
+                            <td>{score.score_avg}</td>
+                            <td>{score.score_min}</td>
+                            <td>{score.rank_min}</td>
+                          </tr>
+                        )
                       )
-                    )
+                    /*
+                      data.scores.map(
+                        (score) => (
+                          <tr>
+                            <td>{score.major_name.split('（')[0]}</td>
+                            <td>{score.enroll_batch}</td>
+                            <td>{score.score_avg}</td>
+                            <td>{score.score_min}</td>
+                            <td>{score.rank_min}</td>
+                          </tr>
+                        )
+                      )
+                      */
                     : (<tr><td colSpan={5}>暂无数据</td></tr>)
                 }
               </tbody>
@@ -509,7 +550,7 @@ const InstituteTabs = (props) => {
       setTopics(res.data.topics)
     })
   }, [])
-  
+
   return (
     <div>
       <Tab.Container defaultActiveKey="general" activeKey={key} onSelect={(k) => setKey(k)}>
@@ -745,7 +786,7 @@ const Detail = (props) => {
           (
             <>
               <Header />
-              <InstituteTabs institute={institute} eventKey={eventKey}/>
+              <InstituteTabs institute={institute} eventKey={eventKey} />
             </>
           ) : null
       }
@@ -962,8 +1003,8 @@ const InstituteTable = (props) => {
                           <SVG variant="trash" />
                         </Badge>
                       ) : (
-                          <></>
-                        )
+                        <></>
+                      )
                     }
                   </Col>
                 </Row>
