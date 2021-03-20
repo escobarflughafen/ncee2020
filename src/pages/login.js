@@ -4,7 +4,7 @@ import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup 
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect } from 'react-router-dom'
 import constants from '../utils/constants'
-import { LoginInForm, SignUpForm } from './components/user'
+import { LoginInForm, SignUpForm, UserLink } from './components/user'
 
 
 const SignupForm = (props) => {
@@ -220,8 +220,12 @@ const LoginPage = (props) => {
     document.title = `${constants.title.login} - ${constants.appName}`
   }, [])
 
+
   return (
     <>
+      <div className="container">
+        <UserLink>admin</UserLink>
+      </div>
       <LoginForm />
     </>
   )
