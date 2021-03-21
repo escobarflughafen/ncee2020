@@ -223,9 +223,6 @@ const LoginPage = (props) => {
 
   return (
     <>
-      <div className="container">
-        <UserLink>admin</UserLink>
-      </div>
       <LoginForm />
     </>
   )

@@ -9,7 +9,9 @@ import SVG from '../../utils/svg'
 import { makePaginations } from './pagination'
 import { timeStringConverter } from '../../utils/util'
 import { TopicCard, TopicList } from './topic'
+import {UserLink} from './user'
 import axios from 'axios'
+import { InstituteCard } from './institute'
 
 
 
@@ -65,7 +67,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="info">
           <Row>
             <Col>
-              回复：<a onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><b>{post.replyTo.content}</b></a>
+              回复：<Button className="p-0" variant="link" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><b>{post.replyTo.content}</b></Button>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -74,19 +76,18 @@ const PostCard = (props) => {
         <ListGroup.Item variant="success">
           <Row>
             <Col>
-              回复：<a onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go()}}><b>{post.relatedTopic.title}</b></a>
+              回复：<Button className="p-0" variant="link" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go()}}><b>{post.relatedTopic.title}</b></Button>
             </Col>
           </Row>
         </ListGroup.Item>
       ) : null}
-      {(expanded && post.relatedInstitute) ? (
-        <ListGroup.Item variant="primary">
-          <Row>
-            <Col>
-            </Col>
-          </Row>
-        </ListGroup.Item>
-      ) : null}
+      {
+        /*
+      (expanded && post.relatedInstitute) ? (
+        <InstituteCard institute={post.relatedInstitute} />
+      ) : null
+      */
+      }
       <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post._id}`); history.go() }}>
         <Row>
           <Col xs="auto" className="pr-0">
@@ -97,7 +98,7 @@ const PostCard = (props) => {
               <Col>
                 <small>
                   {(host) ? (<SVG className="mr-2" variant="person" fill />) : (<></>)}
-                  <a href={`/user/${post.author.username}`}><b>{post.author.name}</b></a>
+                  <UserLink user={post.author}>{post.author.name}</UserLink>
                   {
                     (expanded) ? null : (
                       <span className="d-inline-block">

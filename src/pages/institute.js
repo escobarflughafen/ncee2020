@@ -13,6 +13,7 @@ import Comments from './components/comments'
 import { TopicList, NewTopicForm } from './components/topic'
 import { PostList, NewPostForm } from './components/post'
 import NavigationBar from './components/navigation-bar'
+import {InstituteCard, Labels } from './components/institute'
 
 
 
@@ -162,13 +163,14 @@ const Faculty = (props) => {
 }
 
 
+/*
 const InstituteCard = (props) => {
   const { path, url, params } = useRouteMatch()
   const i = props.institute
   const history = useHistory()
 
   return (
-    <ListGroup.Item action href="#header" onClick={() => { history.push(`/institute/${i.id}`); }}>
+    <ListGroup.Item action onClick={() => { history.push(`/institute/${i.id}`); }}>
       <Row>
         {
           (props.size === "sm") ? (<></>) : (
@@ -240,7 +242,7 @@ const InstituteCard = (props) => {
     </ListGroup.Item>
   )
 }
-
+*/
 const InstituteTabs = (props) => {
   const { path, url, params } = useRouteMatch()
   const institute = props.institute
@@ -292,7 +294,6 @@ const InstituteTabs = (props) => {
     )
   }
 
-  const [key, setKey] = useState(useParams().eventKey)
 
   const ScoreTable = (props) => {
     const [region, setRegion] = useState(constants.regions.find(r => r.region_id === '44'))
@@ -489,7 +490,7 @@ const InstituteTabs = (props) => {
               <tbody>
                 {
                   (enroll) ?
-                      enroll
+                    enroll
                       .scores.map(
                         (score) => (
                           <tr>
@@ -501,19 +502,6 @@ const InstituteTabs = (props) => {
                           </tr>
                         )
                       )
-                    /*
-                      data.scores.map(
-                        (score) => (
-                          <tr>
-                            <td>{score.major_name.split('（')[0]}</td>
-                            <td>{score.enroll_batch}</td>
-                            <td>{score.score_avg}</td>
-                            <td>{score.score_min}</td>
-                            <td>{score.rank_min}</td>
-                          </tr>
-                        )
-                      )
-                      */
                     : (<tr><td colSpan={5}>暂无数据</td></tr>)
                 }
               </tbody>
@@ -550,6 +538,8 @@ const InstituteTabs = (props) => {
       setTopics(res.data.topics)
     })
   }, [])
+
+  const [key, setKey] = useState('general')
 
   return (
     <div>
@@ -622,7 +612,6 @@ const InstituteTabs = (props) => {
             <Tab.Pane eventKey="data">
               <Card.Body>
                 <EnrollTable />
-                <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Tab.Pane>
 
@@ -651,33 +640,6 @@ const InstituteTabs = (props) => {
   )
 }
 
-const Labels = (props) => {
-  const { path, url, params } = useRouteMatch()
-  const history = useHistory()
-  const labels = props.labels
-
-  return (
-    <div>
-      {
-        (labels) ?
-          labels.map(
-            (l, idx) => ((l) ? (<Badge variant={["primary", "secondary", "success", "info"][idx % 4]}
-              className="mr-1"
-              onClick={(e) => {
-                history.push({
-                  pathname: '/institute',
-                  state: {
-                    queryParams: [l]
-                  }
-                })
-              }}
-            >{l.label}</Badge>) : (<></>))
-          ) : []
-      }
-    </div>
-  )
-}
-
 
 const Detail = (props) => {
   const { path, url, params } = useRouteMatch()
@@ -688,6 +650,7 @@ const Detail = (props) => {
   const [institute, setInstitute] = useState()
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     fetchInstituteInfo(id, (res) => {
       document.title = `${res.data.name} - ${constants.title.institute} - ${constants.appName}`
       setInstitute(

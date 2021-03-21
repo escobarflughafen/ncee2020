@@ -31,9 +31,6 @@ const AppNavbar = (props) => {
           <Nav.Item>
             <Nav.Link onClick={() => { history.push('/forum'); history.go() }}>{constants.title.forum}</Nav.Link>
           </Nav.Item >
-          <Nav.Item>
-            <Nav.Link onClick={() => { history.push('/about'); history.go() }}>{constants.title.about}</Nav.Link>
-          </Nav.Item >
         </Nav >
         <Form inline className="mr-2 d-none d-lg-block">
           <FormControl type="text" placeholder="..." className="mr-sm-2" />

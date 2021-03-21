@@ -7,6 +7,7 @@ import { timeStringConverter } from '../../utils/util'
 import SVG from '../../utils/svg'
 import axios from 'axios'
 import { makePaginations } from './pagination'
+import {UserLink} from './user'
 
 const TopicCard = (props) => {
   const history = useHistory()
@@ -36,7 +37,7 @@ const TopicCard = (props) => {
                   <small>
                     <SVG variant="person" fill />
                     <span className="ml-1">
-                      <a><b>{topic.host.name}</b></a>
+                      <UserLink user={topic.host}>{topic.host.name}</UserLink>
                     </span>
                   </small>
                 </Col>

@@ -91,6 +91,7 @@ function App() {
             <Route path="/post">
               <PostPage />
             </Route>
+
           </div>
         </Switch>
       </Router>

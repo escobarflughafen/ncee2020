@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { useState, useEffect } from 'react'
 import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, ModalBody, Popover, OverlayTrigger, Image } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
-import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory } from 'react-router-dom'
 import constants from '../../utils/constants'
 import axios from 'axios'
 import SVG from '../../utils/svg'
@@ -110,25 +110,8 @@ const LoginInForm = (props) => {
 }
 
 const UserCard = (props) => {
-  const [user, setUser] = useState()
-
-  useEffect(() => {
-    setUser({
-      username: 'user01',
-      name: 'John Smith',
-      year: '2020',
-      region: {
-        province: '44',
-        city: '4401'
-      },
-      score: 623,
-      about: '感觉不错',
-      registeredDate: Date.now(),
-      isAdmin: false,
-      follower: [1, 2, 3],
-      following: [3, 4, 5, 6]
-    })
-  }, [])
+  const user = props.user
+  const history = useHistory()
 
   return (
     (user) ? (
@@ -142,18 +125,26 @@ const UserCard = (props) => {
               <Col>
                 <Row>
                   <Col>
-                    <Button variant="link" className="p-0">
+                    <Button variant="link" className="p-0" onClick={(e) => {
+                      history.push(`/user/${user.username}`)
+                      history.go() 
+                    }}>
                       <b>{user.name}</b>
                     </Button>
+                    <code>@{user.username}</code>
                   </Col>
                 </Row>
                 <Row>
                   <Col xs="auto">
                     <p>
-                      <small>
-                        <SVG variant="location" className="pr-1" />
-                        {constants.regions.find(r => r.region_id === user.region.province).region_name}, {constants.cities.find(c => c.city_id === user.region.city).city_name}
-                      </small>
+                      {
+                        (user.region) ? (
+                          <small>
+                            <SVG variant="location" className="pr-1" />
+                            {constants.regions.find(r => r.region_id === user.region.province).region_name}, {constants.cities.find(c => c.city_id === user.region.city).city_name}
+                          </small>
+                        ) : null
+                      }
                     </p>
                   </Col>
                 </Row>
@@ -162,18 +153,18 @@ const UserCard = (props) => {
                 <Button variant="success" size="sm">关注</Button>
               </Col>
             </Row>
-            <Row>
-              <Col>
-                {user.following.length} 关注中
-              </Col>
-              <Col>
-                {user.follower.length} 关注者
-              </Col>
-            </Row>
+                <Row>
+                  <Col>
+                    {user.following.length} 关注中
+                          </Col>
+                  <Col>
+                    {user.follower.length} 关注者
+                          </Col>
+                </Row>
             <Row>
               <Col>
                 <p>
-                  <hr className="m-1"/>
+                  <hr className="m-1" />
                   {user.about}
                 </p>
               </Col>
@@ -190,18 +181,21 @@ const UserCard = (props) => {
 const UserLink = (props) => {
 
   const UserPopover = (
-    <Popover id="popover-basic">
+    <Popover onClick={(e) => { e.stopPropagation() }} >
       <Popover.Content>
-        <UserCard />
+        <UserCard user={props.user} />
       </Popover.Content>
     </Popover>
   )
 
-
   return (
     <>
-      <OverlayTrigger trigger="click" placement="right" overlay={UserPopover}>
-        <Button variant="link" className="p-0"><b>{props.children}</b></Button>
+      <OverlayTrigger rootClose trigger="click" placement="auto" overlay={UserPopover}>
+        <Button size="sm" variant="link" className="p-0" onClick={
+          (e) => {
+            e.stopPropagation()
+          }
+        }><b>{props.children}</b></Button>
       </OverlayTrigger>
     </>
   )

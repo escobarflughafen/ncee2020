@@ -9,6 +9,7 @@ import SVG from '../utils/svg'
 import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList, NewTopicForm } from './components/topic'
+import { InstituteCard } from './components/institute'
 import { PostCard, NewPostForm } from './components/post'
 import axios from 'axios'
 
@@ -303,26 +304,14 @@ const TopicPage = (props) => {
               </Row>
             </Card.Header>
             <ListGroup variant="flush">
+              {
+                (topic.relatedInstitute) ? (
+                  <InstituteCard institute={topic.relatedInstitute} />
+                ) : (<></>)
+              }
               <ListGroup.Item>
                 <Row>
                   <Col xs={12} sm="auto" className="mr-sm-auto">
-                    {
-                      (topic.relatedInstitute) ? (
-                        <>
-                          <Badge
-                            variant="primary"
-                            className="mr-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              history.push(`/institute/${topic.relatedInstitute.data.school_id}`);
-                              history.go()
-                            }}
-                          >
-                            {topic.relatedInstitute.data.name}
-                          </Badge>
-                        </>
-                      ) : (<></>)
-                    }
                     {
                       (topic.region) ? (
                         <>
