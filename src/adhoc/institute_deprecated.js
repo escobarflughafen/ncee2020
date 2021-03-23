@@ -96,6 +96,45 @@ const queryInstitutesInfo = async (queryParams, cb, port = constants.serverPort)
     }
 }
 
+// Componenets
+
+const Faculty = (props) => {
+  const faculty = props.data
+  return (
+    <ListGroup.Item>
+      <Row>
+        <Col >
+          <p><b>{faculty.name}</b></p>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          {
+            <Table striped bordered hover size="sm">
+              <thead>
+                <tr>
+                  <th>系别</th>
+                  <th>年限</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  faculty.special.map((major) => (
+                    <tr>
+                      <td>{major.special_name}</td>
+                      <td>{major.limit_year}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </Table>
+          }
+        </Col>
+      </Row>
+    </ListGroup.Item>
+  )
+}
+
 const fetchInstituteInfo = async (instituteId, cb, port = constants.serverPort) => {
     const url = `http://localhost:${port}/institute/${instituteId}/getinfo`
     try {

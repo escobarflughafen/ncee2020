@@ -11,14 +11,25 @@ const constants = {
     about: "关于",
     search: "搜索",
     login: "登入",
-    account: "个人帐户"
+    user: "用户"
   },
+  dayOfNCEE: new Date(2021, 5, 7), // 5 is the index of June (0 for January and 11 for December)
   topicTypes: [
     {id: '0', name: "讨论"},
     {id: '1', name: "咨询"},
     {id: '2', name: "闲谈"},
     {id: '3', name: "经验"},
   ],
+  shortDateOptions: {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  },
+  extendedDateOptions: {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  },
   regions: [
     { region_name: '北京市', region_id: '11' },
     { region_name: '天津市', region_id: '12' },

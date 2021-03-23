@@ -57,11 +57,11 @@ function App() {
         <Switch>
           <div className="mt-3">
             <Route path="/" exact={true}>
-              <Homepage />
+              <Redirect to="/home" />
             </Route>
 
             <Route path="/home">
-              <Redirect to="/" />
+              <Homepage />
             </Route>
 
             <Route path="/stats">

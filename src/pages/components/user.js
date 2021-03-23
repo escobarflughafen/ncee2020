@@ -109,6 +109,17 @@ const LoginInForm = (props) => {
   )
 }
 
+const UserListItem = (props) => {
+  const user = props.user
+  const history = useHistory() 
+
+  return (
+   <>
+     
+   </> 
+  )
+}
+
 const UserCard = (props) => {
   const user = props.user
   const history = useHistory()
@@ -155,11 +166,15 @@ const UserCard = (props) => {
             </Row>
                 <Row>
                   <Col>
+                    <a href={`/user/${user.username}/following`}>
                     {user.following.length} 关注中
-                          </Col>
+                    </a>
+                  </Col>
                   <Col>
+                    <a href={`/user/${user.username}/follower`}>
                     {user.follower.length} 关注者
-                          </Col>
+                    </a>
+                  </Col>
                 </Row>
             <Row>
               <Col>
@@ -207,4 +222,4 @@ const UserList = (props) => {
 
 
 
-export { SignUpForm, LoginInForm, UserCard, UserLink }
+export { SignUpForm, LoginInForm, UserCard, UserLink, UserListItem }

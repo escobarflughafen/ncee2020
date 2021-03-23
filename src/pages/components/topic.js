@@ -85,6 +85,7 @@ const TopicList = (props) => {
   const [viewMode, setViewMode] = useState(props.viewMode || '详细')
   const topicPerPage = props.topicPerPage || 12
   const [currentPage, setCurrentPage] = useState(1)
+  
   return (
     <>
       <ListGroup variant="flush">

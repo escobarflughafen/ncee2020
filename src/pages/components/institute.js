@@ -14,22 +14,27 @@ const Labels = (props) => {
   const labels = props.labels
 
   return (
-    <div className="d-inline-block" onClick={(e) => {e.stopPropagation()}}>
+    <div className="d-inline-block" onClick={(e) => { e.stopPropagation() }}>
       {
         (labels) ?
           labels.map(
-            (l, idx) => ((l) ? (<Badge variant={["primary", "secondary", "success", "info"][idx % 4]}
-              className="mr-1"
-              onClick={(e) => {
-                history.push({
-                  pathname: '/institute',
-                  state: {
-                    queryParams: [l]
-                  }
-                })
-                history.go()
-              }}
-            >{l.label}</Badge>) : (<></>))
+            (l, idx) => ((l) ? (
+              <Button variant={["primary", "secondary", "success", "info"][idx % 4]}
+                className="mr-1 py-0 px-1"
+                size="sm"
+                onClick={(e) => {
+                  history.push({
+                    pathname: '/institute',
+                    state: {
+                      queryParams: [l]
+                    }
+                  })
+                  history.go()
+                }}
+              > 
+                {l.label}
+                </Button>
+            ) : (<></>))
           ) : []
       }
     </div>
@@ -43,7 +48,7 @@ const InstituteCard = (props) => {
   const history = useHistory()
 
   return (
-    <ListGroup.Item action onClick={() => { history.push(`/institute/${i.id}`); history.go()}}>
+    <ListGroup.Item action onClick={() => { history.push(`/institute/${i.id}`); history.go() }}>
       <Row>
         {
           (props.size === "sm") ? (<></>) : (
@@ -118,8 +123,8 @@ const InstituteCard = (props) => {
 
 const InstituteList = (props) => {
   const [currentPage, setCurrentPage] = useState(0)
-  
+
 
 }
 
-export {InstituteCard, InstituteList, Labels}
+export { InstituteCard, InstituteList, Labels }

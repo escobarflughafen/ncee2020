@@ -105,7 +105,7 @@ const PostPage = (props) => {
       <Router>
         <div className="container mb-3">
           <Switch>
-            <Route path={`/post/:id`} exact={true}>
+            <Route path={`/post/:id`}>
               <PostView />
             </Route>
           </Switch>

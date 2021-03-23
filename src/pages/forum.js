@@ -1,9 +1,9 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../style.css'
 import React, { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Modal, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, ToggleButton, Modal, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
-import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation, useParams } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom'
 import constants from '../utils/constants'
 import SVG from '../utils/svg'
 import { makePaginations } from './components/pagination'
@@ -21,33 +21,7 @@ const ListPage = (props) => {
     document.title = `${constants.title.forum} - ${constants.appName}`
   }, [])
 
-  const HotTopicCard = (props) => {
-    const topic = props.topic
-
-    return (
-      <></>
-      /*
-      <Card border='dark' text="dark">
-        <Card.Body>
-          <Card.Title>{topic.title}</Card.Title>
-          <Card.Text>
-            {JSON.stringify(topic.posts)}
-          </Card.Text>
-        </Card.Body>
-        <Card.Footer>
-          <small className="text-muted">{topic.viewCount}点击，{topic.posts.length}回复</small>
-          <br />
-          {
-            topic.tags.map((tag, idx) => (<Badge className="mr-1" variant={['primary', 'secondary', 'success', 'danger', 'dark'][idx % 5]}>{tag}</Badge>))
-          }
-        </Card.Footer>
-      </Card>
-      */
-    )
-  }
-
   const TopicTabs = (props) => {
-    const [key, setKey] = useState('topics')
     const [topics, setTopics] = useState([])
 
     useEffect(() => {
@@ -58,16 +32,7 @@ const ListPage = (props) => {
       })
     }, [])
 
-    const ReplyTab = (props) => {
-      return (
-        <>
-
-        </>
-      )
-    }
-
     const NewTopicModal = (props) => {
-
       return (
         <Modal
           {...props}
@@ -93,7 +58,7 @@ const ListPage = (props) => {
     }
 
     const [newTopicModalShow, setNewTopicModalShow] = useState(false)
-
+    const { url, path, params } = useRouteMatch()
     return (
       <>
         <Row className="mb-3">
@@ -111,9 +76,6 @@ const ListPage = (props) => {
           </Col>
           <Col xs="auto">
             <ButtonGroup>
-              {
-                // TODO: create compose post view by react-bootstrap.Modal
-              }
               <Button
                 variant="outline-success"
                 onClick={() => setNewTopicModalShow(true)}>发起新讨论</Button>
@@ -128,109 +90,86 @@ const ListPage = (props) => {
             </ButtonGroup>
           </Col>
         </Row>
-        <Tab.Container defaultActiveKey="topics" activeKey={key} onSelect={(k) => setKey(k)}>
-          <Card>
+        <Card>
+          <Router>
             <Card.Header>
               <Nav variant="tabs">
                 <Nav.Item>
-                  <Nav.Link eventKey="topics">讨论</Nav.Link>
+                  <NavLink to={`${url}`} exact={true} className="nav-link" activeClassName="active">讨论</NavLink>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="replies">互动</Nav.Link>
+                  <NavLink to={`${url}/filter`} className="nav-link" activeClassName="active">筛选</NavLink>
+                </Nav.Item>
+                <Nav.Item>
+                  <NavLink to={`${url}/reply`} className="nav-link" activeClassName="active">互动</NavLink>
                 </Nav.Item>
               </Nav>
             </Card.Header>
-            <Tab.Content>
-              <Tab.Pane eventKey="topics">
+            <Switch>
+              <Route path={`${url}`} exact={true}>
                 <TopicList topics={topics} />
-              </Tab.Pane>
-              <Tab.Pane eventKey="replies">
-                <ReplyTab />
-              </Tab.Pane>
-            </Tab.Content>
-          </Card>
-        </Tab.Container>
+              </Route>
+              <Route path={`${url}/filter`}>
+                <Card.Body>
+                  <Form.Group>
+                    <InputGroup size="sm">
+                      <FormControl
+                        placeholder="关键字…"
+                        aria-label="keyword"
+                        aria-describedby="keyword"
+                      />
+                      <InputGroup.Append>
+                        <InputGroup.Text>合取</InputGroup.Text>
+                        <InputGroup.Checkbox aria-label="Checkbox for following text input" />
+                      </InputGroup.Append>
+                      <InputGroup.Append>
+                        <Button variant="outline-success">添加</Button>
+                      </InputGroup.Append>
+                    </InputGroup>
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Row>
+                      <Col>
+                        <Form.Control size="sm" as="select">
+                          <option>Small select</option>
+                        </Form.Control>
+                      </Col>
+                      <Col>
+                        <Form.Control size="sm" as="select">
+                          <option>Small select</option>
+                        </Form.Control>
+                      </Col>
+                    </Form.Row>
+                  </Form.Group>
+                  <Form.Row>
+                    <Col>
+                      12312
+                    <hr className="my-1" />
+                    </Col>
+                  </Form.Row>
+                </Card.Body>
+              </Route>
+              <Route path={`${url}/reply`}>
+                replies
+              </Route>
+            </Switch>
+          </Router>
+        </Card>
         <br />
       </>
     )
   }
-
-  const Filter = (props) => {
-    return (
-      <>
-        <ListGroup>
-          <ListGroup.Item>
-            关键字
-             <InputGroup className="mb-3" size="sm">
-              <FormControl
-                aria-label="Recipient's username"
-                aria-describedby="basic-addon2"
-              />
-              <InputGroup.Append>
-                <Button variant="outline-secondary">添加</Button>
-              </InputGroup.Append>
-            </InputGroup>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            相关院校
-             <InputGroup className="mb-3" size="sm">
-              <FormControl
-                aria-label="Recipient's username"
-                aria-describedby="basic-addon2"
-              />
-              <InputGroup.Append>
-                <Button variant="outline-secondary">添加</Button>
-              </InputGroup.Append>
-            </InputGroup>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            地区
-             <InputGroup className="mb-3" size="sm">
-              <FormControl
-                aria-label="Recipient's username"
-                aria-describedby="basic-addon2"
-              />
-              <InputGroup.Append>
-                <Button variant="outline-secondary">添加</Button>
-              </InputGroup.Append>
-            </InputGroup>
-          </ListGroup.Item>
-        </ListGroup>
-      </>
-    )
-  }
-
 
   return (
     <>
-      <div className="container d-none d-md-block">
-        <h5>热门话题</h5>
-        <CardGroup>
-
-          {/*
-          demoTopics.slice(0, 3).map((topic) => {
-            return (
-              <HotTopicCard topic={topic} />
-            )
-          })
-        */}
-        </CardGroup>
-        <br />
-      </div>
       <div className="container">
         <Row>
           <Col>
           </Col>
         </Row>
         <Row>
-          <Col md={8}>
+          <Col>
             <TopicTabs />
-          </Col>
-          <Col md={4} className="d-none d-md-block">
-            <div>
-              <h5>筛选</h5>
-              <Filter />
-            </div>
           </Col>
         </Row>
       </div>
@@ -365,10 +304,13 @@ const ForumPage = (props) => {
       <div className="mb-3">
         <Router>
           <Switch>
-            <Route path={`/forum/`} exact={true}>
+            <Route path={`/forum/home`}>
               <ListPage />
             </Route>
-            <Route path={`/forum/:id`} exact={true}>
+            <Route path={`/forum/`} exact={true}>
+              <Redirect to={`/forum/home`} />
+            </Route>
+            <Route path={`/forum/:id`} >
               <TopicPage />
             </Route>
           </Switch>

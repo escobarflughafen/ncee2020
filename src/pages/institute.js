@@ -13,7 +13,7 @@ import Comments from './components/comments'
 import { TopicList, NewTopicForm } from './components/topic'
 import { PostList, NewPostForm } from './components/post'
 import NavigationBar from './components/navigation-bar'
-import {InstituteCard, Labels } from './components/institute'
+import { InstituteCard, Labels } from './components/institute'
 
 
 
@@ -123,126 +123,159 @@ const fetchInstituteEnrollData = async (instituteId, cb, port = constants.server
   }
 }
 
-// Componenets
+const MajorTable = (props) => {
 
-const Faculty = (props) => {
-  const faculty = props.data
+  const majors = props.majors
   return (
-    <ListGroup.Item>
-      <Row>
-        <Col >
-          <p><b>{faculty.name}</b></p>
+    <div>
+      <Table striped bordered hover size="sm">
+        <thead>
+          <tr>
+            <th>系别</th>
+            <th>院系</th>
+            <th>年限</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            (majors) ? majors.data.special.map(
+              (faculty) =>
+                faculty.special.map((major) => (
+                  <tr>
+                    <td>
+                      {major.special_name}
+                      {
+                        (major.nation_feature === '1') ? (<Badge className="ml-1" variant="success">国家级特色专业</Badge>) : (<></>)
+                      }
+                    </td>
+                    <td>{faculty.name}</td>
+                    <td>{(major.limit_year) ? major.limit_year : "四年"}</td>
+                  </tr>
+                ))
+            ) : (<></>)
+          }
+        </tbody>
+      </Table>
+    </div>
+  )
+}
+
+const EnrollTable = (props) => {
+  const id = props.iid
+  const [data, setData] = useState([])
+  const [region, setRegion] = useState(constants.regions.find((r) => r.region_id === '44'))
+  const [year, setYear] = useState('2019')
+  const [type, setType] = useState()
+  const [enroll, setEnroll] = useState()
+
+  useEffect(() => {
+    fetchInstituteEnrollData(id, (res) => {
+      if (res.data) {
+        console.log(res.data)
+        setData(res.data)
+        setType([...res.data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)][0])
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (data.length) {
+      setType([...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)][0])
+    }
+  }, [year, region])
+
+  useEffect(() => {
+    setEnroll(data.find(d => d.region === region.region_id && d.type === type && d.year === year))
+  }, [region, year, type])
+
+  return (
+    <div>
+      <Row className="mb-2">
+        <Col md={3}>
+          <Card.Title>各专业录取数据</Card.Title>
+        </Col>
+        <Col md={3} xs={4}>
+          <FormControl
+            as="select"
+            size="sm"
+            value={year}
+            onChange={(e) => {
+              setYear(e.target.value)
+            }}
+          >
+            {['2019', '2018', '2017', '2016'].map(yr => (
+              <option>{yr}</option>
+            ))}
+          </FormControl>
+        </Col>
+        <Col md={3} xs={4}>
+          <FormControl
+            as="select"
+            size="sm"
+            value={type}
+            onChange={(e) => {
+              setType(e.target.value)
+            }}
+          >
+            {[...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)].map(t => (
+              <option>{t}</option>
+            ))}
+          </FormControl>
+        </Col>
+        <Col md={3} xs={4}>
+          <FormControl
+            as="select"
+            size="sm"
+            value={region.region_name}
+            onChange={(e) => {
+              setRegion(constants.regions.find(r => r.region_name === e.target.value))
+            }}
+          >
+            {constants.regions.map(region => (
+              <option>{region.region_name}</option>
+            ))}
+          </FormControl>
         </Col>
       </Row>
       <Row>
         <Col>
-          {
-            <Table striped bordered hover size="sm">
-              <thead>
-                <tr>
-                  <th>系别</th>
-                  <th>年限</th>
-                </tr>
-              </thead>
-              <tbody>
-                {
-                  faculty.special.map((major) => (
-                    <tr>
-                      <td>{major.special_name}</td>
-                      <td>{major.limit_year}</td>
-                    </tr>
-                  ))
-                }
-              </tbody>
-            </Table>
-          }
-        </Col>
-      </Row>
-    </ListGroup.Item>
-  )
-}
-
-
-/*
-const InstituteCard = (props) => {
-  const { path, url, params } = useRouteMatch()
-  const i = props.institute
-  const history = useHistory()
-
-  return (
-    <ListGroup.Item action onClick={() => { history.push(`/institute/${i.id}`); }}>
-      <Row>
-        {
-          (props.size === "sm") ? (<></>) : (
-            <Col xs="auto" className="d-none d-sm-block">
-              <Image fluid height={80} width={80} src={i.icon} />
-            </Col>
-          )
-        }
-        <Col sm>
-          <Row >
-            <Col xs>
+          <Table striped bordered hover size="sm">
+            <thead>
+              <tr>
+                <th>专业</th>
+                <th>录取批次</th>
+                <th>平均分</th>
+                <th>最低分</th>
+                <th>最低名次</th>
+              </tr>
+            </thead>
+            <tbody>
               {
-                (props.size === "sm") ? (
-                  <Image className="mr-2" fluid height={24} width={24} src={i.icon} />
-                ) : (
-                  <Image className="d-xs-block d-sm-none mr-2" fluid height={24} width={24} src={i.icon} />
-                )
+                (enroll) ?
+                  enroll
+                    .scores.map(
+                      (score) => (
+                        <tr>
+                          <td>{score.major_name.split('（')[0]}</td>
+                          <td>{score.enroll_batch}</td>
+                          <td>{score.score_avg}</td>
+                          <td>{score.score_min}</td>
+                          <td>{score.rank_min}</td>
+                        </tr>
+                      )
+                    )
+                  : (<tr><td colSpan={5}>暂无数据</td></tr>)
               }
-              <b className="mr-1">{i.name}</b>
-              {(props.score) ? (<Badge variant="info">{props.score}分</Badge>) : (<></>)}
-            </Col>
-            <Col style={{ textAlign: "right" }} xs="auto">
-              <span className="annotation">
-                <SVG variant="location" />
-                {i.location}
-              </span>
-            </Col>
-          </Row>
-          <Row>
-            <Col >
-              <Labels labels={i.labels} />
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <Nav fill onClick={(e) => { e.stopPropagation(); }}>
-                <Nav.Item>
-                  <Nav.Link onClick={(e) => { alert(1234) }}>
-                    <SVG variant="star" />
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link>
-                    <SVG variant="chat" />
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link>
-                    <SVG variant="share" />
-                  </Nav.Link>
-                </Nav.Item>
-              </Nav>
-            </Col>
-          </Row>
+            </tbody>
+          </Table>
+
         </Col>
-        {
-          (props.size === 'sm') ? (<></>) : (
-            <Col className="d-none d-lg-block">
-              <Row>
-                <span className="annotation">
-                  {i.brief}...
-                      </span>
-              </Row>
-              <Row>
-              </Row>
-            </Col>)
-        }
-      </Row>
-    </ListGroup.Item>
+      </Row >
+
+    </div >
   )
 }
-*/
+
 const InstituteTabs = (props) => {
   const { path, url, params } = useRouteMatch()
   const institute = props.institute
@@ -258,47 +291,13 @@ const InstituteTabs = (props) => {
   }, [])
 
 
-  const MajorTable = (props) => {
-
-    return (
-      <div>
-        <Table striped bordered hover size="sm">
-          <thead>
-            <tr>
-              <th>系别</th>
-              <th>院系</th>
-              <th>年限</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              (majors) ? majors.data.special.map(
-                (faculty) =>
-                  faculty.special.map((major) => (
-                    <tr>
-                      <td>
-                        {major.special_name}
-                        {
-                          (major.nation_feature === '1') ? (<Badge className="ml-1" variant="success">国家级特色专业</Badge>) : (<></>)
-                        }
-                      </td>
-                      <td>{faculty.name}</td>
-                      <td>{(major.limit_year) ? major.limit_year : "四年"}</td>
-                    </tr>
-                  ))
-              ) : (<></>)
-            }
-          </tbody>
-        </Table>
-      </div>
-    )
-  }
-
-
   const ScoreTable = (props) => {
     const [region, setRegion] = useState(constants.regions.find(r => r.region_id === '44'))
     const [relatedInstitutes, setRelatedInstitutes] = useState([])
     const [relatedType, setRelatedType] = useState(constants.types[0])
+
+    const match = useRouteMatch()
+    const history = useHistory()
 
     useEffect(() => {
       fetchInstitutesWithinScoreRange(id, relatedType.type_id, region.region_id, (res) => {
@@ -357,9 +356,7 @@ const InstituteTabs = (props) => {
               </tbody>
             </Table>
             <Button variant="outline-success" size="sm" className="mb-3" onClick={(e) => {
-              if (props.setKey) {
-                props.setKey('data')
-              }
+              history.push('stat')
             }}>各专业数据→</Button>
           </Col>
         </Row>
@@ -399,121 +396,6 @@ const InstituteTabs = (props) => {
   }
 
 
-  const EnrollTable = (props) => {
-    const [data, setData] = useState([])
-    const [region, setRegion] = useState(constants.regions.find((r) => r.region_id === '44'))
-    const [year, setYear] = useState('2019')
-    const [type, setType] = useState()
-    const [enroll, setEnroll] = useState()
-
-    useEffect(() => {
-      fetchInstituteEnrollData(id, (res) => {
-        if (res.data) {
-          console.log(res.data)
-          setData(res.data)
-          setType([...res.data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)][0])
-        }
-      })
-    }, [])
-
-    useEffect(() => {
-      if (data.length) {
-        setType([...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)][0])
-      }
-    }, [year, region])
-
-    useEffect(() => {
-      setEnroll(data.find(d => d.region === region.region_id && d.type === type && d.year === year))
-    }, [region, year, type])
-
-    return (
-      <div>
-        <Row className="mb-2">
-          <Col md={3}>
-            <Card.Title>各专业录取数据</Card.Title>
-          </Col>
-          <Col md={3} xs={4}>
-            <FormControl
-              as="select"
-              size="sm"
-              value={year}
-              onChange={(e) => {
-                setYear(e.target.value)
-              }}
-            >
-              {['2019', '2018', '2017', '2016'].map(yr => (
-                <option>{yr}</option>
-              ))}
-            </FormControl>
-          </Col>
-          <Col md={3} xs={4}>
-            <FormControl
-              as="select"
-              size="sm"
-              value={type}
-              onChange={(e) => {
-                setType(e.target.value)
-              }}
-            >
-              {[...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)].map(t => (
-                <option>{t}</option>
-              ))}
-            </FormControl>
-          </Col>
-          <Col md={3} xs={4}>
-            <FormControl
-              as="select"
-              size="sm"
-              value={region.region_name}
-              onChange={(e) => {
-                setRegion(constants.regions.find(r => r.region_name === e.target.value))
-              }}
-            >
-              {constants.regions.map(region => (
-                <option>{region.region_name}</option>
-              ))}
-            </FormControl>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <Table striped bordered hover size="sm">
-              <thead>
-                <tr>
-                  <th>专业</th>
-                  <th>录取批次</th>
-                  <th>平均分</th>
-                  <th>最低分</th>
-                  <th>最低名次</th>
-                </tr>
-              </thead>
-              <tbody>
-                {
-                  (enroll) ?
-                    enroll
-                      .scores.map(
-                        (score) => (
-                          <tr>
-                            <td>{score.major_name.split('（')[0]}</td>
-                            <td>{score.enroll_batch}</td>
-                            <td>{score.score_avg}</td>
-                            <td>{score.score_min}</td>
-                            <td>{score.rank_min}</td>
-                          </tr>
-                        )
-                      )
-                    : (<tr><td colSpan={5}>暂无数据</td></tr>)
-                }
-              </tbody>
-            </Table>
-
-          </Col>
-        </Row >
-
-      </div >
-    )
-  }
-
   const [posts, setPosts] = useState([])
   const [topics, setTopics] = useState([])
 
@@ -539,101 +421,107 @@ const InstituteTabs = (props) => {
     })
   }, [])
 
-  const [key, setKey] = useState('general')
 
   return (
     <div>
-      <Tab.Container defaultActiveKey="general" activeKey={key} onSelect={(k) => setKey(k)}>
+      <Tab.Container>
         <Card>
-          <Card.Header>
-            <Nav variant="tabs" defaultActiveKey="general">
-              <Nav.Item>
-                <Nav.Link eventKey="general">概览</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="major">开设专业</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="data">数据</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="comments">讨论</Nav.Link>
-              </Nav.Item>
-            </Nav>
-          </Card.Header>
+          <Router>
+            <Card.Header>
+              <Nav variant="tabs">
+                <Nav.Item>
+                  <NavLink to={`general`} className="nav-link" activeClassName="active">概览</NavLink>
+                </Nav.Item>
+                <Nav.Item>
+                  <NavLink to={`major`} className="nav-link" activeClassName="active">开设专业</NavLink>
+                </Nav.Item>
+                <Nav.Item>
+                  <NavLink to={`stat`} className="nav-link" activeClassName="active">数据</NavLink>
+                </Nav.Item>
+                <Nav.Item>
+                  <NavLink to={`discuss`} className="nav-link" activeClassName="active">讨论</NavLink>
+                </Nav.Item>
+              </Nav>
+            </Card.Header>
 
-          <Tab.Content>
-            <Tab.Pane eventKey="general">
-              <Card.Body>
-                <Card.Title>介绍</Card.Title>
-                <Card.Text>
-                  {institute.raw.content}...
+            <Switch>
+              <Route path={`${url}`} exact={true}>
+                <Redirect to={`${url}/general`} />
+              </Route>
+              <Route path={`${url}/general`}>
+                <Card.Body>
+                  <Card.Title>介绍</Card.Title>
+                  <Card.Text>
+                    {institute.raw.content}...
                 </Card.Text>
-                <hr />
-                <Card.Title>规模</Card.Title>
-                <CardColumns>
-                  {
-                    [
-                      { variant: 'Primary', data: (majors) ? majors.data.special_detail["1"].length : institute.raw.num_subject, title: "开设专业" },
-                      { variant: 'Warning', data: (majors) ? majors.data.nation_feature.length : 0, title: "国家级特色专业" },
-                      { variant: 'Secondary', data: institute.raw.num_master, title: "硕士点" },
-                      { variant: 'Success', data: institute.raw.num_doctor, title: "博士点" },
-                      { variant: 'Info', data: institute.raw.num_library + "册", title: "图书馆藏" },
-                      { variant: 'Dark', data: institute.raw.num_lab, title: "重点实验室" },
-                    ].map((feature, idx) => (
-                      <>
-                        <Card
-                          bg={feature.variant.toLowerCase()}
-                          text={feature.variant.toLowerCase() === 'light' ? 'dark' : 'white'}
-                          style={{ textAlign: "center" }}
-                          className=""
-                        >
-                          <Card.Header>{feature.title}</Card.Header>
-                          <Card.Body>
-                            <h3>{feature.data}</h3>
-                          </Card.Body>
-                        </Card>
-                      </>
-                    ))}
-                </CardColumns>
-                <hr />
-                <ScoreTable setKey={setKey} />
-                <hr />
-              </Card.Body>
-            </Tab.Pane>
-            <Tab.Pane eventKey="major">
-              <Card.Body>
-                <Card.Title>专业列表</Card.Title>
-                <Card.Text>
-                  <MajorTable />
-                </Card.Text>
-              </Card.Body>
-            </Tab.Pane>
-            <Tab.Pane eventKey="data">
-              <Card.Body>
-                <EnrollTable />
-              </Card.Body>
-            </Tab.Pane>
+                  <hr />
+                  <Card.Title>规模</Card.Title>
+                  <CardColumns>
+                    {
+                      [
+                        { variant: 'Primary', data: (majors) ? majors.data.special_detail["1"].length : institute.raw.num_subject, title: "开设专业" },
+                        { variant: 'Warning', data: (majors) ? majors.data.nation_feature.length : 0, title: "国家级特色专业" },
+                        { variant: 'Secondary', data: institute.raw.num_master, title: "硕士点" },
+                        { variant: 'Success', data: institute.raw.num_doctor, title: "博士点" },
+                        { variant: 'Info', data: institute.raw.num_library + "册", title: "图书馆藏" },
+                        { variant: 'Dark', data: institute.raw.num_lab, title: "重点实验室" },
+                      ].map((feature, idx) => (
+                        <>
+                          <Card
+                            bg={feature.variant.toLowerCase()}
+                            text={feature.variant.toLowerCase() === 'light' ? 'dark' : 'white'}
+                            style={{ textAlign: "center" }}
+                            className=""
+                          >
+                            <Card.Header>{feature.title}</Card.Header>
+                            <Card.Body>
+                              <h3>{feature.data}</h3>
+                            </Card.Body>
+                          </Card>
+                        </>
+                      ))}
+                  </CardColumns>
+                  <hr />
+                  <ScoreTable />
+                  <hr />
+                </Card.Body>
+              </Route>
+              <Route path={`${url}/major`}>
+                <Card.Body>
+                  <Card.Title>专业列表</Card.Title>
+                  <Card.Text>
+                    <MajorTable majors={majors} />
+                  </Card.Text>
+                </Card.Body>
+              </Route>
+              <Route path={`${url}/stat`}>
+                <Card.Body>
+                  <EnrollTable iid={id} />
+                </Card.Body>
+              </Route>
+              <Route path={`${url}/discuss`}>
+                <Card.Body className="">
+                  <Row>
+                    <Col>
+                      <Card.Title>院校评价</Card.Title>
+                    </Col>
+                  </Row>
+                </Card.Body>
+                <PostList posts={posts} />
+                <NewPostForm className="p-3" relatedInstitute={institute._id} />
+                <Card.Body className="">
+                  <Row>
+                    <Col>
+                      <Card.Title>相关讨论</Card.Title>
+                    </Col>
+                  </Row>
+                </Card.Body>
+                <TopicList topics={topics} />
 
-            <Tab.Pane eventKey="comments">
-              <Card.Body>
-                <Card.Title>院校评价</Card.Title>
-                <Card.Text>
-                  <Card>
-                    <PostList posts={posts} />
-                    <NewPostForm className="p-3" relatedInstitute={institute._id} />
-                  </Card>
-                </Card.Text>
-                <Card.Title>相关讨论</Card.Title>
-                <Card.Text>
-                  <Card>
-                    <TopicList topics={topics} />
-                    <NewTopicForm className="p-3" relatedInstitute={institute._id} />
-                  </Card>
-                </Card.Text>
-              </Card.Body>
-            </Tab.Pane>
-          </Tab.Content>
+                <NewTopicForm className="p-3" relatedInstitute={institute._id} />
+              </Route>
+            </Switch>
+          </Router>
         </Card>
       </Tab.Container>
     </div>
@@ -671,13 +559,6 @@ const Detail = (props) => {
               <Row className="mb-2">
                 <Col>
                   <Image width={96} height={96} src={`https://static-data.eol.cn/upload/logo/${institute.id}.jpg`} />
-                </Col>
-              </Row>
-              <Row>
-                <Col>
-                  <Button variant="outline-success" size="sm" block>
-                    关注
-                  </Button>
                 </Col>
               </Row>
             </Col>
@@ -726,13 +607,6 @@ const Detail = (props) => {
                   <p>
                     <Labels labels={institute.labels} />
                   </p>
-                </Col>
-              </Row>
-              <Row>
-                <Col>
-                  <u>
-                    <b>{Math.floor(Math.random() * 1000)}</b>
-                  </u> 人关注
                 </Col>
               </Row>
             </Col>
@@ -971,7 +845,7 @@ const InstituteTable = (props) => {
                     }
                   </Col>
                 </Row>
-                <hr />
+                <hr className="mt-2"/>
                 <ButtonGroup>
                   <Button variant="primary" type="button" size="sm" onClick={handleQuery}>
                     查询
@@ -1010,7 +884,6 @@ const InstituteTable = (props) => {
                   <span className="annotation">
                     第 {(currentPage - 1) * instPerPage + 1}~{(currentPage * instPerPage > institutes.length) ? institutes.length : (currentPage * instPerPage)} 项
                   </span>
-
                 ) :
                   (<></>)
               }
@@ -1041,9 +914,11 @@ const InstituteTable = (props) => {
                         case "类别":
                           setInstitutes([...institutes.sort((a, b) => a.labels.join(',').localeCompare(b.labels.join(','), 'zh'))])
                           break;
+                          /*
                         case "理科最低分数":
                         case "文科最低分数":
                           break;
+                          */
                         default:
                           return 0
                       }
@@ -1099,17 +974,10 @@ const InstitutePage = (props) => {
     <Router>
       <div className="container mb-3">
         <Switch>
-          <Route path={`/institute/:id/`} exact={true}>
+          <Route path={`/institute/:id`} >
             <Detail />
           </Route>
-          {
-            /*
-          <Route path={`/institute/:id`} exact={true} render={props => (
-            <Redirect to={`/institute/${props.match.params.id}/general`} />
-          )} />
-            */
-          }
-          <Route path={`/institute/`} exact={true}>
+          <Route path={`/institute`} exact={true}>
             <InstituteTable instperpage={instperpage} />
           </Route>
         </Switch>

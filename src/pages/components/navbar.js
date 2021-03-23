@@ -32,15 +32,20 @@ const AppNavbar = (props) => {
             <Nav.Link onClick={() => { history.push('/forum'); history.go() }}>{constants.title.forum}</Nav.Link>
           </Nav.Item >
         </Nav >
+        {
+          /*
+          
         <Form inline className="mr-2 d-none d-lg-block">
           <FormControl type="text" placeholder="..." className="mr-sm-2" />
           <Button variant="outline-success">搜索</Button>
         </Form>
 
-        <Nav>
           <Nav.Item>
             <Nav.Link className="d-lg-none" onClick={() => { history.push('/search'); history.go() }}>{constants.title.search}</Nav.Link>
           </Nav.Item>
+          */
+        }
+        <Nav>
           <Nav.Item>
             <Nav.Link onClick={() => { history.push('/login'); history.go() }}>{constants.title.login}</Nav.Link>
           </Nav.Item>
