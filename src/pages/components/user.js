@@ -11,10 +11,250 @@ import SVG from '../../utils/svg'
 
 
 const loginSchema = Yup.object().shape({
-  username: Yup.string().required(),
-  password: Yup.string().required()
+  username: Yup.string().required('请输入用户名'),
+  password: Yup.string().required('请输入密码')
 })
 
+const signupValidator = Yup.object().shape({
+  username: Yup.string()
+    .min(4, '需要至少4个字符')
+    .max(16, '用户名过长，最多16个字符')
+    .required('请输入用户名'),
+  password: Yup.string()
+    .min(6, '需要至少6位字符')
+    .max(32, '密码过长，最多32个字符')
+    .required('请输入密码'),
+  name: Yup.string().max(20, '姓名过长，最多20个字符'),
+  hint: Yup.string()
+    .max(100, '提示过长'),
+  year: Yup.string().required('需要选择考生的届次'),
+  province: Yup.string().required('需要选择考生的省份'),
+  city: Yup.string().required('需要选择考生的城市'),
+  about: Yup.string().max(1000, '个人简介过长，请控制在1000字内'),
+})
+
+const SignupForm = (props) => {
+  const handleSubmit = (body) => {
+    console.log(body)
+  }
+  return (
+    <Formik
+      onSubmit={handleSubmit}
+      initialValues={
+        {
+          username: '',
+          password: '',
+          name: '',
+          hint: '',
+          year: '2021',
+          province: '44',
+          city: '4401',
+          about: ''
+        }
+      }
+      validationSchema={signupValidator}
+    >
+      {
+        ({
+          handleSubmit,
+          handleChange,
+          handleBlur,
+          values,
+          errors,
+          touched,
+          isValid
+        }) => (
+          <Form noValidate onSubmit={handleSubmit}>
+            <Form.Row>
+              <Col xs={12} sm={4}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>姓名</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      type="text"
+                      name="name"
+                      value={values.name}
+                      onChange={handleChange}
+                      isValid={touched.name && !errors.name}
+                      isInvalid={!!errors.name}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.name}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+              <Col xs={12} sm={4}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>@</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      type="text"
+                      placeholder="用户名"
+                      name="username"
+                      value={values.username}
+                      onChange={handleChange}
+                      isValid={touched.username && !errors.username}
+                      isInvalid={!!errors.username}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.username}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+              <Col xs={12} sm={4}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>密码</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      type="password"
+                      name="password"
+                      value={values.password}
+                      onChange={handleChange}
+                      isValid={touched.password && !errors.password}
+                      isInvalid={!!errors.password}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.password}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+            </Form.Row>
+            <Form.Row>
+              <Col xs={12} sm={8}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>密码提示</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      type="text"
+                      name="hint"
+                      value={values.hint}
+                      onChange={handleChange}
+                    />
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+              <Col xs={12} sm={4}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <Form.Control
+                      as="select"
+                      name="year"
+                      value={values.year}
+                      onChange={handleChange}
+                      isValid={touched.year && !errors.year}
+                      isInvalid={!!errors.year}
+                    >
+                      {
+                        [
+                          '2021',
+                          '2020',
+                          '2019',
+                          '2018',
+                          '2017',
+                          '2016'
+                        ].map((year) => (<option>{year}</option>))
+                      }
+                    </Form.Control>
+                    <InputGroup.Append>
+                      <InputGroup.Text>届</InputGroup.Text>
+                    </InputGroup.Append>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+            </Form.Row>
+            <Form.Row>
+              <Col xs={12} sm={6}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>省份</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      as="select"
+                      name="province"
+                      value={values.province}
+                      onChange={handleChange}
+                      isValid={touched.province && !errors.province}
+                      isInvalid={!!errors.province}
+                    >
+                      {
+                        constants.regions.map((r) => (<option value={r.region_id}>{r.region_name}</option>))
+                      }
+                    </Form.Control>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>城市</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      as="select"
+                      name="city"
+                      value={values.city}
+                      onChange={handleChange}
+                      isValid={touched.city && !errors.city}
+                      isInvalid={!!errors.city}
+                    >
+                      {
+                        constants.cities
+                          .filter(city => city.city_id.slice(0, 2) === values.province)
+                          .sort((a, b) => a.city_id.localeCompare(b.city_id))
+                          .map((c) => (<option value={c.city_id}>{c.city_name}</option>))
+                      }
+                    </Form.Control>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+            </Form.Row>
+            <Form.Row>
+              <Col>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>介绍</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control 
+                    as="textarea" 
+                    name="about"
+                    value={values.about}
+                    onChange={handleChange}
+                    isValid={touched.about && !errors.about}
+                    isInvalid={!!errors.about}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.about}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+            </Form.Row>
+            <Form.Row>
+              <Col xs="auto">
+                <Button type="submit" variant="success">
+                  提交注册
+                </Button>
+              </Col>
+            </Form.Row>
+          </Form>
+        )
+      }
+    </Formik>
+  )
+}
 
 const SignUpForm = (props) => {
 
@@ -106,17 +346,13 @@ const SignUpForm = (props) => {
 }
 
 const LoginForm = (props) => {
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const form = e.currentTarget
-    if (form.checkValidity() == false) {
-      e.stopPropagation()
-    }
+  const handleSubmit = (body) => {
+    console.log(body)
   }
 
   return (
     <Formik
-      onSubmit={values => console.log(values)}
+      onSubmit={handleSubmit}
       initialValues={{ username: '', password: '' }}
       validationSchema={loginSchema}
     >
@@ -129,46 +365,51 @@ const LoginForm = (props) => {
         touched,
         isValid,
       }) => (
-        <Form onSubmit={handleSubmit}>
+        <Form noValidate onSubmit={handleSubmit}>
           <Form.Row>
-            <Col>
-              <InputGroup hasValidation>
-                <InputGroup.Prepend>
-                  <InputGroup.Text>@</InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control
-                  type="text"
-                  placeholder="用户名..."
-                  name="username"
-                  value={values.username}
-                  onChange={handleChange}
-                  isValid={touched.username && !errors.username}
-                  isInvalid={!!errors.username}
-                />
-                <Form.Control.Feedback type="invalid">
-                  请填写用户名
-                </Form.Control.Feedback>
-              </InputGroup>
+            <Col xs={12} sm={6}>
+              <Form.Group>
+                <InputGroup hasValidation>
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>@</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    type="text"
+                    placeholder="用户名..."
+                    name="username"
+                    value={values.username}
+                    onChange={handleChange}
+                    isValid={touched.username && !errors.username}
+                    isInvalid={!!errors.username}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.username}
+                  </Form.Control.Feedback>
+                </InputGroup>
+              </Form.Group>
             </Col>
-            <Col>
-              <InputGroup hasValidation>
-                <InputGroup.Prepend>
-                  <InputGroup.Text>密码</InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control
-                  type="password"
-                  name="password"
-                  value={values.password}
-                  onChange={handleChange}
-                  isValid={touched.password && !errors.password}
-                  isInvalid={!!errors.password}
-                />
-                <Form.Control.Feedback type="invalid">
-                  请填写密码
-                </Form.Control.Feedback>
-              </InputGroup>
-
+            <Col xs={12} sm={6}>
+              <Form.Group>
+                <InputGroup hasValidation>
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>密码</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    type="password"
+                    name="password"
+                    value={values.password}
+                    onChange={handleChange}
+                    isValid={touched.password && !errors.password}
+                    isInvalid={!!errors.password}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.password}
+                  </Form.Control.Feedback>
+                </InputGroup>
+              </Form.Group>
             </Col>
+          </Form.Row>
+          <Form.Row>
             <Col xs="auto">
               <Button type="submit" variant="success">
                 登入
@@ -329,7 +570,7 @@ const ExampleForm = (props) => {
       }) => (
         <Form noValidate onSubmit={handleSubmit}>
           <Form.Row>
-            <Form.Group as={Col} md="4" controlId="validationFormik01">
+            <Form.Group as={Col} sm="4" controlId="validationFormik01">
               <Form.Label>First name</Form.Label>
               <Form.Control
                 type="text"
@@ -340,7 +581,7 @@ const ExampleForm = (props) => {
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>
-            <Form.Group as={Col} md="4" controlId="validationFormik02">
+            <Form.Group as={Col} sm="4" controlId="validationFormik02">
               <Form.Label>Last name</Form.Label>
               <Form.Control
                 type="text"
@@ -438,4 +679,4 @@ const ExampleForm = (props) => {
 }
 
 
-export { SignUpForm, LoginForm, UserCard, UserLink, UserListItem, ExampleForm }
+export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, ExampleForm }

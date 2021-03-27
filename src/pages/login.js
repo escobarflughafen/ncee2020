@@ -4,7 +4,7 @@ import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col,Card,  Table, List
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useRouteMatch } from 'react-router-dom'
 import constants from '../utils/constants'
-import { ExampleForm, LoginForm, SignUpForm, UserLink } from './components/user'
+import { ExampleForm, LoginForm, SignupForm, UserLink } from './components/user'
 
 
 const LoginPage = (props) => {
@@ -16,6 +16,7 @@ const LoginPage = (props) => {
 
   return (
     <div className="container">
+      <div>
       <Router>
         <Card>
         <Card.Header>
@@ -39,12 +40,13 @@ const LoginPage = (props) => {
               <LoginForm />
             </Route>
             <Route path={`${url}/signup`}>
-              <SignUpForm />
+              <SignupForm />
             </Route>
           </Switch>
         </Card.Body>
         </Card>
       </Router>
+      </div>
     </div>
   )
 }
