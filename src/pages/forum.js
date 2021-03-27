@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../style.css'
 import React, { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, ToggleButton, Modal, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, ToggleButton, Modal, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup, ListGroupItem } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom'
 import constants from '../utils/constants'
@@ -23,14 +23,6 @@ const ListPage = (props) => {
 
   const TopicTabs = (props) => {
     const [topics, setTopics] = useState([])
-
-    useEffect(() => {
-      const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
-      axios.post(url).then((res) => {
-        console.log(res)
-        setTopics(res.data.topics)
-      })
-    }, [])
 
     const NewTopicModal = (props) => {
       return (
@@ -58,7 +50,64 @@ const ListPage = (props) => {
     }
 
     const [newTopicModalShow, setNewTopicModalShow] = useState(false)
+
+    const [queryTags, setQueryTags] = useState([])
+
+    const [instituteIndex, setInstituteIndex] = useState([])
+
+    useEffect(() => {
+      const url = `http://${document.domain}:${constants.serverPort}/institute/indexlist`
+      axios.post(url).then((res) => {
+        console.log(res.data)
+        setInstituteIndex(res.data.institutes)
+      })
+    }, [])
+
+    const [keyword, setKeyword] = useState("")
+    const [instituteKeyword, setInstituteKeyword] = useState("")
+
+    const handleQuery = (e) => {
+      if (e) e.preventDefault()
+    }
+
+    const addTag = (category, label, data) => {
+      if (!queryTags.find(t => (t.category === category) && (t.label === label))) {
+        setQueryTags([
+          ...queryTags,
+          {
+            category,
+            label,
+            data
+          }
+        ])
+      }
+    }
+
+    const addKeyword = (kw) => {
+      if (kw != '') {
+        addTag('keyword', kw, kw)
+      }
+    }
+
+    const removeTag = (tag) => {
+      setQueryTags(queryTags.filter((t) => !((t.category === tag.category) && (t.label === tag.label))))
+    }
+
     const { url, path, params } = useRouteMatch()
+
+    useEffect(() => {
+      const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
+      axios.post(url).then((res) => {
+        console.log(res)
+        setTopics(res.data.topics)
+      })
+    }, [])
+
+    useEffect(() => {
+      console.log(queryTags)
+      handleQuery()
+    }, [queryTags])
+
     return (
       <>
         <Row className="mb-3">
@@ -117,36 +166,137 @@ const ListPage = (props) => {
                         placeholder="关键字…"
                         aria-label="keyword"
                         aria-describedby="keyword"
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                        onKeyPress={(e) => {if (e.code === 'Enter') {
+                            addTag('keyword', keyword, keyword)
+                            setKeyword('')
+                        }}}
                       />
                       <InputGroup.Append>
-                        <InputGroup.Text>合取</InputGroup.Text>
-                        <InputGroup.Checkbox aria-label="Checkbox for following text input" />
-                      </InputGroup.Append>
-                      <InputGroup.Append>
-                        <Button variant="outline-success">添加</Button>
+                        <Button variant="outline-success" onClick={(e) => {
+                          if(keyword != '') {
+                            addTag('keyword', keyword, keyword)
+                            setKeyword('')
+                          }
+                        }}>添加</Button>
                       </InputGroup.Append>
                     </InputGroup>
                   </Form.Group>
                   <Form.Group>
                     <Form.Row>
                       <Col>
-                        <Form.Control size="sm" as="select">
-                          <option>Small select</option>
-                        </Form.Control>
+                        <InputGroup size="sm">
+                          <InputGroup.Prepend>
+                            <InputGroup.Text>类别</InputGroup.Text>
+                          </InputGroup.Prepend>
+                          <Form.Control as="select"
+                            onChange={(e) => {
+                              if (e.target.value != -1) {
+                                const value = JSON.parse(e.target.value)
+                                addTag('category', value.name, value.id)
+                              }
+                            }}
+                          >
+                            <option value={-1}>...</option>
+                            {
+                              constants.topicTypes.map(t => (
+                                <option value={JSON.stringify(t)}>{t.name}</option>
+                              ))
+                            }
+                          </Form.Control>
+                        </InputGroup>
                       </Col>
                       <Col>
-                        <Form.Control size="sm" as="select">
-                          <option>Small select</option>
-                        </Form.Control>
+                        <InputGroup size="sm">
+                          <InputGroup.Prepend>
+                            <InputGroup.Text>地区</InputGroup.Text>
+                          </InputGroup.Prepend>
+                          <Form.Control as="select"
+                            onChange={(e) => {
+                              console.log(e.target.value)
+                              if (e.target.value != -1) {
+                                const value = JSON.parse(e.target.value)
+                                addTag('region', value.region_name, value.region_id)
+                              }
+                            }
+                            }
+                          >
+                            <option value={-1}>...</option>
+                            {
+                              constants.regions.map(r => (
+                                <option value={JSON.stringify(r)}>{r.region_name}</option>
+                              ))
+                            }
+                          </Form.Control>
+                        </InputGroup>
                       </Col>
                     </Form.Row>
                   </Form.Group>
+                  <Form.Group>
+                    <InputGroup size="sm">
+                      <FormControl
+                        placeholder="院校"
+                        aria-label="institute"
+                        aria-describedby="institute"
+                        value={instituteKeyword}
+                        onChange={(e) => { setInstituteKeyword(e.target.value) }}
+                      />
+                    </InputGroup>
+                    <ListGroup variant="flush">
+                      {
+                        (instituteKeyword) ?
+                          instituteIndex
+                            .filter(i => i.name.includes(instituteKeyword) || instituteKeyword === `${i.id}`)
+                            .map(i => (<ListGroup.Item
+                              className="py-1 px-2"
+                              action
+                              onClick={() => {
+                                setInstituteKeyword('');
+                                addTag('institute', i.name, i.id)
+                              }}
+                            >
+                              <small>
+                                <b>{i.name}</b> [{i.id}]
+                              </small>
+                            </ListGroup.Item>))
+                          : null
+                      }
+                    </ListGroup>
+                  </Form.Group>
                   <Form.Row>
                     <Col>
-                      12312
-                    <hr className="my-1" />
+                      {
+                        queryTags.map((tag) => {
+                          let badgeVariant = {
+                            'keyword': 'dark',
+                            'category': 'primary',
+                            'region': 'success',
+                            'institute': 'info'
+                          }
+
+                          return (
+                            <Badge
+                              className="mr-2"
+                              variant={badgeVariant[tag.category]}
+                              pill
+                              onClick={() => removeTag(tag)}
+                            >{tag.label}<SVG variant="x" /></Badge>
+                          )
+                        })
+                      }
+                      <hr className="mt-1" />
                     </Col>
                   </Form.Row>
+                  <Row>
+                    <Col>
+                      <Button variant="primary" size="sm" onClick={() => {
+                        history.push('/forum/')
+                      }}>
+                        查询
+                      </Button>
+                    </Col>
+                  </Row>
                 </Card.Body>
               </Route>
               <Route path={`${url}/reply`}>
@@ -163,15 +313,7 @@ const ListPage = (props) => {
   return (
     <>
       <div className="container">
-        <Row>
-          <Col>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <TopicTabs />
-          </Col>
-        </Row>
+        <TopicTabs />
       </div>
     </>
   )
@@ -253,11 +395,10 @@ const TopicPage = (props) => {
                   <Col xs={12} sm="auto" className="mr-sm-auto">
                     {
                       (topic.region) ? (
-                        <>
-                          <Badge variant="success" className="mr-1">
-                            {constants.regions.find(r => r.region_id === topic.region).region_name}
-                          </Badge>
-                        </>
+                        <small>
+                          <SVG variant="location" className="mr-1" />
+                          {constants.regions.find(r => r.region_id === topic.region).region_name}
+                        </small>
                       ) : (<></>)
                     }
                   </Col>
