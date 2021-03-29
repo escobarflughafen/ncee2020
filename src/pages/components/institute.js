@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, ModalBody, Popover, Badge, OverlayTrigger, Image } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, ModalBody, Popover, Badge, OverlayTrigger, Image, InputGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useRouteMatch, useHistory } from 'react-router-dom'
 import constants from '../../utils/constants'
@@ -31,9 +31,9 @@ const Labels = (props) => {
                   })
                   history.go()
                 }}
-              > 
+              >
                 {l.label}
-                </Button>
+              </Button>
             ) : (<></>))
           ) : []
       }
@@ -127,4 +127,89 @@ const InstituteList = (props) => {
 
 }
 
-export { InstituteCard, InstituteList, Labels }
+
+/*
+  props:
+  @size: size of selector - 'sm' | 'lg'
+  @onSelect: function of handling the selected institute -- function: (i: instituteObject) => {}
+  @caption: caption of selector - String
+  @autohide: auto hide the input area when institute is selected
+  @multiple: decide whether this selector displays in a multiple selection fashion or not
+*/
+
+const InstituteSelector = (props) => {
+  const [indices, setIndices] = useState([])
+  const [keyword, setKeyword] = useState('')
+  const [selected, setSelected] = useState()
+
+  useEffect(() => {
+    const url = `http://${document.domain}:${constants.serverPort}/institute/indexlist`
+    axios.post(url).then((res) => {
+      console.log(res.data)
+      setIndices(res.data.institutes)
+    })
+  }, [])
+
+  return (
+    <>
+      <Form.Group>
+        <InputGroup size={props.size}>
+          <InputGroup.Prepend>
+            <InputGroup.Text>{props.caption ? props.caption : '院校'}</InputGroup.Text>
+          </InputGroup.Prepend>
+          {
+            (selected && !props.multiple) ? (
+              <InputGroup.Prepend>
+                <InputGroup.Text>
+                  <Badge variant="info" className="btn btn-link" onClick={() => {
+                    setSelected(null)
+                    if (props.onSelect) {
+                      props.onSelect(null)
+                    }
+                  }}>
+                    {selected.name} [{selected.id}]
+                  </Badge>
+                </InputGroup.Text>
+              </InputGroup.Prepend>
+            ) : null
+          }
+          {
+            (!props.multiple && props.autohide && selected) ? null : (
+              <FormControl
+                value={keyword}
+                onChange={(e) => { setKeyword(e.target.value) }} />
+            )
+          }
+        </InputGroup>
+        <ListGroup variant="flush">
+          {
+            (keyword) ?
+              indices
+                .filter(i => i.name.includes(keyword) || keyword === `${i.id}`)
+                .map(i => (
+                  <ListGroup.Item
+                    className="py-1 px-2"
+                    action
+                    onClick={() => {
+                      setKeyword('')
+                      setSelected(i)
+                      if (props.onSelect) {
+                        props.onSelect(i)
+                      }
+                    }}
+                  >
+                    <small>
+                      <b>{i.name}</b> [{i.id}]
+                  </small>
+                  </ListGroup.Item>
+                ))
+              : null
+          }
+        </ListGroup>
+      </Form.Group>
+    </>
+  )
+}
+
+
+export { InstituteCard, InstituteList, Labels, InstituteSelector }

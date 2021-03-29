@@ -9,6 +9,7 @@ import axios from 'axios'
 import { makePaginations } from './pagination'
 import { UserLink } from './user'
 import { MsgAlert } from './msg'
+import { InstituteSelector } from './institute'
 
 const TopicCard = (props) => {
   const history = useHistory()
@@ -157,7 +158,7 @@ const NewTopicForm = (props) => {
     e.preventDefault()
     setMsg({ type: '', text: '' })
     const url = `http://${document.domain}:${constants.serverPort}/forum/newtopic`
-    const token = `bearer ${window.localStorage.getItem('token')}`
+    const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
     const body = {
       title: title,
       category: category,
@@ -181,7 +182,7 @@ const NewTopicForm = (props) => {
       console.log(err.response)
       setMsg({
         type: 'danger',
-        text: err.response.data.msg
+        text: (err.response.data) ? err.response.data.msg : null
       })
     }
   }
@@ -267,12 +268,19 @@ const NewTopicForm = (props) => {
             <Col>
               {
                 (props.relatedInstitute) ? null : (
-                  <InputGroup size="sm">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>相关院校</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <Form.Control as="input" value={relatedInstitute} onChange={(e) => { setRelatedInstitute(e.target.value) }} />
-                  </InputGroup>
+                  <InstituteSelector
+                    autohide
+                    size="sm"
+                    caption="相关院校"
+                    onSelect={(i) => {
+                      if (i) {
+                        setRelatedInstitute(i._id)
+                      } else {
+                        setRelatedInstitute(null)
+                      }
+                    }
+                    }
+                  />
                 )
               }
             </Col>

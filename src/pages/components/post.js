@@ -9,9 +9,10 @@ import SVG from '../../utils/svg'
 import { makePaginations } from './pagination'
 import { timeStringConverter } from '../../utils/util'
 import { TopicCard, TopicList } from './topic'
-import {UserLink} from './user'
+import { UserLink } from './user'
 import axios from 'axios'
 import { InstituteCard } from './institute'
+import { MsgAlert } from './msg'
 
 
 
@@ -76,7 +77,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="success">
           <Row>
             <Col>
-              回复：<Button className="p-0" variant="link" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go()}}><b>{post.relatedTopic.title}</b></Button>
+              回复：<Button className="p-0" variant="link" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}><b>{post.relatedTopic.title}</b></Button>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -202,7 +203,10 @@ const PostList = (props) => {
 }
 
 const NewPostForm = (props) => {
-
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
   const id = useParams().id
   // states
   const [content, setContent] = useState()
@@ -213,13 +217,17 @@ const NewPostForm = (props) => {
   const [tags, setTags] = useState()
   const [photos, setPhotos] = useState()
 
+  const history = useHistory()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    console.log(replyTo)
+    setMsg({
+      type: '',
+      text: ''
+    })
     const url = `http://${document.domain}:${constants.serverPort}/post/newpost`
-    const token = `bearer ${window.localStorage.getItem('token')}`
+    const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
     const body = {
       content: content,
       relatedInstitute: relatedInstitute,
@@ -229,51 +237,66 @@ const NewPostForm = (props) => {
       tags: tags,
       photos: photos
     }
+    try {
+      const res = await axios.post(url, body, { headers: { auth: token } })
+      setMsg({
+        type: 'success',
+        text: res.data.msg
+      })
 
-    axios.post(url, body, {headers: {auth: token}}).then((res) => {
-      console.log(res)
-    })
+      setTimeout(() => {
+        history.go()
+      }, 1000)
+    } catch (err) {
+      console.log(err.response)
+      setMsg({
+        type: 'danger',
+        text: (err.response.data) ? err.response.data.msg : ''
+      })
+    }
   }
 
-  useEffect(()=>{
-    if(!props.relatedInstitute && !props.relatedTopic) {
+
+  useEffect(() => {
+    if (!props.relatedInstitute && !props.relatedTopic) {
       setReplyTo(id)
     }
   }, [id])
 
   return (
     <div className={props.className}>
-    <Form onSubmit={handleSubmit}>
-      <Form.Row>
-        <Form.Group as={Col} >
-          <Form.Label>回复内容</Form.Label>
-          <Form.Control
-            as="textarea"
-            placeholder="..."
-            rows={3}
-            id="replytextarea"
-            value={content}
-            onChange={(e) => { setContent(e.target.value) }} />
-        </Form.Group>
-      </Form.Row>
+      <MsgAlert msg={msg} />
+      <Form onSubmit={handleSubmit}>
+        <Form.Row>
+          <Form.Group as={Col} >
+            <Form.Label>回复内容</Form.Label>
+            <Form.Control
+              as="textarea"
+              placeholder="..."
+              rows={3}
+              id="replytextarea"
+              value={content}
+              onChange={(e) => { setContent(e.target.value) }} />
+          </Form.Group>
+        </Form.Row>
 
-      <Form.Group as={Row} controlId="replyTo">
+        <Form.Group as={Row} controlId="replyTo">
 
-        <Col xs="auto">
-          <ButtonGroup aria-label="reply" size="sm">
-            <Button variant="outline-dark">添加图片</Button>
-            <Button variant="primary" type="submit">
-              发布
+          <Col xs="auto">
+            <ButtonGroup aria-label="reply" size="sm">
+              <Button variant="outline-dark">添加图片</Button>
+              <Button variant="primary" type="submit">
+                发布
           </Button>
-          </ButtonGroup>
-        </Col>
-      </Form.Group>
+            </ButtonGroup>
+          </Col>
+        </Form.Group>
 
-    </Form>
+      </Form>
     </div>
   )
-
-
 }
+
+
 
 export { PostCard, PostList, NewPostForm };
