@@ -7,7 +7,8 @@ import { timeStringConverter } from '../../utils/util'
 import SVG from '../../utils/svg'
 import axios from 'axios'
 import { makePaginations } from './pagination'
-import {UserLink} from './user'
+import { UserLink } from './user'
+import { MsgAlert } from './msg'
 
 const TopicCard = (props) => {
   const history = useHistory()
@@ -85,7 +86,7 @@ const TopicList = (props) => {
   const [viewMode, setViewMode] = useState(props.viewMode || '详细')
   const topicPerPage = props.topicPerPage || 12
   const [currentPage, setCurrentPage] = useState(1)
-  
+
   return (
     <>
       <ListGroup variant="flush">
@@ -145,10 +146,18 @@ const NewTopicForm = (props) => {
   const [region, setRegion] = useState()
   const [tags, setTags] = useState()
   const [content, setContent] = useState()
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
 
-  const handleSubmit = (e) => {
+  const history = useHistory()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setMsg({ type: '', text: '' })
     const url = `http://${document.domain}:${constants.serverPort}/forum/newtopic`
-
+    const token = `bearer ${window.localStorage.getItem('token')}`
     const body = {
       title: title,
       category: category,
@@ -157,15 +166,30 @@ const NewTopicForm = (props) => {
       region: region,
       tags: tags,
     }
-
-    axios.post(url, body).then((res) => {
+    try {
+      const res = await axios.post(url, body, { headers: { auth: token } })
       console.log(res)
-    })
+      setMsg({
+        type: 'success',
+        text: res.data.msg
+      })
+      setTimeout(() => {
+        history.push(`/forum/${res.data.topic._id}`)
+        history.go()
+      }, 1000)
+    } catch (err) {
+      console.log(err.response)
+      setMsg({
+        type: 'danger',
+        text: err.response.data.msg
+      })
+    }
   }
 
   return (
     <>
       <div className={props.className}>
+        <MsgAlert msg={msg} />
         <Form onSubmit={handleSubmit}>
           <Form.Row>
             <Col>

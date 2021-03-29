@@ -83,6 +83,7 @@ const PostView = (props) => {
                               post={reply}
                               index={idx + 1}
                               expanded={false}
+                              host={reply.author._id === post.author._id}
                             />
                           )
                         })

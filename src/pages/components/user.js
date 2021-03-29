@@ -50,7 +50,7 @@ const SignupForm = (props) => {
     text: ''
   })
 
-  const resetMsg = () => setMsg({type: '', text: ''})
+  const resetMsg = () => setMsg({ type: '', text: '' })
 
   const handleSubmit = async (body) => {
     resetMsg()
@@ -299,9 +299,9 @@ const SignupForm = (props) => {
 
 const LoginForm = (props) => {
   const history = useHistory()
-  const [msg, setMsg] = useState({type: '', text: ''})
+  const [msg, setMsg] = useState({ type: '', text: '' })
 
-  const resetMsg = () => setMsg({type: '', text: ''})
+  const resetMsg = () => setMsg({ type: '', text: '' })
 
   const handleSubmit = async (body) => {
     resetMsg()
@@ -309,18 +309,18 @@ const LoginForm = (props) => {
     try {
       const res = await loginService(body)
       console.log(res)
-      setMsg({type: 'success', text: '登入成功'})
+      setMsg({ type: 'success', text: '登入成功' })
 
       window.localStorage.setItem('user', JSON.stringify(res.data.user))
       window.localStorage.setItem('token', res.data.token)
 
-      setTimeout(()=>{
+      setTimeout(() => {
         history.push('/home')
         history.go()
       }, 1000)
     } catch (err) {
       console.log(err.response)
-      setMsg({type: 'danger', text: err.response.data.msg})
+      setMsg({ type: 'danger', text: err.response.data.msg })
     }
   }
 
@@ -341,58 +341,58 @@ const LoginForm = (props) => {
       }) => (
         <div>
           {(msg.text.length > 0) ? (<Alert variant={msg.type}>{msg.text}</Alert>) : null}
-        <Form noValidate onSubmit={handleSubmit}>
-          <Form.Row>
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <InputGroup hasValidation>
-                  <InputGroup.Prepend>
-                    <InputGroup.Text>@</InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <Form.Control
-                    type="text"
-                    placeholder="用户名..."
-                    name="username"
-                    value={values.username}
-                    onChange={handleChange}
-                    isValid={touched.username && !errors.username}
-                    isInvalid={!!errors.username}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.username}
-                  </Form.Control.Feedback>
-                </InputGroup>
-              </Form.Group>
-            </Col>
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <InputGroup hasValidation>
-                  <InputGroup.Prepend>
-                    <InputGroup.Text>密码</InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    value={values.password}
-                    onChange={handleChange}
-                    isValid={touched.password && !errors.password}
-                    isInvalid={!!errors.password}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.password}
-                  </Form.Control.Feedback>
-                </InputGroup>
-              </Form.Group>
-            </Col>
-          </Form.Row>
-          <Form.Row>
-            <Col xs="auto">
-              <Button type="submit" variant="success">
-                登入
+          <Form noValidate onSubmit={handleSubmit}>
+            <Form.Row>
+              <Col xs={12} sm={6}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>@</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      type="text"
+                      placeholder="用户名..."
+                      name="username"
+                      value={values.username}
+                      onChange={handleChange}
+                      isValid={touched.username && !errors.username}
+                      isInvalid={!!errors.username}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.username}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Form.Group>
+                  <InputGroup hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>密码</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      type="password"
+                      name="password"
+                      value={values.password}
+                      onChange={handleChange}
+                      isValid={touched.password && !errors.password}
+                      isInvalid={!!errors.password}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.password}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+            </Form.Row>
+            <Form.Row>
+              <Col xs="auto">
+                <Button type="submit" variant="success">
+                  登入
               </Button>
-            </Col>
-          </Form.Row>
-        </Form>
+              </Col>
+            </Form.Row>
+          </Form>
         </div>
       )}
     </Formik>
@@ -414,6 +414,11 @@ const UserListItem = (props) => {
 const UserCard = (props) => {
   const user = props.user
   const history = useHistory()
+  const [loginAs, setLoginAs] = useState()
+
+  useEffect(() => {
+    setLoginAs(JSON.parse(window.localStorage.getItem('user')))
+  }, [])
 
   return (
     (user) ? (
@@ -433,7 +438,7 @@ const UserCard = (props) => {
                     }}>
                       <b>{user.name}</b>
                     </Button>
-                    <code>@{user.username}</code>
+                    <small className="text-info">@{user.username}</small>
                   </Col>
                 </Row>
                 <Row>
@@ -451,9 +456,15 @@ const UserCard = (props) => {
                   </Col>
                 </Row>
               </Col>
-              <Col xs="auto">
-                <Button variant="success" size="sm">关注</Button>
-              </Col>
+              {
+                (loginAs) ? (
+                  (loginAs.username === user.username) ? null : (
+                    <Col xs="auto">
+                      <Button variant="success" size="sm">关注</Button>
+                    </Col>
+                  )
+                ) : null
+              }
             </Row>
             <Row>
               <Col>

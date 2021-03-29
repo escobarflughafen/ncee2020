@@ -215,8 +215,11 @@ const NewPostForm = (props) => {
 
 
   const handleSubmit = (e) => {
+    e.preventDefault()
+
     console.log(replyTo)
     const url = `http://${document.domain}:${constants.serverPort}/post/newpost`
+    const token = `bearer ${window.localStorage.getItem('token')}`
     const body = {
       content: content,
       relatedInstitute: relatedInstitute,
@@ -227,13 +230,13 @@ const NewPostForm = (props) => {
       photos: photos
     }
 
-    axios.post(url, body).then((res) => {
+    axios.post(url, body, {headers: {auth: token}}).then((res) => {
       console.log(res)
     })
   }
 
   useEffect(()=>{
-    if(!props.relatedInstitute) {
+    if(!props.relatedInstitute && !props.relatedTopic) {
       setReplyTo(id)
     }
   }, [id])
@@ -255,33 +258,6 @@ const NewPostForm = (props) => {
       </Form.Row>
 
       <Form.Group as={Row} controlId="replyTo">
-        <Col>
-          {
-            /*
-            (props.topic) ? (
-              <>
-                <InputGroup className="mb-3" size="sm">
-                  <InputGroup.Prepend>
-                    <InputGroup.Text>回复</InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <Form.Control
-                    as="select"
-                    defaultValue={replyTo}
-                    onChange={(e) => { setReplyTo(e.target.value) }}
-                  >
-                    <option value={-1}>...</option>
-                    {props.topic.posts.map((post, idx) => {
-                      return (
-                        <option value={post.id}>{idx + 1} - {post.content}</option>
-                      )
-                    })}
-                  </Form.Control>
-                </InputGroup>
-              </>
-            ) : null
-            */
-          }
-        </Col>
 
         <Col xs="auto">
           <ButtonGroup aria-label="reply" size="sm">

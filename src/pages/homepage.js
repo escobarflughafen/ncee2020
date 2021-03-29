@@ -10,47 +10,74 @@ import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm } from './components/post'
+import { LoginForm } from './components/user'
 import axios from 'axios'
 
 
 const HomePage = (props) => {
   const today = new Date()
+  const [user, setUser] = useState()
   const history = useHistory()
+
+  useEffect(() => {
+    if (window.localStorage.getItem('user')) {
+      setUser(JSON.parse(window.localStorage.getItem('user')))
+    }
+  }, [])
+
   return (
     <>
       <div className="container">
         <Card.Body>
-          <Card.Title as="h3">
-            欢迎使用
-        </Card.Title>
+          <Row>
+            <Col>
+              <Card.Title as="h3">
+                {
+                  (user) ? (<><a href={`/user/${user.username}`}>{user.name}</a>，</>) : null
+                }
+                欢迎使用
+              </Card.Title>
+            </Col>
+            {
+              (user) ? null : (
+                <Col className="d-lg-none" xs="auto">
+                  <Card.Text>
+                    <Button variant="link" className="p-0 text-success" onClick={() => { history.push('/login'); history.go() }}>
+                        登入
+                    </Button>
+                  </Card.Text>
+                </Col>
+              )
+            }
+          </Row>
           <Card.Text>
             <p>
               <Alert variant="info">
                 今天是 <b>{today.toLocaleString('zh', constants.shortDateOptions)}</b>，距离高考还有 <b className="text-primary">{Math.floor((constants.dayOfNCEE.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))}</b> 天
                 </Alert>
-              <Button variant="link" size="sm" className="text-success" 
-              onClick={() => {
-                history.push('/institute')
-              }}
+              <Button variant="link" size="sm" className="text-success"
+                onClick={() => {
+                  history.push('/institute')
+                }}
               >查学校→</Button>
               <br />
               <Button variant="link" size="sm" className="text-success"
-              onClick={() => {
-                history.push('/forum')
-              }}
+                onClick={() => {
+                  history.push('/forum')
+                }}
               >讨论区→</Button>
               <br />
               <Button variant="link" size="sm" className="text-success"
-              onClick={() => {
-                history.push('/stats')
-              }}
+                onClick={() => {
+                  history.push('/stats')
+                }}
               >看数据→</Button>
             </p>
           </Card.Text>
           <Card.Title as="h3">
             推荐学校
         </Card.Title>
-        <Card.Text>
+          <Card.Text>
             <Carousel>
               <Carousel.Item>
                 <Carousel.Caption>
@@ -83,7 +110,7 @@ const HomePage = (props) => {
                 </Carousel.Caption>
               </Carousel.Item>
             </Carousel>
-        </Card.Text>
+          </Card.Text>
           <Card.Title as="h3">
             热门话题
         </Card.Title>

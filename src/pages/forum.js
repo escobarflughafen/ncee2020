@@ -418,7 +418,7 @@ const TopicPage = (props) => {
                   return (<PostCard
                     post={post}
                     index={(currentPage - 1) * postPerPage + idx + 1}
-                    host={post.author.id === topic.host.id}
+                    host={post.author._id === topic.host._id}
                     expanded={false}
                   />)
                 }
