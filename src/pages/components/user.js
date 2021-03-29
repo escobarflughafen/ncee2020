@@ -310,8 +310,13 @@ const LoginForm = (props) => {
       const res = await loginService(body)
       console.log(res)
       setMsg({type: 'success', text: '登入成功'})
+
+      window.localStorage.setItem('user', JSON.stringify(res.data.user))
+      window.localStorage.setItem('token', res.data.token)
+
       setTimeout(()=>{
         history.push('/home')
+        history.go()
       }, 1000)
     } catch (err) {
       console.log(err.response)

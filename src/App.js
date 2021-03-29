@@ -1,9 +1,9 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation } from 'react-router-dom'
-import {createBrowserHistory} from 'history'
+import { createBrowserHistory } from 'history'
 import SVG from './utils/svg'
 import Homepage from './pages/homepage'
 import InstitutePage from './pages/institute'
@@ -43,59 +43,77 @@ const CNavbar = () => {
 }
 
 
-function App() {
-  const [user, setUser] = useState(null);
-  const history = createBrowserHistory();
-
+const LogoutPage = (props) => {
+  const history = useHistory()
+  useEffect(() => {
+    window.localStorage.removeItem('user')
+    window.localStorage.removeItem('token')
+    history.push('/') 
+    history.go()
+  }, [])
   return (
-    <div>
-      <Router history={history}>
-        {
-          // TODO: change Link into history.push() components
-        }
-      <AppNavbar />
-        <Switch>
-          <div className="mt-3">
-            <Route path="/" exact={true}>
-              <Redirect to="/home" />
-            </Route>
+    <div></div>
+  )
+}
 
-            <Route path="/home">
-              <Homepage />
-            </Route>
 
-            <Route path="/stats">
-              <StatsPage />
-            </Route>
+function App() {
+  const [user, setUser] = useState(JSON.parse(window.localStorage.getItem('user')));
+  const history = createBrowserHistory();
+  
+  return (
+      <div>
+        <Router history={history}>
+          {
+            // TODO: change Link into history.push() components
+          }
+          <AppNavbar />
+          <Switch>
+            <div className="mt-3">
+              <Route path="/" exact={true}>
+                <Redirect to="/home" />
+              </Route>
 
-            <Route path="/institute">
-              <InstitutePage />
-            </Route>
+              <Route path="/home">
+                <Homepage />
+              </Route>
 
-            <Route path="/forum">
-              <ForumPage />
-            </Route>
+              <Route path="/stats">
+                <StatsPage />
+              </Route>
 
-            <Route path="/about">
-              <AboutPage />
-            </Route>
+              <Route path="/institute">
+                <InstitutePage />
+              </Route>
 
-            <Route path="/login">
-              <LoginPage />
-            </Route>
+              <Route path="/forum">
+                <ForumPage />
+              </Route>
 
-            <Route path="/user">
-              <UserPage />
-            </Route>
+              <Route path="/about">
+                <AboutPage />
+              </Route>
 
-            <Route path="/post">
-              <PostPage />
-            </Route>
+              <Route path="/login">
+                <LoginPage />
+              </Route>
 
-          </div>
-        </Switch>
-      </Router>
-    </div>
+              <Route path="/logout">
+                <LogoutPage />
+              </Route>
+
+              <Route path="/user">
+                <UserPage />
+              </Route>
+
+              <Route path="/post">
+                <PostPage />
+              </Route>
+
+            </div>
+          </Switch>
+        </Router>
+      </div>
   );
 }
 
