@@ -284,3 +284,34 @@ const demoComments = [
     createdAt: Date.now() - Math.ceil(Math.random() * 1000 * 3600 * 72),
   },
 ]
+                  <Form.Group>
+                    <InputGroup size="sm">
+                      <FormControl
+                        placeholder="院校"
+                        aria-label="institute"
+                        aria-describedby="institute"
+                        value={instituteKeyword}
+                        onChange={(e) => { setInstituteKeyword(e.target.value) }}
+                      />
+                    </InputGroup>
+                    <ListGroup variant="flush">
+                      {
+                        (instituteKeyword) ?
+                          instituteIndex
+                            .filter(i => i.name.includes(instituteKeyword) || instituteKeyword === `${i.id}`)
+                            .map(i => (<ListGroup.Item
+                              className="py-1 px-2"
+                              action
+                              onClick={() => {
+                                setInstituteKeyword('');
+                                addTag('institute', i.name, i.id)
+                              }}
+                            >
+                              <small>
+                                <b>{i.name}</b> [{i.id}]
+                              </small>
+                            </ListGroup.Item>))
+                          : null
+                      }
+                    </ListGroup>
+                  </Form.Group>

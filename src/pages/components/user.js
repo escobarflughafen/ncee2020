@@ -315,8 +315,7 @@ const LoginForm = (props) => {
       window.localStorage.setItem('token', res.data.token)
 
       setTimeout(() => {
-        history.push('/home')
-        history.go()
+        history.goBack()
       }, 1000)
     } catch (err) {
       console.log(err.response)

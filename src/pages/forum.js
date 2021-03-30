@@ -9,7 +9,7 @@ import SVG from '../utils/svg'
 import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList, NewTopicForm } from './components/topic'
-import { InstituteCard } from './components/institute'
+import { InstituteCard, InstituteSelector } from './components/institute'
 import { PostCard, NewPostForm } from './components/post'
 import axios from 'axios'
 
@@ -168,14 +168,16 @@ const ListPage = (props) => {
                         aria-describedby="keyword"
                         value={keyword}
                         onChange={(e) => setKeyword(e.target.value)}
-                        onKeyPress={(e) => {if (e.code === 'Enter') {
+                        onKeyPress={(e) => {
+                          if (e.code === 'Enter') {
                             addTag('keyword', keyword, keyword)
                             setKeyword('')
-                        }}}
+                          }
+                        }}
                       />
                       <InputGroup.Append>
                         <Button variant="outline-success" onClick={(e) => {
-                          if(keyword != '') {
+                          if (keyword != '') {
                             addTag('keyword', keyword, keyword)
                             setKeyword('')
                           }
@@ -233,37 +235,16 @@ const ListPage = (props) => {
                       </Col>
                     </Form.Row>
                   </Form.Group>
-                  <Form.Group>
-                    <InputGroup size="sm">
-                      <FormControl
-                        placeholder="院校"
-                        aria-label="institute"
-                        aria-describedby="institute"
-                        value={instituteKeyword}
-                        onChange={(e) => { setInstituteKeyword(e.target.value) }}
-                      />
-                    </InputGroup>
-                    <ListGroup variant="flush">
-                      {
-                        (instituteKeyword) ?
-                          instituteIndex
-                            .filter(i => i.name.includes(instituteKeyword) || instituteKeyword === `${i.id}`)
-                            .map(i => (<ListGroup.Item
-                              className="py-1 px-2"
-                              action
-                              onClick={() => {
-                                setInstituteKeyword('');
-                                addTag('institute', i.name, i.id)
-                              }}
-                            >
-                              <small>
-                                <b>{i.name}</b> [{i.id}]
-                              </small>
-                            </ListGroup.Item>))
-                          : null
+                  <InstituteSelector
+                    multiple
+                    size="sm"
+                    onSelect={(i) => {
+                      if (i) {
+                        addTag('institute', `${i.name} [${i.id}]`, i.id)
                       }
-                    </ListGroup>
-                  </Form.Group>
+                    }}
+                    caption="关联院校"
+                  />
                   <Form.Row>
                     <Col>
                       {

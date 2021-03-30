@@ -133,7 +133,7 @@ const InstituteList = (props) => {
   @size: size of selector - 'sm' | 'lg'
   @onSelect: function of handling the selected institute -- function: (i: instituteObject) => {}
   @caption: caption of selector - String
-  @autohide: auto hide the input area when institute is selected
+  @nohide: don't hide the input area when institute is selected
   @multiple: decide whether this selector displays in a multiple selection fashion or not
 */
 
@@ -161,20 +161,20 @@ const InstituteSelector = (props) => {
             (selected && !props.multiple) ? (
               <InputGroup.Prepend>
                 <InputGroup.Text>
-                  <Badge variant="info" className="btn btn-link" onClick={() => {
+                  <Alert.Link className="text-info" size="sm" onClick={() => {
                     setSelected(null)
                     if (props.onSelect) {
                       props.onSelect(null)
                     }
                   }}>
                     {selected.name} [{selected.id}]
-                  </Badge>
+                  </Alert.Link>
                 </InputGroup.Text>
               </InputGroup.Prepend>
             ) : null
           }
           {
-            (!props.multiple && props.autohide && selected) ? null : (
+            (!props.multiple && !props.nohide && selected) ? null : (
               <FormControl
                 value={keyword}
                 onChange={(e) => { setKeyword(e.target.value) }} />
@@ -186,7 +186,7 @@ const InstituteSelector = (props) => {
             (keyword) ?
               indices
                 .filter(i => i.name.includes(keyword) || keyword === `${i.id}`)
-                .map(i => (
+                .map((i, idx) => (
                   <ListGroup.Item
                     className="py-1 px-2"
                     action
@@ -199,7 +199,7 @@ const InstituteSelector = (props) => {
                     }}
                   >
                     <small>
-                      <b>{i.name}</b> [{i.id}]
+                      {idx+1}. <b>{i.name}</b> [{i.id}]
                   </small>
                   </ListGroup.Item>
                 ))

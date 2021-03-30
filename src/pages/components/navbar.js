@@ -13,6 +13,10 @@ const AppNavbar = (props) => {
 
   const [user, setUser] = useState(JSON.parse(window.localStorage.getItem('user')));
 
+  useEffect(() => {
+    setUser(JSON.parse(window.localStorage.getItem('user')))
+  }, [window.localStorage.getItem('user')])
+
   return (
     <Router>
 

@@ -152,6 +152,7 @@ const NewTopicForm = (props) => {
     text: ''
   })
 
+  const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
   const history = useHistory()
 
   const handleSubmit = async (e) => {
@@ -190,6 +191,8 @@ const NewTopicForm = (props) => {
   return (
     <>
       <div className={props.className}>
+        {token ? (
+          <>
         <MsgAlert msg={msg} />
         <Form onSubmit={handleSubmit}>
           <Form.Row>
@@ -269,7 +272,6 @@ const NewTopicForm = (props) => {
               {
                 (props.relatedInstitute) ? null : (
                   <InstituteSelector
-                    autohide
                     size="sm"
                     caption="相关院校"
                     onSelect={(i) => {
@@ -289,6 +291,10 @@ const NewTopicForm = (props) => {
             </Col>
           </Form.Row>
         </Form>
+          </>
+        ) : (
+          <Alert variant="info"><Alert.Link href="/login">登入</Alert.Link>后可以发起新讨论</Alert>
+        )}
       </div>
     </>
   )

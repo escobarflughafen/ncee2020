@@ -68,7 +68,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="info">
           <Row>
             <Col>
-              回复：<Button className="p-0" variant="link" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><b>{post.replyTo.content}</b></Button>
+              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><b>{post.replyTo.content}</b></Alert.Link>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -77,7 +77,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="success">
           <Row>
             <Col>
-              回复：<Button className="p-0" variant="link" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}><b>{post.relatedTopic.title}</b></Button>
+              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}><b>{post.relatedTopic.title}</b></Alert.Link>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -208,6 +208,7 @@ const NewPostForm = (props) => {
     text: ''
   })
   const id = useParams().id
+  const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
   // states
   const [content, setContent] = useState()
   const [relatedInstitute, setRelatedInstitute] = useState(props.relatedInstitute)
@@ -221,13 +222,13 @@ const NewPostForm = (props) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
+    // add here to prevent logout activity
+    const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
     setMsg({
       type: '',
       text: ''
     })
     const url = `http://${document.domain}:${constants.serverPort}/post/newpost`
-    const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
     const body = {
       content: content,
       relatedInstitute: relatedInstitute,
@@ -265,6 +266,8 @@ const NewPostForm = (props) => {
 
   return (
     <div className={props.className}>
+      {token ? (
+        <>
       <MsgAlert msg={msg} />
       <Form onSubmit={handleSubmit}>
         <Form.Row>
@@ -293,6 +296,10 @@ const NewPostForm = (props) => {
         </Form.Group>
 
       </Form>
+      </>
+      ) : (
+        <Alert variant="info"><Alert.Link href="/login">登入</Alert.Link>后可以进行回复</Alert>
+      )}
     </div>
   )
 }
