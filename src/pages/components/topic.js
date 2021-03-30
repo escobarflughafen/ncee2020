@@ -28,10 +28,10 @@ const TopicCard = (props) => {
         <Col xs="auto" style={{ textAlign: "center" }}>
           <small>{constants.topicTypes.find(t => topic.category === t.id).name}</small>
         </Col>
-        <Col className="">
+        <Col>
           <Row>
             <Col className="">
-              <a><b>{topic.title}</b></a>
+              <a className=""><b>{topic.title}</b></a>
             </Col>
             <Col xs="auto">
               <Row>
@@ -46,7 +46,7 @@ const TopicCard = (props) => {
               </Row>
             </Col>
           </Row>
-          <Row className={(viewMode === '紧凑') ? "d-none" : ""}>
+          <Row>
             <Col>
               {
                 (topic.relatedInstitute) ? (
@@ -69,9 +69,14 @@ const TopicCard = (props) => {
                   </>
                 ) : (<></>)
               }
-              <small>
+            </Col>
+          </Row>
+          <Row className={(viewMode === '紧凑') ? "d-none" : ""}>
+            <Col>
+              <small className="text-black-50">
                 <span className="mr-1 d-inline-block">{topic.viewCount}次浏览・</span>
                 <span className="mr-1 d-inline-block">{topic.posts.length}条回复・</span>
+                <span className="mr-1 d-inline-block">创建于 {timeStringConverter(topic.createdAt)}・</span>
                 <span className="mr-1 d-inline-block">最后回复于 {timeStringConverter(topic.lastUpdated)}</span>
               </small>
             </Col>
@@ -93,7 +98,17 @@ const TopicList = (props) => {
       <ListGroup variant="flush">
         <ListGroup.Item>
           <Row className="ml-auto">
-            <Col></Col>
+            <Col>
+              <small className="d-none d-sm-inline text-black-50">
+                {
+                  (topics.length > 0) ? (
+                    <>
+                      共 {topics.length} 条讨论，第 {(currentPage - 1) * topicPerPage + 1}~{currentPage * topicPerPage} 项
+                    </>
+                  ) : (<>未能找到符合条件的讨论</>)
+                }
+              </small>
+            </Col>
             <Col xs="auto">
               <Row>
                 <SVG variant="column-gap" />
@@ -193,104 +208,104 @@ const NewTopicForm = (props) => {
       <div className={props.className}>
         {token ? (
           <>
-        <MsgAlert msg={msg} />
-        <Form onSubmit={handleSubmit}>
-          <Form.Row>
-            <Col>
-              <InputGroup className="mb-3" size="sm">
-                <InputGroup.Prepend>
-                  <InputGroup.Text>标题</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl
-                  aria-label="title"
-                  aria-describedby="basic-addon1"
-                  required
-                  value={title}
-                  onChange={(e) => { setTitle(e.target.value) }}
-                />
-              </InputGroup>
-            </Col>
-            <Col xs="auto">
-              <InputGroup className="mb-3" size="sm">
-                <InputGroup.Prepend>
-                  <InputGroup.Text>类型</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl
-                  as="select"
-                  value={category}
-                  onChange={(e) => { setCategory(e.target.value) }}
-                >
-                  {
-                    constants.topicTypes.map((type) => (
-                      <option value={type.id}>{type.name}</option>
-                    ))
-                  }
-                </FormControl>
-              </InputGroup>
-            </Col>
-          </Form.Row>
-          <Form.Row>
-            <Form.Group as={Col}>
-              <Form.Control
-                as="textarea"
-                placeholder="内容"
-                rows={3}
-                required
-                id="topiccontent"
-                value={content}
-                onChange={(e) => { setContent(e.target.value) }}
-              />
-            </Form.Group>
-          </Form.Row>
-          <Form.Row className="mb-3">
-            <Col>
-              <InputGroup size="sm">
-                <InputGroup.Prepend>
-                  <InputGroup.Text>地区</InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control
-                  as="select"
-                  value={region}
-                  onChange={(e) => { setRegion(e.target.value) }}
-                >
-                  <option value={false}>...</option>
-                  {
-                    constants.regions.map((region) => (<option value={region.region_id}>{region.region_name}</option>))
-                  }
-                </Form.Control>
-              </InputGroup>
-            </Col>
-            <Col xs="auto">
-              <Button
-                variant="outline-dark"
-                size="sm"
-              >上传图片</Button>
-            </Col>
-          </Form.Row>
-          <Form.Row controlId="replyTo">
-            <Col>
-              {
-                (props.relatedInstitute) ? null : (
-                  <InstituteSelector
-                    size="sm"
-                    caption="相关院校"
-                    onSelect={(i) => {
-                      if (i) {
-                        setRelatedInstitute(i._id)
-                      } else {
-                        setRelatedInstitute(null)
+            <MsgAlert msg={msg} />
+            <Form onSubmit={handleSubmit}>
+              <Form.Row>
+                <Col>
+                  <InputGroup className="mb-3" size="sm">
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>标题</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <FormControl
+                      aria-label="title"
+                      aria-describedby="basic-addon1"
+                      required
+                      value={title}
+                      onChange={(e) => { setTitle(e.target.value) }}
+                    />
+                  </InputGroup>
+                </Col>
+                <Col xs="auto">
+                  <InputGroup className="mb-3" size="sm">
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>类型</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <FormControl
+                      as="select"
+                      value={category}
+                      onChange={(e) => { setCategory(e.target.value) }}
+                    >
+                      {
+                        constants.topicTypes.map((type) => (
+                          <option value={type.id}>{type.name}</option>
+                        ))
                       }
-                    }
-                    }
+                    </FormControl>
+                  </InputGroup>
+                </Col>
+              </Form.Row>
+              <Form.Row>
+                <Form.Group as={Col}>
+                  <Form.Control
+                    as="textarea"
+                    placeholder="内容"
+                    rows={3}
+                    required
+                    id="topiccontent"
+                    value={content}
+                    onChange={(e) => { setContent(e.target.value) }}
                   />
-                )
-              }
-            </Col>
-            <Col xs="auto">
-              <Button variant="success" type="submit" size="sm">发布</Button>
-            </Col>
-          </Form.Row>
-        </Form>
+                </Form.Group>
+              </Form.Row>
+              <Form.Row className="mb-3">
+                <Col>
+                  <InputGroup size="sm">
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>地区</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      as="select"
+                      value={region}
+                      onChange={(e) => { setRegion(e.target.value) }}
+                    >
+                      <option value={false}>...</option>
+                      {
+                        constants.regions.map((region) => (<option value={region.region_id}>{region.region_name}</option>))
+                      }
+                    </Form.Control>
+                  </InputGroup>
+                </Col>
+                <Col xs="auto">
+                  <Button
+                    variant="outline-dark"
+                    size="sm"
+                  >上传图片</Button>
+                </Col>
+              </Form.Row>
+              <Form.Row controlId="replyTo">
+                <Col>
+                  {
+                    (props.relatedInstitute) ? null : (
+                      <InstituteSelector
+                        size="sm"
+                        caption="相关院校"
+                        onSelect={(i) => {
+                          if (i) {
+                            setRelatedInstitute(i._id)
+                          } else {
+                            setRelatedInstitute(null)
+                          }
+                        }
+                        }
+                      />
+                    )
+                  }
+                </Col>
+                <Col xs="auto">
+                  <Button variant="success" type="submit" size="sm">发布</Button>
+                </Col>
+              </Form.Row>
+            </Form>
           </>
         ) : (
           <Alert variant="info"><Alert.Link href="/login">登入</Alert.Link>后可以发起新讨论</Alert>

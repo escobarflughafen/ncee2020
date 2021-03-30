@@ -11,8 +11,8 @@ import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList, NewTopicForm } from './components/topic'
 import { InstituteCard, InstituteSelector } from './components/institute'
 import { PostCard, NewPostForm } from './components/post'
+import { MsgAlert } from './components/msg'
 import axios from 'axios'
-
 
 const ListPage = (props) => {
   const history = useHistory();
@@ -56,9 +56,28 @@ const ListPage = (props) => {
     const [keyword, setKeyword] = useState("")
     const [singleSearchKeyword, setSingleSearchKeyword] = useState("")
 
-    const handleQuery = (e) => {
-      if (e) e.preventDefault()
+    const [msg, setMsg] = useState({
+      type: '',
+      text: ''
+    })
+
+    const handleQuery = async () => {
       console.log(queryTags)
+      const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
+      try {
+        const res = await axios.post(url, {
+          queryTags
+        })
+        setTopics(res.data.topics)
+        if (res.data.topics.length == 0) {
+          setMsg({ type: 'warning', text: '未能找到符合条件的讨论' })
+        } else {
+          setMsg({ type: '', text: ''})
+        }
+      } catch (err) {
+        console.log(err.response)
+        setMsg({ type: 'danger', text: err.response.data.msg })
+      }
     }
 
     const addTag = (category, label, data) => {
@@ -95,8 +114,18 @@ const ListPage = (props) => {
     }, [])
 
 
+    const [queryImmediately, setQueryImmediately] = useState(false)
+
+    useEffect(() => {
+      if (queryImmediately) {
+        setQueryImmediately(false)
+        handleQuery()
+      }
+    }, [queryImmediately])
+
     return (
       <>
+        <MsgAlert msg={msg} />
         <Row className="mb-3">
           <Col>
             <InputGroup>
@@ -105,21 +134,24 @@ const ListPage = (props) => {
                 aria-label="keyword"
                 aria-describedby="keyword"
                 value={singleSearchKeyword}
+                required
                 onChange={(e) => { setSingleSearchKeyword(e.target.value) }}
               />
               <InputGroup.Append>
                 <Button
-                  variant="outline-secondary"
+                  variant="outline-primary"
                   onClick={() => {
-                    setQueryTags([
-                      {
-                        category: 'keyword',
-                        label: singleSearchKeyword,
-                        data: singleSearchKeyword
-                      }
-                    ])
-                  }
-                  }
+                    if (singleSearchKeyword.length > 0) {
+                      setQueryTags([
+                        {
+                          category: 'keyword',
+                          label: singleSearchKeyword,
+                          data: singleSearchKeyword
+                        }
+                      ])
+                      setQueryImmediately(true)
+                    }
+                  }}
                 >搜索</Button>
               </InputGroup.Append>
             </InputGroup>
@@ -134,8 +166,12 @@ const ListPage = (props) => {
                 onHide={() => setNewTopicModalShow(false)}
               />
               <DropdownButton as={ButtonGroup} variant="success" id="bg-nested-dropdown">
-                <Dropdown.Item eventKey="1">Dropdown link</Dropdown.Item>
-                <Dropdown.Item eventKey="2">Dropdown link</Dropdown.Item>
+                <Dropdown.Item
+                  eventKey="1"
+                  onClick={() => {
+                    setQueryImmediately(true)
+                  }}
+                >刷新</Dropdown.Item>
               </DropdownButton>
             </ButtonGroup>
           </Col>
@@ -243,7 +279,7 @@ const ListPage = (props) => {
                         size="sm"
                         onSelect={(i) => {
                           if (i) {
-                            addTag('institute', `${i.name} [${i.id}]`, i.id)
+                            addTag('institute', `${i.name} [${i.id}]`, i._id)
                           }
                         }}
                         caption="关联院校"
@@ -251,7 +287,7 @@ const ListPage = (props) => {
                     </Card.Body>
                   </Col>
                   <Col xs={12} md={6}>
-                    <Card.Body className="pt-0 pt-md-4  pl-md-0">
+                    <Card.Body className="pt-0 pt-md-4 pl-md-0">
                       <Form.Row>
                         <Col>
                           {
@@ -280,7 +316,6 @@ const ListPage = (props) => {
                         <Col>
                           <Button variant="primary" size="sm" onClick={() => {
                             handleQuery()
-                            history.push('/forum/')
                           }}>
                             查询
                       </Button>
