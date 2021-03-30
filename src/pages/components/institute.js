@@ -144,10 +144,18 @@ const InstituteSelector = (props) => {
 
   useEffect(() => {
     const url = `http://${document.domain}:${constants.serverPort}/institute/indexlist`
-    axios.post(url).then((res) => {
-      console.log(res.data)
-      setIndices(res.data.institutes)
-    })
+    const localStorage = window.localStorage.getItem('instituteIndices')
+    if (localStorage) {
+      console.log('fetching instituteIndices from localStorage')
+      setIndices(JSON.parse(localStorage))
+    } else {
+      axios.post(url).then((res) => {
+        console.log(res.data)
+        console.log('instituteIndices fetched, setting into localStorage')
+        window.localStorage.setItem('instituteIndices', JSON.stringify(res.data.institutes))
+        setIndices(res.data.institutes)
+      })
+    }
   }, [])
 
   return (
@@ -199,7 +207,7 @@ const InstituteSelector = (props) => {
                     }}
                   >
                     <small>
-                      {idx+1}. <b>{i.name}</b> [{i.id}]
+                      {idx + 1}. <b>{i.name}</b> [{i.id}]
                   </small>
                   </ListGroup.Item>
                 ))

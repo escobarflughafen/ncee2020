@@ -53,21 +53,12 @@ const ListPage = (props) => {
 
     const [queryTags, setQueryTags] = useState([])
 
-    const [instituteIndex, setInstituteIndex] = useState([])
-
-    useEffect(() => {
-      const url = `http://${document.domain}:${constants.serverPort}/institute/indexlist`
-      axios.post(url).then((res) => {
-        console.log(res.data)
-        setInstituteIndex(res.data.institutes)
-      })
-    }, [])
-
     const [keyword, setKeyword] = useState("")
     const [singleSearchKeyword, setSingleSearchKeyword] = useState("")
 
     const handleQuery = (e) => {
       if (e) e.preventDefault()
+      console.log(queryTags)
     }
 
     const addTag = (category, label, data) => {
@@ -103,10 +94,6 @@ const ListPage = (props) => {
       })
     }, [])
 
-    useEffect(() => {
-      console.log(queryTags)
-      handleQuery()
-    }, [queryTags])
 
     return (
       <>
@@ -286,6 +273,7 @@ const ListPage = (props) => {
                   <Row>
                     <Col>
                       <Button variant="primary" size="sm" onClick={() => {
+                        handleQuery()
                         history.push('/forum/')
                       }}>
                         查询
@@ -434,6 +422,9 @@ const TopicPage = (props) => {
 }
 
 const ForumPage = (props) => {
+  useEffect(() => {
+    window.localStorage.removeItem('instituteIndices')
+  }, [])
 
   return (
     <>

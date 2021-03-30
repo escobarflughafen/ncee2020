@@ -403,7 +403,9 @@ const InstituteTabs = (props) => {
     const url = `http://${document.domain}:${constants.serverPort}/post/fetch`
     console.log(institute._id)
     axios.post(url, {
-      relatedInstitute: institute._id
+      queryParams: {
+        relatedInstitute: institute._id
+      }
     }).then((res) => {
       console.log(res)
       setPosts(res.data.posts)
@@ -414,7 +416,9 @@ const InstituteTabs = (props) => {
     const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
     console.log(institute._id)
     axios.post(url, {
-      relatedInstitute: institute._id
+      queryParams: {
+        relatedInstitute: institute._id
+      }
     }).then((res) => {
       console.log(res)
       setTopics(res.data.topics)
@@ -517,7 +521,6 @@ const InstituteTabs = (props) => {
                   </Row>
                 </Card.Body>
                 <TopicList topics={topics} />
-
                 <NewTopicForm className="p-3" relatedInstitute={institute._id} />
               </Route>
             </Switch>
@@ -645,7 +648,6 @@ const InstituteTable = (props) => {
   const [queryTags, setQueryTags] = useState((location.state) ? location.state.queryParams : [])
   const [keyword, setKeyword] = useState("")
 
-  const [allInstituteInfo, setAllInstituteInfo] = useState([])
 
   useEffect(() => {
     document.title = `${constants.title.institute} - ${constants.appName}`
@@ -655,17 +657,18 @@ const InstituteTable = (props) => {
     console.log(queryTags)
     if (e) e.preventDefault();
     if (queryTags.length == 0) {
-      if (allInstituteInfo.length == 0) {
+      const localStorage = window.localStorage.getItem('allInstitutes')
+      if (localStorage) {
+        console.log('getting data from localStorage')
+        setInstitutes(JSON.parse(localStorage))
+        setCurrentPage(1)
+      } else {
         fetchAllInstitutesInfo((res) => {
           console.log('fetching all data')
-          setAllInstituteInfo([...res.data.institutes])
+          window.localStorage.setItem('allInstitutes', JSON.stringify(res.data.institutes))
           setInstitutes([...res.data.institutes])
           setCurrentPage(1)
         })
-      } else {
-        console.log('getting data from cache')
-        setInstitutes([...allInstituteInfo])
-        setCurrentPage(1)
       }
     } else {
       queryInstitutesInfo({
@@ -752,7 +755,6 @@ const InstituteTable = (props) => {
                       as="select"
                       defaultValue="..."
                       onChange={
-                        // TODO: CHECK DATA TYPE 03302021 ----fixed: 03302021-23-15
                         (e) => {
                           if (e.target.value !== "...") {
                             addTag("region", e.target.value)

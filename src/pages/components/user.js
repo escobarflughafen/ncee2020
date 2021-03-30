@@ -311,6 +311,8 @@ const LoginForm = (props) => {
       console.log(res)
       setMsg({ type: 'success', text: '登入成功' })
 
+      window.localStorage.clear()
+
       window.localStorage.setItem('user', JSON.stringify(res.data.user))
       window.localStorage.setItem('token', res.data.token)
 

@@ -46,8 +46,7 @@ const CNavbar = () => {
 const LogoutPage = (props) => {
   const history = useHistory()
   useEffect(() => {
-    window.localStorage.removeItem('user')
-    window.localStorage.removeItem('token')
+    window.localStorage.clear()
     history.push('/') 
     history.go()
   }, [])
