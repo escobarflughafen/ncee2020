@@ -103,7 +103,7 @@ const TopicList = (props) => {
                 {
                   (topics.length > 0) ? (
                     <>
-                      共 {topics.length} 条讨论，第 {(currentPage - 1) * topicPerPage + 1}~{currentPage * topicPerPage} 项
+                      共 {topics.length} 条讨论，第 {(currentPage - 1) * topicPerPage + 1}~{(currentPage * topicPerPage) > topics.length ? topics.length : currentPage * topicPerPage} 项
                     </>
                   ) : (<>未能找到符合条件的讨论</>)
                 }

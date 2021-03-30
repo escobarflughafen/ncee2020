@@ -123,6 +123,10 @@ const ListPage = (props) => {
       }
     }, [queryImmediately])
 
+    useEffect(() => {
+      handleQuery() 
+    }, [queryTags])
+
     return (
       <>
         <MsgAlert msg={msg} />
@@ -172,6 +176,12 @@ const ListPage = (props) => {
                     setQueryImmediately(true)
                   }}
                 >刷新</Dropdown.Item>
+                <Dropdown.Item
+                  eventKey="2"
+                  onClick={() => {
+                    setQueryTags([])
+                  }}
+                >清空筛选条件</Dropdown.Item>
               </DropdownButton>
             </ButtonGroup>
           </Col>
@@ -312,15 +322,19 @@ const ListPage = (props) => {
                           <hr className="my-3" />
                         </Col>
                       </Form.Row>
+                      {
+                        /*
                       <Row>
                         <Col>
                           <Button variant="primary" size="sm" onClick={() => {
                             handleQuery()
                           }}>
                             查询
-                      </Button>
+                          </Button>
                         </Col>
                       </Row>
+                        */
+                      }
                     </Card.Body>
                   </Col>
                 </Row>
