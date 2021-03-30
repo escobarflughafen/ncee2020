@@ -64,7 +64,7 @@ const ListPage = (props) => {
     }, [])
 
     const [keyword, setKeyword] = useState("")
-    const [instituteKeyword, setInstituteKeyword] = useState("")
+    const [singleSearchKeyword, setSingleSearchKeyword] = useState("")
 
     const handleQuery = (e) => {
       if (e) e.preventDefault()
@@ -117,9 +117,23 @@ const ListPage = (props) => {
                 placeholder="关键字…"
                 aria-label="keyword"
                 aria-describedby="keyword"
+                value={singleSearchKeyword}
+                onChange={(e) => { setSingleSearchKeyword(e.target.value) }}
               />
               <InputGroup.Append>
-                <Button variant="outline-secondary">搜索</Button>
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => {
+                    setQueryTags([
+                      {
+                        category: 'keyword',
+                        label: singleSearchKeyword,
+                        data: singleSearchKeyword
+                      }
+                    ])
+                  }
+                  }
+                >搜索</Button>
               </InputGroup.Append>
             </InputGroup>
           </Col>
@@ -178,7 +192,7 @@ const ListPage = (props) => {
                       <InputGroup.Append>
                         <Button variant="outline-success" onClick={(e) => {
                           if (keyword != '') {
-                            addTag('keyword', keyword, keyword)
+                            addKeyword(keyword)
                             setKeyword('')
                           }
                         }}>添加</Button>
@@ -266,7 +280,7 @@ const ListPage = (props) => {
                           )
                         })
                       }
-                      <hr className="mt-1" />
+                      <hr className="" />
                     </Col>
                   </Form.Row>
                   <Row>

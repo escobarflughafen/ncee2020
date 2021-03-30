@@ -652,6 +652,7 @@ const InstituteTable = (props) => {
   }, [])
 
   const handleQuery = (e) => {
+    console.log(queryTags)
     if (e) e.preventDefault();
     if (queryTags.length == 0) {
       if (allInstituteInfo.length == 0) {
@@ -751,6 +752,7 @@ const InstituteTable = (props) => {
                       as="select"
                       defaultValue="..."
                       onChange={
+                        // TODO: CHECK DATA TYPE 03302021 ----fixed: 03302021-23-15
                         (e) => {
                           if (e.target.value !== "...") {
                             addTag("region", e.target.value)
@@ -760,7 +762,7 @@ const InstituteTable = (props) => {
                       }>
                       <option>...</option>
                       {constants.regions.map((r) => {
-                        return (<option>{r.region_name}</option>)
+                        return (<option value={r.region_id}>{r.region_name}</option>)
                       })}
                     </Form.Control>
                   </Form.Group>
@@ -824,7 +826,9 @@ const InstituteTable = (props) => {
                             onClick={() => removeTag(tag)}
                           >
                             {(tag.category === 'keyword') ? '关键字：' : ''}
-                            {tag.label}
+                            {tag.category === 'region' ?
+                              constants.regions.find(r => r.region_id === tag.label).region_name
+                              : tag.label}
                             <SVG variant="x" />
                           </Badge>
                         )
@@ -845,7 +849,7 @@ const InstituteTable = (props) => {
                     }
                   </Col>
                 </Row>
-                <hr className="mt-2"/>
+                <hr className="mt-2" />
                 <ButtonGroup>
                   <Button variant="primary" type="button" size="sm" onClick={handleQuery}>
                     查询
@@ -914,11 +918,11 @@ const InstituteTable = (props) => {
                         case "类别":
                           setInstitutes([...institutes.sort((a, b) => a.labels.join(',').localeCompare(b.labels.join(','), 'zh'))])
                           break;
-                          /*
-                        case "理科最低分数":
-                        case "文科最低分数":
-                          break;
-                          */
+                        /*
+                      case "理科最低分数":
+                      case "文科最低分数":
+                        break;
+                        */
                         default:
                           return 0
                       }
