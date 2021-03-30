@@ -160,127 +160,135 @@ const ListPage = (props) => {
                 <TopicList topics={topics} />
               </Route>
               <Route path={`${url}/filter`}>
-                <Card.Body>
-                  <Form.Group>
-                    <InputGroup size="sm">
-                      <FormControl
-                        placeholder="关键字…"
-                        aria-label="keyword"
-                        aria-describedby="keyword"
-                        value={keyword}
-                        onChange={(e) => setKeyword(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.code === 'Enter') {
-                            addTag('keyword', keyword, keyword)
-                            setKeyword('')
-                          }
-                        }}
-                      />
-                      <InputGroup.Append>
-                        <Button variant="outline-success" onClick={(e) => {
-                          if (keyword != '') {
-                            addKeyword(keyword)
-                            setKeyword('')
-                          }
-                        }}>添加</Button>
-                      </InputGroup.Append>
-                    </InputGroup>
-                  </Form.Group>
-                  <Form.Group>
-                    <Form.Row>
-                      <Col>
+                <Row>
+                  <Col xs={12} md={6}>
+                    <Card.Body>
+                      <Form.Group>
                         <InputGroup size="sm">
-                          <InputGroup.Prepend>
-                            <InputGroup.Text>类别</InputGroup.Text>
-                          </InputGroup.Prepend>
-                          <Form.Control as="select"
-                            onChange={(e) => {
-                              if (e.target.value != -1) {
-                                const value = JSON.parse(e.target.value)
-                                addTag('category', value.name, value.id)
+                          <FormControl
+                            placeholder="关键字…"
+                            aria-label="keyword"
+                            aria-describedby="keyword"
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.code === 'Enter') {
+                                addTag('keyword', keyword, keyword)
+                                setKeyword('')
                               }
                             }}
-                          >
-                            <option value={-1}>...</option>
-                            {
-                              constants.topicTypes.map(t => (
-                                <option value={JSON.stringify(t)}>{t.name}</option>
-                              ))
-                            }
-                          </Form.Control>
-                        </InputGroup>
-                      </Col>
-                      <Col>
-                        <InputGroup size="sm">
-                          <InputGroup.Prepend>
-                            <InputGroup.Text>地区</InputGroup.Text>
-                          </InputGroup.Prepend>
-                          <Form.Control as="select"
-                            onChange={(e) => {
-                              console.log(e.target.value)
-                              if (e.target.value != -1) {
-                                const value = JSON.parse(e.target.value)
-                                addTag('region', value.region_name, value.region_id)
+                          />
+                          <InputGroup.Append>
+                            <Button variant="outline-success" onClick={(e) => {
+                              if (keyword != '') {
+                                addKeyword(keyword)
+                                setKeyword('')
                               }
-                            }
-                            }
-                          >
-                            <option value={-1}>...</option>
-                            {
-                              constants.regions.map(r => (
-                                <option value={JSON.stringify(r)}>{r.region_name}</option>
-                              ))
-                            }
-                          </Form.Control>
+                            }}>添加</Button>
+                          </InputGroup.Append>
                         </InputGroup>
-                      </Col>
-                    </Form.Row>
-                  </Form.Group>
-                  <InstituteSelector
-                    multiple
-                    size="sm"
-                    onSelect={(i) => {
-                      if (i) {
-                        addTag('institute', `${i.name} [${i.id}]`, i.id)
-                      }
-                    }}
-                    caption="关联院校"
-                  />
-                  <Form.Row>
-                    <Col>
-                      {
-                        queryTags.map((tag) => {
-                          let badgeVariant = {
-                            'keyword': 'dark',
-                            'category': 'primary',
-                            'region': 'success',
-                            'institute': 'info'
+                      </Form.Group>
+                      <Form.Group>
+                        <Form.Row>
+                          <Col>
+                            <InputGroup size="sm">
+                              <InputGroup.Prepend>
+                                <InputGroup.Text>类别</InputGroup.Text>
+                              </InputGroup.Prepend>
+                              <Form.Control as="select"
+                                onChange={(e) => {
+                                  if (e.target.value != -1) {
+                                    const value = JSON.parse(e.target.value)
+                                    addTag('category', value.name, value.id)
+                                  }
+                                }}
+                              >
+                                <option value={-1}>...</option>
+                                {
+                                  constants.topicTypes.map(t => (
+                                    <option value={JSON.stringify(t)}>{t.name}</option>
+                                  ))
+                                }
+                              </Form.Control>
+                            </InputGroup>
+                          </Col>
+                          <Col>
+                            <InputGroup size="sm">
+                              <InputGroup.Prepend>
+                                <InputGroup.Text>地区</InputGroup.Text>
+                              </InputGroup.Prepend>
+                              <Form.Control as="select"
+                                onChange={(e) => {
+                                  console.log(e.target.value)
+                                  if (e.target.value != -1) {
+                                    const value = JSON.parse(e.target.value)
+                                    addTag('region', value.region_name, value.region_id)
+                                  }
+                                }
+                                }
+                              >
+                                <option value={-1}>...</option>
+                                {
+                                  constants.regions.map(r => (
+                                    <option value={JSON.stringify(r)}>{r.region_name}</option>
+                                  ))
+                                }
+                              </Form.Control>
+                            </InputGroup>
+                          </Col>
+                        </Form.Row>
+                      </Form.Group>
+                      <InstituteSelector
+                        multiple
+                        size="sm"
+                        onSelect={(i) => {
+                          if (i) {
+                            addTag('institute', `${i.name} [${i.id}]`, i.id)
                           }
+                        }}
+                        caption="关联院校"
+                      />
+                    </Card.Body>
+                  </Col>
+                  <Col xs={12} md={6}>
+                    <Card.Body className="pt-0 pt-md-4  pl-md-0">
+                      <Form.Row>
+                        <Col>
+                          {
+                            queryTags.map((tag) => {
+                              let badgeVariant = {
+                                'keyword': 'dark',
+                                'category': 'primary',
+                                'region': 'success',
+                                'institute': 'info'
+                              }
 
-                          return (
-                            <Badge
-                              className="mr-2"
-                              variant={badgeVariant[tag.category]}
-                              pill
-                              onClick={() => removeTag(tag)}
-                            >{tag.label}<SVG variant="x" /></Badge>
-                          )
-                        })
-                      }
-                      <hr className="" />
-                    </Col>
-                  </Form.Row>
-                  <Row>
-                    <Col>
-                      <Button variant="primary" size="sm" onClick={() => {
-                        handleQuery()
-                        history.push('/forum/')
-                      }}>
-                        查询
+                              return (
+                                <Badge
+                                  className="mr-2"
+                                  variant={badgeVariant[tag.category]}
+                                  pill
+                                  onClick={() => removeTag(tag)}
+                                >{tag.label}<SVG variant="x" /></Badge>
+                              )
+                            })
+                          }
+                          <hr className="my-3" />
+                        </Col>
+                      </Form.Row>
+                      <Row>
+                        <Col>
+                          <Button variant="primary" size="sm" onClick={() => {
+                            handleQuery()
+                            history.push('/forum/')
+                          }}>
+                            查询
                       </Button>
-                    </Col>
-                  </Row>
-                </Card.Body>
+                        </Col>
+                      </Row>
+                    </Card.Body>
+                  </Col>
+                </Row>
               </Route>
               <Route path={`${url}/reply`}>
                 replies
