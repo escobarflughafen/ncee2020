@@ -163,6 +163,8 @@ const EnrollTable = (props) => {
   const [year, setYear] = useState('2019')
   const [type, setType] = useState()
   const [enroll, setEnroll] = useState()
+  const [regionData, setRegionData] = useState([])
+  const [major, selectedMajor] = useState('')
 
   useEffect(() => {
     fetchInstituteEnrollData(id, (res) => {
@@ -183,6 +185,15 @@ const EnrollTable = (props) => {
   useEffect(() => {
     setEnroll(data.find(d => d.region === region.region_id && d.type === type && d.year === year))
   }, [region, year, type])
+
+  useEffect(() => {
+    if (data.length) {
+      setRegionData(data
+        .filter(d => d.region === region.region_id && d.type === type)
+        .flatMap(yearData => yearData.scores
+          .map(s => { return { ...s, year: yearData.year } })))
+    }
+  }, [region, type])
 
   return (
     <div>
@@ -310,15 +321,24 @@ const EnrollTable = (props) => {
                 <Col>
                   <Form.Control as="select" size="sm">
                     {
-                      (enroll) ? ([...new Set(enroll.scores
-                        .map(score => score.major_name
-                          .split('（')[0]))]
-                        .map(majorName => <option>{majorName}</option>)) : null
+                      [...new Set(regionData
+                        .map(d => d.major_name.split('（')[0]))]
+                        .filter(d => d !== '-')
+                        .map(majorName => (<option>{majorName}</option>))
                     }
                   </Form.Control>
                 </Col>
               </Row>
-              <Line />
+              <Line data={
+                {
+
+                }
+              }
+                options={
+                  {
+
+                  }
+                } />
             </Col>
           </Row>
         </Col>
