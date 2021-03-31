@@ -164,7 +164,7 @@ const EnrollTable = (props) => {
   const [type, setType] = useState()
   const [enroll, setEnroll] = useState()
   const [regionData, setRegionData] = useState([])
-  const [major, selectedMajor] = useState('')
+  const [selectedMajor, setSelectedMajor] = useState('')
 
   useEffect(() => {
     fetchInstituteEnrollData(id, (res) => {
@@ -275,40 +275,69 @@ const EnrollTable = (props) => {
                 }
               }
                 options={
-                  {
-                    scales: {
-                      xAxes: [
-                        {
-                          stacked: true
-                        }
-                      ],
-                      yAxes: [
-                        {
-                          id: 'score',
-                          position: 'left',
-                          stacked: true,
-                          ticks: {
-                            min: (enroll) ? Math.min(
-                              enroll.scores.map(score => score.score_avg).sort((a, b) => a - b)[0] - 5,
-                              (enroll.scores.map(score => score.score_min).sort((a, b) => a - b)[0] == -1)
-                                ? enroll.scores.map(score => score.score_avg).sort((a, b) => a - b)[0] - 5
-                                : enroll.scores.map(score => score.score_min).sort((a, b) => a - b)[0] - 5,
-                            ) : 0,
-                            max: (enroll) ? enroll.scores.map(score => score.score_avg).sort((a, b) => b - a)[0] + 5 : 0
-                          }
-                        },
-                        {
-                          id: 'rank',
-                          position: 'right',
-                          stacked: false,
-                          ticks: {
-                            min: (enroll) ? Math.max(enroll.scores.map(score => score.rank_min).sort((a, b) => a - b)[0] - 1000, 0) : 0,
-                            max: (enroll) ? enroll.scores.map(score => score.rank_min).sort((a, b) => b - a)[0] + 1000 : 0
-                          }
-                        },
-                      ]
+                  (() => {
+                    let min_score_avg = (enroll) ? enroll.scores
+                      .map(s => s.score_avg)
+                      .sort((a, b) => a - b)[0] : -1;
+                    let max_score_avg = (enroll) ? enroll.scores
+                      .map(s => s.score_avg)
+                      .sort((a, b) => b - a)[0] : -1;
+                    let min_score_min = (enroll) ? enroll.scores
+                      .map(s => s.score_min)
+                      .sort((a, b) => a - b)[0] : -1;
+                    let max_score_min = (enroll) ? enroll.scores
+                      .map(s => s.score_min)
+                      .sort((a, b) => b - a)[0] : -1;
+                    let min_rank_min = (enroll) ? enroll.scores
+                      .map(s => s.rank_min)
+                      .sort((a, b) => a - b)[0] : -1;
+                    let max_rank_min = (enroll) ? enroll.scores
+                      .map(s => s.rank_min)
+                      .sort((a, b) => b - a)[0] : -1;
+
+                    let min_score;
+
+                    if (max_score_min === -1) {
+                      min_score = min_score_avg
+                    } else {
+                      min_score = min_score_min
                     }
-                  }
+
+                    let max_score = max_score_avg
+
+
+                    let padding_score = Math.round((max_score - min_score) / 10)
+                    let padding_rank = Math.round((max_rank_min - min_rank_min) / 10)
+                    return {
+                      scales: {
+                        xAxes: [
+                          {
+                            stacked: true
+                          }
+                        ],
+                        yAxes: [
+                          {
+                            id: 'score',
+                            position: 'left',
+                            stacked: true,
+                            ticks: {
+                              min: Math.max(0, min_score - padding_score),
+                              max: Math.max(0, max_score + padding_score)
+                            }
+                          },
+                          {
+                            id: 'rank',
+                            position: 'right',
+                            stacked: false,
+                            ticks: {
+                              min: Math.max(0, min_rank_min - padding_rank),
+                              max: Math.max(0, max_rank_min + padding_rank)
+                            }
+                          },
+                        ]
+                      }
+                    }
+                  })()
                 } />
             </Col>
           </Row>
@@ -319,7 +348,13 @@ const EnrollTable = (props) => {
                   <h6>专业最低排名变化</h6>
                 </Col>
                 <Col>
-                  <Form.Control as="select" size="sm">
+                  <Form.Control
+                    as="select"
+                    size="sm"
+                    value={selectedMajor}
+                    onChange={(e) => { setSelectedMajor(e.target.value) }}
+                  > 
+                    <option value=''>选择专业...</option>
                     {
                       [...new Set(regionData
                         .map(d => d.major_name.split('（')[0]))]
@@ -329,16 +364,23 @@ const EnrollTable = (props) => {
                   </Form.Control>
                 </Col>
               </Row>
-              <Line data={
-                {
-
-                }
-              }
-                options={
-                  {
-
+              {
+                (selectedMajor) ?
+                  (<Line data={
+                    (() => {
+                      let data = regionData.filter(d => d.major_name.split('（')[0] === selectedMajor)
+                      console.log(data)
+                      return {
+                        labels: data.map(d => d.year)
+                      }
+                    })()
                   }
-                } />
+                    options={
+                      {
+
+                      }
+                    } />) : null
+              }
             </Col>
           </Row>
         </Col>
