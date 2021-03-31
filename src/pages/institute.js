@@ -4,18 +4,14 @@ import { useState, useEffect } from 'react'
 import { ButtonGroup, ToggleButton, Accordion, Card, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, InputGroup, CardColumns } from 'react-bootstrap'
 import { Tabs, Image, Badge, Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useParams, useRouteMatch, useHistory, useLocation } from 'react-router-dom'
-import { withRouter } from "react-router-dom"
 import constants from '../utils/constants'
 import SVG from '../utils/svg'
 import axios from 'axios'
 import { makePaginations } from './components/pagination'
-import Comments from './components/comments'
 import { TopicList, NewTopicForm } from './components/topic'
 import { PostList, NewPostForm } from './components/post'
-import NavigationBar from './components/navigation-bar'
 import { InstituteCard, Labels } from './components/institute'
-
-
+import { Bar, Line } from 'react-chartjs-2'
 
 // Utils
 
@@ -173,14 +169,14 @@ const EnrollTable = (props) => {
       if (res.data) {
         console.log(res.data)
         setData(res.data)
-        setType([...res.data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)][0])
+        setType([...res.data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type).sort((a, b) => a.length - b.length)][0])
       }
     })
   }, [])
 
   useEffect(() => {
     if (data.length) {
-      setType([...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)][0])
+      setType([...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type).sort((a, b) => a.length - b.length)][0])
     }
   }, [year, region])
 
@@ -190,11 +186,9 @@ const EnrollTable = (props) => {
 
   return (
     <div>
+      <Card.Title>各专业录取数据</Card.Title>
       <Row className="mb-2">
-        <Col md={3}>
-          <Card.Title>各专业录取数据</Card.Title>
-        </Col>
-        <Col md={3} xs={4}>
+        <Col className="pr-0">
           <FormControl
             as="select"
             size="sm"
@@ -208,7 +202,7 @@ const EnrollTable = (props) => {
             ))}
           </FormControl>
         </Col>
-        <Col md={3} xs={4}>
+        <Col className="pr-0">
           <FormControl
             as="select"
             size="sm"
@@ -217,12 +211,12 @@ const EnrollTable = (props) => {
               setType(e.target.value)
             }}
           >
-            {[...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type)].map(t => (
+            {[...data.filter((d) => d.region === region.region_id && d.year === year).map((d) => d.type).sort((a, b) => a.length - b.length)].map(t => (
               <option>{t}</option>
             ))}
           </FormControl>
         </Col>
-        <Col md={3} xs={4}>
+        <Col >
           <FormControl
             as="select"
             size="sm"
@@ -238,41 +232,133 @@ const EnrollTable = (props) => {
         </Col>
       </Row>
       <Row>
-        <Col>
-          <Table striped bordered hover size="sm">
-            <thead>
-              <tr>
-                <th>专业</th>
-                <th>录取批次</th>
-                <th>平均分</th>
-                <th>最低分</th>
-                <th>最低名次</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                (enroll) ?
-                  enroll
-                    .scores.map(
-                      (score) => (
-                        <tr>
-                          <td>{score.major_name.split('（')[0]}</td>
-                          <td>{score.enroll_batch}</td>
-                          <td>{score.score_avg}</td>
-                          <td>{score.score_min}</td>
-                          <td>{score.rank_min}</td>
-                        </tr>
-                      )
-                    )
-                  : (<tr><td colSpan={5}>暂无数据</td></tr>)
+        <Col xs={{ span: 12, order: 1 }} lg={{ span: 6, order: 12 }} className="mb-3">
+          <Row className="mb-3">
+            <Col>
+              <Bar data={
+                {
+                  labels: (enroll) ? enroll.scores.map(score => score.major_name.split('（')[0]) : [],
+                  datasets: [
+                    {
+                      label: '平均分',
+                      yAxisID: 'score',
+                      backgroundColor: 'rgba(76, 159, 182, 0.5)',
+                      borderWidth: 1,
+                      data: (enroll) ? enroll.scores.map(score => (score.score_avg) ? score.score_avg : 0) : []
+                    },
+                    {
+                      label: '最低分',
+                      yAxisID: 'score',
+                      backgroundColor: 'rgba(40, 167, 69, 0.5)',
+                      borderWidth: 1,
+                      data: (enroll) ? enroll.scores.map(score => (score.score_min) ? score.score_min : 0) : []
+                    },
+                    {
+                      label: '最低排名',
+                      yAxisID: 'rank',
+                      backgroundColor: 'rgba(255, 193, 8, 0.5)',
+                      borderWidth: 1,
+                      data: (enroll) ? enroll.scores.map(score => (score.rank_min) ? score.rank_min : 0) : []
+                    },
+                  ],
+                }
               }
-            </tbody>
-          </Table>
-
+                options={
+                  {
+                    scales: {
+                      xAxes: [
+                        {
+                          stacked: true
+                        }
+                      ],
+                      yAxes: [
+                        {
+                          id: 'score',
+                          position: 'left',
+                          stacked: true,
+                          ticks: {
+                            min: (enroll) ? Math.min(
+                              enroll.scores.map(score => score.score_avg).sort((a, b) => a - b)[0] - 5,
+                              (enroll.scores.map(score => score.score_min).sort((a, b) => a - b)[0] == -1)
+                                ? enroll.scores.map(score => score.score_avg).sort((a, b) => a - b)[0] - 5
+                                : enroll.scores.map(score => score.score_min).sort((a, b) => a - b)[0] - 5,
+                            ) : 0,
+                            max: (enroll) ? enroll.scores.map(score => score.score_avg).sort((a, b) => b - a)[0] + 5 : 0
+                          }
+                        },
+                        {
+                          id: 'rank',
+                          position: 'right',
+                          stacked: false,
+                          ticks: {
+                            min: (enroll) ? Math.max(enroll.scores.map(score => score.rank_min).sort((a, b) => a - b)[0] - 1000, 0) : 0,
+                            max: (enroll) ? enroll.scores.map(score => score.rank_min).sort((a, b) => b - a)[0] + 1000 : 0
+                          }
+                        },
+                      ]
+                    }
+                  }
+                } />
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <Row>
+                <Col>
+                  <h6>专业最低排名变化</h6>
+                </Col>
+                <Col>
+                  <Form.Control as="select" size="sm">
+                    {
+                      (enroll) ? ([...new Set(enroll.scores
+                        .map(score => score.major_name
+                          .split('（')[0]))]
+                        .map(majorName => <option>{majorName}</option>)) : null
+                    }
+                  </Form.Control>
+                </Col>
+              </Row>
+              <Line />
+            </Col>
+          </Row>
         </Col>
-      </Row >
-
-    </div >
+        <Col xs={{ span: 12, order: 12 }} lg={{ span: 6, order: 1 }}>
+          <Row>
+            <Col>
+              <Table striped bordered hover size="sm">
+                <thead>
+                  <tr>
+                    <th>专业</th>
+                    <th>录取批次</th>
+                    <th>平均分</th>
+                    <th>最低分</th>
+                    <th>最低名次</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    (enroll) ?
+                      enroll
+                        .scores.map(
+                          (score) => (
+                            <tr>
+                              <td>{score.major_name.split('（')[0]}</td>
+                              <td>{score.enroll_batch}</td>
+                              <td>{score.score_avg}</td>
+                              <td>{score.score_min}</td>
+                              <td>{score.rank_min}</td>
+                            </tr>
+                          )
+                        )
+                      : (<tr><td colSpan={5}>暂无数据</td></tr>)
+                  }
+                </tbody>
+              </Table>
+            </Col>
+          </Row >
+        </Col>
+      </Row>
+    </div>
   )
 }
 
@@ -426,6 +512,7 @@ const InstituteTabs = (props) => {
   }, [])
 
 
+
   return (
     <div>
       <Tab.Container>
@@ -440,7 +527,7 @@ const InstituteTabs = (props) => {
                   <NavLink to={`major`} className="nav-link" activeClassName="active">开设专业</NavLink>
                 </Nav.Item>
                 <Nav.Item>
-                  <NavLink to={`stat`} className="nav-link" activeClassName="active">数据</NavLink>
+                  <NavLink to={`stats`} className="nav-link" activeClassName="active">数据</NavLink>
                 </Nav.Item>
                 <Nav.Item>
                   <NavLink to={`discuss`} className="nav-link" activeClassName="active">讨论</NavLink>
@@ -498,7 +585,7 @@ const InstituteTabs = (props) => {
                   </Card.Text>
                 </Card.Body>
               </Route>
-              <Route path={`${url}/stat`}>
+              <Route path={`${url}/stats`}>
                 <Card.Body>
                   <EnrollTable iid={id} />
                 </Card.Body>
@@ -527,7 +614,7 @@ const InstituteTabs = (props) => {
           </Router>
         </Card>
       </Tab.Container>
-    </div>
+    </div >
   )
 }
 
