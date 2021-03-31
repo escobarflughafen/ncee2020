@@ -371,13 +371,17 @@ const EnrollTable = (props) => {
                       let data = regionData.filter(d => d.major_name.split('（')[0] === selectedMajor)
                       console.log(data)
                       return {
-                        labels: data.map(d => d.year)
+                        labels: data.map(d => d.year),
+                        datasets: [{
+                          label: '最低排名',
+                          data: data.map(d=>d.rank_min)
+                        }]
                       }
                     })()
                   }
                     options={
                       {
-
+                        
                       }
                     } />) : null
               }
