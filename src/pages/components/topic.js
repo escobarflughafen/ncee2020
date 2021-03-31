@@ -92,6 +92,13 @@ const TopicList = (props) => {
   const [viewMode, setViewMode] = useState(props.viewMode || '详细')
   const topicPerPage = props.topicPerPage || 12
   const [currentPage, setCurrentPage] = useState(1)
+  const [displayTopics, setDisplayTopics] = useState([])
+
+  useEffect(() => {
+    if (topics) {
+      setDisplayTopics([...topics])
+    }
+  }, [topics])
 
   return (
     <>
@@ -101,9 +108,9 @@ const TopicList = (props) => {
             <Col>
               <small className="d-none d-sm-inline text-black-50">
                 {
-                  (topics.length > 0) ? (
+                  (displayTopics.length > 0) ? (
                     <>
-                      共 {topics.length} 条讨论，第 {(currentPage - 1) * topicPerPage + 1}~{(currentPage * topicPerPage) > topics.length ? topics.length : currentPage * topicPerPage} 项
+                      共 {displayTopics.length} 条讨论，第 {(currentPage - 1) * topicPerPage + 1}~{(currentPage * topicPerPage) > displayTopics.length ? displayTopics.length : currentPage * topicPerPage} 项
                     </>
                   ) : (<>未能找到符合条件的讨论</>)
                 }
@@ -129,18 +136,62 @@ const TopicList = (props) => {
               <Row>
                 <SVG variant="sort" />
                 <Col className="pl-2">
-                  <FormControl as="select" size="sm">
-                    <option>最后回复</option>
-                    <option>发布时间</option>
-                    <option>地区</option>
-                    <option>相关院校</option>
+                  <FormControl
+                    as="select"
+                    size="sm"
+                    onChange={(e) => {
+                      switch (e.target.value) {
+                        case '0':
+                          setDisplayTopics([...topics.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated))])
+                          break;
+                        case '1':
+                          setDisplayTopics([...topics.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))])
+                          break;
+                        case '2':
+                          setDisplayTopics([...topics.sort((a, b) => b.posts.length - a.posts.length)])
+                          break;
+                        case '3':
+                          setDisplayTopics([...topics.sort((a, b) => {
+                            if (a.region) {
+                              if (b.region) {
+                                return a.region.localeCompare(b.region)
+                              } else {
+                                return -1
+                              }
+                            } else {
+                              return 1
+                            }
+                          })])
+                          break;
+                        case '4':
+                          setDisplayTopics([...topics.sort((a, b) => {
+                            if (a.relatedInstitute) {
+                              if(b.relatedInstitute) {
+                                return a.relatedInstitute.data.school_id - b.relatedInstitute.data.school_id
+                              } else {
+                                return -1
+                              }
+                            } else {
+                              return 1
+                            }
+                          })])
+                        default:
+                          return
+                      }
+                    }}
+                  >
+                    <option value={0}>最后回复</option>
+                    <option value={1}>最新发起</option>
+                    <option value={2}>回复数量</option>
+                    <option value={3}>地区</option>
+                    <option value={4}>相关院校</option>
                   </FormControl>
                 </Col>
               </Row>
             </Col>
           </Row>
         </ListGroup.Item>
-        {topics.slice((currentPage - 1) * topicPerPage, (currentPage) * topicPerPage).map((topic) => {
+        {displayTopics.slice((currentPage - 1) * topicPerPage, (currentPage) * topicPerPage).map((topic) => {
           return (
             <TopicCard topic={topic} viewMode={viewMode} />
           )

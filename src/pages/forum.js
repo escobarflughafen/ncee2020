@@ -72,7 +72,7 @@ const ListPage = (props) => {
         if (res.data.topics.length == 0) {
           setMsg({ type: 'warning', text: '未能找到符合条件的讨论' })
         } else {
-          setMsg({ type: '', text: ''})
+          setMsg({ type: '', text: '' })
         }
       } catch (err) {
         console.log(err.response)
@@ -124,7 +124,7 @@ const ListPage = (props) => {
     }, [queryImmediately])
 
     useEffect(() => {
-      handleQuery() 
+      handleQuery()
     }, [queryTags])
 
     return (
@@ -140,6 +140,20 @@ const ListPage = (props) => {
                 value={singleSearchKeyword}
                 required
                 onChange={(e) => { setSingleSearchKeyword(e.target.value) }}
+                onKeyPress={(e) => {
+                  if (e.code === 'Enter') {
+                    if (singleSearchKeyword.length > 0) {
+                      setQueryTags([
+                        {
+                          category: 'keyword',
+                          label: singleSearchKeyword,
+                          data: singleSearchKeyword
+                        }
+                      ])
+                      setQueryImmediately(true)
+                    }
+                  }
+                }}
               />
               <InputGroup.Append>
                 <Button
