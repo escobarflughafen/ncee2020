@@ -21,6 +21,12 @@ const signupService = async profile => {
   return res
 }
 
+const modifyService = async profile => {
+  const url = `http://${document.domain}:${constants.serverPort}/user/modify`
+  const res = await axios.post(url, profile)
+  return res
+}
+
 const loginSchema = Yup.object().shape({
   username: Yup.string().required('请输入用户名'),
   password: Yup.string().required('请输入密码')

@@ -15,6 +15,24 @@ import axios from 'axios'
 
 const demoUser = {
   username: 'user',
+  name: 'Gaia',
+  avatar: '',
+  year: '2021',
+  region: {
+    province: '11',
+    city: '1101'
+  },
+  score: 600,
+  about: 'feeling good today',
+  registeredDate: new Date(Date.now()),
+  isAdmin: true,
+  follower: [],
+  following: []
+}
+
+
+const demoUser1 = {
+  username: 'user1',
   name: 'John Smith',
   avatar: '',
   year: '2021',
@@ -26,8 +44,25 @@ const demoUser = {
   about: 'feeling good today',
   registeredDate: new Date(Date.now()),
   isAdmin: false,
-  follower: [1, 2, 3],
-  following: [1, 2, 3]
+  follower: [],
+  following: [demoUser]
+}
+
+const demoUser2 = {
+  username: 'user2',
+  name: 'Alexa',
+  avatar: '',
+  year: '2021',
+  region: {
+    province: '11',
+    city: '1101'
+  },
+  score: 600,
+  about: 'feeling good today',
+  registeredDate: new Date(Date.now()),
+  isAdmin: true,
+  follower: [],
+  following: [demoUser]
 }
 
 const UserList = (props) => {
@@ -68,9 +103,6 @@ const UserHeader = (props) => {
                   </div>
                   <span className="text-info">@{user.username}</span>
                 </Col>
-                <Col xs="auto">
-                  <Button variant="info" size="sm">编辑</Button>
-                </Col>
               </Row>
               <Row className="text-muted">
                 <Col xs="auto" className="pr-0">
@@ -108,7 +140,7 @@ const UserDetail = (props) => {
 
   useEffect(() => {
     const url = '123'
-    setUser({ ...demoUser })
+    setUser({ ...demoUser1 })
   }, [useParams().username])
 
   return (

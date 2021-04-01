@@ -58,7 +58,7 @@ const InstituteCard = (props) => {
           )
         }
         <Col sm>
-          <Row >
+          <Row className="mb-2">
             <Col xs>
               {
                 (props.size === "sm") ? (
@@ -78,7 +78,7 @@ const InstituteCard = (props) => {
             </Col>
           </Row>
           <Row>
-            <Col >
+            <Col>
               <Labels labels={i.labels} />
             </Col>
           </Row>

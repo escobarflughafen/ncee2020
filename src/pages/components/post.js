@@ -23,6 +23,7 @@ const PostCard = (props) => {
   const setReplyTo = props.setReplyTo
 
   const post = props.post
+  const [msg, setMsg] = useState({ type: '', text: '' })
   const history = useHistory()
 
   // custom dropdown
@@ -64,6 +65,7 @@ const PostCard = (props) => {
 
   return (
     <>
+
       {(expanded && post.replyTo) ? (
         <ListGroup.Item variant="info">
           <Row>
@@ -119,45 +121,68 @@ const PostCard = (props) => {
                 }
               </Col>
             </Row>
-            <Row>
-              <Col>
-                {post.content}
-              </Col>
-            </Row>
-            <Row>
-              {
-                // photos columns
-              }
-            </Row>
-            <Row>
-              <Col style={{ textAlign: "right" }}>
-              </Col>
-              {
-                (setReplyTo) ? (
-                  <Col xs="auto">
-                    <Dropdown>
-                      <Dropdown.Toggle as={CustomToggle} className="pl-2 pr-2">
-                        <SVG variant="three-dots" />
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu as={CustomMenu}>
-                        <Dropdown.Item eventKey="1"
-                          href="#replytextarea"
-                          onClick={(e) => { e.stopPropagation(); setReplyTo(post._id) }}
-                        >
-                          回复
-                                  </Dropdown.Item>
-                        <Dropdown.Item eventKey="2">
-                          转发
-                                  </Dropdown.Item>
-                        <Dropdown.Item eventKey="2">
-                          关注此用户
-                                  </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </Col>
-                ) : null
-              }
-            </Row>
+            {
+              (() => {
+                const user = JSON.parse(window.localStorage.getItem('user'))
+                const visible = !post.removed.status
+                const permit = ((user) ? (user.isAdmin || user.username === post.author.username) : false)
+                if (visible) {
+                  return (
+                    <>
+                      <Row>
+                        <Col>
+                          {post.content}
+                        </Col>
+                      </Row>
+                      <Row>
+                        {
+                          // TODO: photos
+                        }
+                      </Row>
+                      <Row>
+                        <Col style={{ textAlign: "right" }}>
+                        </Col>
+                        {
+                          (user && !expanded) ? (
+                        <Col xs="auto">
+                          <Dropdown>
+                            <Dropdown.Toggle as={CustomToggle} className="pl-2 pr-2">
+                              <SVG variant="three-dots" />
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu as={CustomMenu}>
+                              <Dropdown.Item eventKey="1"
+                                href="#replytextarea"
+                                onClick={(e) => { e.stopPropagation(); }}
+                              >
+                                回复
+                              </Dropdown.Item>
+                              {
+                                (permit) ?
+                                  (
+                                    <Dropdown.Item eventKey="2">
+                                      删除
+                                    </Dropdown.Item>
+                                  ) : null
+                              }
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </Col>
+                          ) : null
+                        }
+                      </Row>
+                    </>
+                  )
+                } else {
+                  return (
+                    <Row>
+                      <Col>
+                        <Alert variant="info" >该贴文已被移除</Alert>
+                      </Col>
+                    </Row>
+                  )
+                }
+              })()
+            }
             {
               (expanded) ? (
                 <Row>
@@ -268,35 +293,35 @@ const NewPostForm = (props) => {
     <div className={props.className}>
       {token ? (
         <>
-      <MsgAlert msg={msg} />
-      <Form onSubmit={handleSubmit}>
-        <Form.Row>
-          <Form.Group as={Col} >
-            <Form.Label>回复内容</Form.Label>
-            <Form.Control
-              as="textarea"
-              placeholder="..."
-              rows={3}
-              id="replytextarea"
-              value={content}
-              onChange={(e) => { setContent(e.target.value) }} />
-          </Form.Group>
-        </Form.Row>
+          <MsgAlert msg={msg} />
+          <Form onSubmit={handleSubmit}>
+            <Form.Row>
+              <Form.Group as={Col} >
+                <Form.Label>回复内容</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  placeholder="..."
+                  rows={3}
+                  id="replytextarea"
+                  value={content}
+                  onChange={(e) => { setContent(e.target.value) }} />
+              </Form.Group>
+            </Form.Row>
 
-        <Form.Group as={Row} controlId="replyTo">
+            <Form.Group as={Row} controlId="replyTo">
 
-          <Col xs="auto">
-            <ButtonGroup aria-label="reply" size="sm">
-              <Button variant="outline-dark">添加图片</Button>
-              <Button variant="primary" type="submit">
-                发布
+              <Col xs="auto">
+                <ButtonGroup aria-label="reply" size="sm">
+                  <Button variant="outline-dark">添加图片</Button>
+                  <Button variant="primary" type="submit">
+                    发布
           </Button>
-            </ButtonGroup>
-          </Col>
-        </Form.Group>
+                </ButtonGroup>
+              </Col>
+            </Form.Group>
 
-      </Form>
-      </>
+          </Form>
+        </>
       ) : (
         <Alert variant="info"><Alert.Link href="/login">登入</Alert.Link>后可以进行回复</Alert>
       )}

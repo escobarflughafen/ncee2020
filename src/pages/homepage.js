@@ -75,7 +75,7 @@ const HomePage = (props) => {
             </p>
           </Card.Text>
           <Card.Title as="h3">
-            推荐学校
+            推荐院校
         </Card.Title>
           <Card.Text>
             <Carousel>
@@ -88,7 +88,6 @@ const HomePage = (props) => {
               <Carousel.Item>
                 <img
                   className="d-block w-100"
-                  src="https://img1.eol.cn/e_images/gk/2019/PC/banner101.png"
                   alt="Second slide"
                 />
 
@@ -100,7 +99,6 @@ const HomePage = (props) => {
               <Carousel.Item>
                 <img
                   className="d-block w-100"
-                  src="https://img1.eol.cn/e_images/gk/2019/PC/banner101.png"
                   alt="Third slide"
                 />
 
@@ -119,7 +117,6 @@ const HomePage = (props) => {
               <Carousel.Item>
                 <img
                   className="d-block w-100"
-                  src="https://img1.eol.cn/e_images/gk/2019/PC/banner101.png"
                   alt="First slide"
                 />
                 <Carousel.Caption>
@@ -130,7 +127,6 @@ const HomePage = (props) => {
               <Carousel.Item>
                 <img
                   className="d-block w-100"
-                  src="https://img1.eol.cn/e_images/gk/2019/PC/banner101.png"
                   alt="Second slide"
                 />
 
@@ -142,7 +138,6 @@ const HomePage = (props) => {
               <Carousel.Item>
                 <img
                   className="d-block w-100"
-                  src="https://img1.eol.cn/e_images/gk/2019/PC/banner101.png"
                   alt="Third slide"
                 />
 
