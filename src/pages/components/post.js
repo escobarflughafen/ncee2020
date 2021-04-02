@@ -14,7 +14,7 @@ import axios from 'axios'
 import { InstituteCard } from './institute'
 import { MsgAlert } from './msg'
 
-const postRemovalService = async (pid, port = constants.serverPort) => {
+const togglePostRemovalService = async (pid, port = constants.serverPort) => {
   const url = `http://${document.domain}:${port}/post/toggleremoval`
   const token = window.localStorage.getItem('token')
   const auth = (token) ? `bearer ${token}` : null
@@ -34,6 +34,8 @@ const PostCard = (props) => {
   const index = props.index
   const host = props.host
   const setReplyTo = props.setReplyTo
+
+  const [removedPostVisible, setRemovedPostVisible] = useState(false)
 
   const post = props.post
   const [msg, setMsg] = useState({ type: '', text: '' })
@@ -107,7 +109,7 @@ const PostCard = (props) => {
       <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post._id}`); history.go() }}>
         <Row>
           <Col>
-          <MsgAlert msg={msg} />
+            <MsgAlert msg={msg} />
           </Col>
         </Row>
         <Row>
@@ -182,8 +184,8 @@ const PostCard = (props) => {
                                           onClick={async (e) => {
                                             e.stopPropagation()
                                             try {
-                                              const res = await postRemovalService(post._id)
-                                              setMsg({ type: 'info', text: '贴文删除成功' })
+                                              const res = await togglePostRemovalService(post._id)
+                                              setMsg({ type: 'info', text: res.data.msg })
                                               setTimeout(() => {
                                                 window.location.reload()
                                               }, 1000)
@@ -197,7 +199,7 @@ const PostCard = (props) => {
 
                                           }}
                                         >
-                                          删除
+                                          移除
                                         </Dropdown.Item>
                                       ) : null
                                   }
@@ -210,10 +212,44 @@ const PostCard = (props) => {
                     </>
                   )
                 } else {
+                  const visible = !!post.content
+                  const togglable = (visible) ? post.author._id === post.removed.from : false
+                  const removedByAdmin = post.author._id !== post.removed.from
+
                   return (
-                    <Row>
+                    <Row onClick={(e) => { e.stopPropagation() }}>
                       <Col>
-                        <Alert variant="info" >该贴文已被移除</Alert>
+                        <Alert variant="info" >
+                          <span className="mr-1">该贴文已被{(removedByAdmin) ? '管理员' : '创作者'}移除</span>
+                          {(visible) ? (<Alert.Link
+                            className="mr-1"
+                            onClick={() => { setRemovedPostVisible(!removedPostVisible) }}
+                          >{(removedPostVisible) ? '[收起]' : '[查看]'}</Alert.Link>) : null}
+                          {(togglable) ? (<Alert.Link
+                            className="mr-1"
+                            onClick={async () => {
+                              try {
+                                const res = await togglePostRemovalService(post._id)
+                                setMsg({ type: 'info', text: res.data.msg })
+                                setTimeout(() => {
+                                  window.location.reload()
+                                }, 1000)
+                              } catch (err) {
+                                console.log(err)
+                                setMsg({
+                                  type: 'danger',
+                                  text: (err.response.data) ? err.response.data.msg : ''
+                                })
+                              }
+                            }}
+                          >[恢复]</Alert.Link>) : null}
+                          {
+                            (removedPostVisible) ? (<>
+                              <hr />
+                              <span>{post.content}</span>
+                            </>) : null
+                          }
+                        </Alert>
                       </Col>
                     </Row>
                   )
