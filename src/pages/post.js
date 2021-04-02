@@ -12,24 +12,45 @@ import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm } from './components/post'
 import axios from 'axios'
 
+const fetchPostService = async (id, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${constants.serverPort}/post/${id}/fetch`
+  const token = window.localStorage.getItem('token')
+  const auth = (token) ? `bearer ${token}` : null
+
+  const body = {
+    id
+  }
+
+  const res = await axios.post(url, body, { headers: { auth } })
+  return res
+}
 
 const PostView = (props) => {
   const { path, url, params } = useRouteMatch()
   const location = useLocation();
   const history = useHistory();
   const id = useParams().id
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
 
   const [post, setPost] = useState()
 
-  useEffect(() => {
-    const url = `http://${document.domain}:${constants.serverPort}/post/${id}/fetch`
-    axios.post(url).then(res => {
+
+  useEffect(async () => {
+    try {
+      const res = await fetchPostService(id)
       console.log(res)
       document.title = `${res.data.post.content} - ${constants.title.post} - ${constants.appName}`
       setPost(res.data.post)
-    })
-  }, [])
+    } catch (err) {
+      console.log(err.response)
+      setMsg({ type: 'danger', text: '未能取得贴文内容' })
+    }
+  }, [id])
 
+  /*
   useEffect(() => {
     const url = `http://${document.domain}:${constants.serverPort}/post/${id}/fetch`
     axios.post(url).then(res => {
@@ -38,6 +59,7 @@ const PostView = (props) => {
       setPost(res.data.post)
     })
   }, [id])
+  */
 
   return (
     <>

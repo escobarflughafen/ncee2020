@@ -28,6 +28,15 @@ const togglePostRemovalService = async (pid, port = constants.serverPort) => {
   return res
 }
 
+const PostContent = (props) => {
+  const [post, setPost] = useState()
+  useEffect(() => { setPost(props.post) }, [props.post])
+
+  return (
+    <>
+    </>
+  )
+}
 
 const PostCard = (props) => {
   const expanded = props.expanded || false
@@ -145,7 +154,7 @@ const PostCard = (props) => {
               (() => {
                 const user = JSON.parse(window.localStorage.getItem('user'))
                 const visible = !post.removed.status
-                const permit = ((user) ? (user.isAdmin || user.username === post.author.username) : false)
+                const permit = ((user) ? (user.isAdmin || user._id === post.author._id) : false)
                 if (visible) {
                   return (
                     <>
@@ -160,22 +169,33 @@ const PostCard = (props) => {
                         }
                       </Row>
                       <Row>
-                        <Col style={{ textAlign: "right" }}>
+                        <Col>
+                          {
+                            expanded && (
+                              <small className="text-grey d-none d-sm-block">
+                                {new Date(post.createdAt).toString()}
+                              </small>
+                            )
+                          }
                         </Col>
                         {
-                          (user && !expanded) ? (
+                          (user) ? (
                             <Col xs="auto">
                               <Dropdown>
                                 <Dropdown.Toggle as={CustomToggle} className="pl-2 pr-2">
                                   <SVG variant="three-dots" />
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu as={CustomMenu}>
-                                  <Dropdown.Item eventKey="1"
-                                    href={`/post/${post._id}`}
-                                    onClick={(e) => { e.stopPropagation(); }}
-                                  >
-                                    回复
-                              </Dropdown.Item>
+                                  {
+                                    (!expanded) && (
+                                      <Dropdown.Item eventKey="1"
+                                        href={`/post/${post._id}`}
+                                        onClick={(e) => { e.stopPropagation(); }}
+                                      >
+                                        回复
+                                      </Dropdown.Item>
+                                    )
+                                  }
                                   {
                                     (permit) ?
                                       (
@@ -213,14 +233,14 @@ const PostCard = (props) => {
                   )
                 } else {
                   const visible = !!post.content
-                  const togglable = (visible) ? post.author._id === post.removed.from : false
-                  const removedByAdmin = post.author._id !== post.removed.from
+                  const removedByAuthor = post.author._id === post.removed.from || post.author._id === post.removed.from._id
+                  const togglable = (visible) ? ((removedByAuthor && user._id === post.author._id) || (user.isAdmin && !removedByAuthor)) : false
 
                   return (
                     <Row onClick={(e) => { e.stopPropagation() }}>
                       <Col>
                         <Alert variant="info" >
-                          <span className="mr-1">该贴文已被{(removedByAdmin) ? '管理员' : '创作者'}移除</span>
+                          <span className="mr-1">该贴文已被{(removedByAuthor) ? '创作者' : '管理员'}移除</span>
                           {(visible) ? (<Alert.Link
                             className="mr-1"
                             onClick={() => { setRemovedPostVisible(!removedPostVisible) }}
@@ -256,19 +276,19 @@ const PostCard = (props) => {
                 }
               })()
             }
-            {
-              (expanded) ? (
-                <Row>
-                  <Col>
-                    <small>
-                      {new Date(post.createdAt).toString()}
-                    </small>
-                  </Col>
-                </Row>
-              ) : null
-            }
           </Col>
         </Row>
+        {
+          (expanded) ? (
+            <Row className="d-block d-sm-none">
+              <Col>
+                <small className="text-grey">
+                  {new Date(post.createdAt).toString()}
+                </small>
+              </Col>
+            </Row>
+          ) : null
+        }
       </ListGroup.Item>
     </>
   )
