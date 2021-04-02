@@ -287,8 +287,8 @@ const transparency = (variant) => {
 }
 
 const SVG = ({ fill, variant, className }) => {
-  if (fill) return (<span className={className}>{filled(variant)}</span>)
-  else return (<span className={className}>{transparency(variant)}</span>)
+  if (fill) return (<span className={`${className}`}>{filled(variant)}</span>)
+  else return (<span className={`${className}`}>{transparency(variant)}</span>)
 }
 
 

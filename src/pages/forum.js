@@ -14,6 +14,18 @@ import { PostCard, NewPostForm } from './components/post'
 import { MsgAlert } from './components/msg'
 import axios from 'axios'
 
+const fetchTopicService = async (id, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${port}/forum/${id}/fetch`
+  const token = window.localStorage.getItem('token')
+  const auth = (token) ? `bearer ${token}` : null
+
+  const body = {
+    id
+  }
+  const res = await axios.post(url, body, { headers: { auth } })
+  return res
+}
+
 const ListPage = (props) => {
   const history = useHistory();
 
@@ -384,23 +396,22 @@ const TopicPage = (props) => {
   const [topic, setTopic] = useState()
 
   const [currentPage, setCurrentPage] = useState(1)
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
 
-  useEffect(() => {
-    const url = `http://${document.domain}:${constants.serverPort}/forum/${id}/fetch`
-    axios.post(url).then((res) => {
+
+  useEffect(async () => {
+    try {
+      const res = await fetchTopicService(id)
       console.log(res)
       document.title = `${res.data.topic.title} - ${constants.title.forum} - ${constants.appName}`
       setTopic(res.data.topic)
-    })
-  }, [])
-
-  useEffect(() => {
-    const url = `http://${document.domain}:${constants.serverPort}/forum/${id}/fetch`
-    axios.post(url).then((res) => {
-      console.log(res)
-      document.title = `${res.data.topic.title} - ${constants.title.forum} - ${constants.appName}`
-      setTopic(res.data.topic)
-    })
+    } catch (err) {
+      console.log(err)
+      setMsg({ type: 'danger', text: '未能取得讨论内容' })
+    }
   }, [id])
 
   return (

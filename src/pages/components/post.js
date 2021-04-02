@@ -123,14 +123,14 @@ const PostCard = (props) => {
         </Row>
         <Row>
           <Col xs="auto" className="pr-0">
-            <Image width={48} height={48} />
+            <Image width={48} height={48} src="https://inspiretothrive-inspiretothrive.netdna-ssl.com/wp-content/uploads/2017/03/new-twitter-profile.png"/>
           </Col>
           <Col>
             <Row>
               <Col>
                 <small>
-                  {(host) ? (<SVG className="mr-2" variant="person" fill />) : (<></>)}
                   <UserLink user={post.author}>{post.author.name}</UserLink>
+                  {(host) ? (<SVG variant="person" fill />) : (<></>)}
                   {
                     (expanded) ? null : (
                       <span className="d-inline-block">
@@ -153,6 +153,7 @@ const PostCard = (props) => {
             {
               (() => {
                 const user = JSON.parse(window.localStorage.getItem('user'))
+
                 const visible = !post.removed.status
                 const permit = ((user) ? (user.isAdmin || user._id === post.author._id) : false)
                 if (visible) {
@@ -233,19 +234,21 @@ const PostCard = (props) => {
                   )
                 } else {
                   const visible = !!post.content
-                  const removedByAuthor = post.author._id === post.removed.from || post.author._id === post.removed.from._id
-                  const togglable = (visible) ? ((removedByAuthor && user._id === post.author._id) || (user.isAdmin && !removedByAuthor)) : false
+                  const userIsAuthor = (user) ? user._id === post.author._id : false
+                  const userIsAdmin = (user) ? user.isAdmin : false
+                  const postIsRemovedByAuthor = (post.removed.status) ? (post.removed.by._id === post.author._id) : false
+                  const postIsRemovedByAdmin = (post.removed.status) ? (post.removed.by.isAdmin) : false
 
                   return (
-                    <Row onClick={(e) => { e.stopPropagation() }}>
+                    <Row>
                       <Col>
-                        <Alert variant="info" >
-                          <span className="mr-1">该贴文已被{(removedByAuthor) ? '创作者' : '管理员'}移除</span>
+                        <Alert variant="info" onClick={(e) => {e.stopPropagation()}}>
+                          <span className="mr-1">该贴文已被{(postIsRemovedByAuthor) ? ((userIsAuthor) ? '你' : '创作者') : ((userIsAdmin && (post.removed.by._id === user._id)) ? '你' : '管理员')}移除</span>
                           {(visible) ? (<Alert.Link
                             className="mr-1"
                             onClick={() => { setRemovedPostVisible(!removedPostVisible) }}
                           >{(removedPostVisible) ? '[收起]' : '[查看]'}</Alert.Link>) : null}
-                          {(togglable) ? (<Alert.Link
+                          {((userIsAdmin && postIsRemovedByAdmin) || (userIsAuthor && postIsRemovedByAuthor)) ? (<Alert.Link
                             className="mr-1"
                             onClick={async () => {
                               try {
@@ -402,7 +405,7 @@ const NewPostForm = (props) => {
             </Form.Row>
 
             <Form.Group as={Row} controlId="replyTo">
-
+              <Col></Col>
               <Col xs="auto">
                 <ButtonGroup aria-label="reply" size="sm">
                   <Button variant="outline-dark">添加图片</Button>

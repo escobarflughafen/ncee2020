@@ -13,7 +13,7 @@ import { PostCard, NewPostForm } from './components/post'
 import axios from 'axios'
 
 const fetchPostService = async (id, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${constants.serverPort}/post/${id}/fetch`
+  const url = `http://${document.domain}:${port}/post/${id}/fetch`
   const token = window.localStorage.getItem('token')
   const auth = (token) ? `bearer ${token}` : null
 

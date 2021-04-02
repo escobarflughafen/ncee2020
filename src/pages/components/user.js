@@ -498,7 +498,7 @@ const UserLink = (props) => {
   return (
     <>
       <OverlayTrigger rootClose trigger="click" placement="auto" overlay={UserPopover}>
-        <Button size="sm" variant="link" className="p-0" onClick={
+        <Button size="sm" variant="link" className="p-0 align-baseline"  onClick={
           (e) => {
             e.stopPropagation()
           }
