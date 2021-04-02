@@ -225,7 +225,8 @@ const NewTopicForm = (props) => {
     e.preventDefault()
     setMsg({ type: '', text: '' })
     const url = `http://${document.domain}:${constants.serverPort}/forum/newtopic`
-    const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
+    const token = window.localStorage.getItem('token')
+    const auth = (token) ? `bearer ${token}` : null
     const body = {
       title: title,
       category: category,
@@ -235,7 +236,7 @@ const NewTopicForm = (props) => {
       tags: tags,
     }
     try {
-      const res = await axios.post(url, body, { headers: { auth: token } })
+      const res = await axios.post(url, body, { headers: { auth } })
       console.log(res)
       setMsg({
         type: 'success',
@@ -249,7 +250,7 @@ const NewTopicForm = (props) => {
       console.log(err.response)
       setMsg({
         type: 'danger',
-        text: (err.response.data) ? err.response.data.msg : null
+        text: (err.response.data) ? err.response.data.msg : ''
       })
     }
   }

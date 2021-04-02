@@ -9,7 +9,7 @@ const MsgAlert = (props) => {
   return (
     <>
       {
-        (msg.text.length > 0) ? (
+        (msg.type && msg.text && msg.text.length > 0) ? (
           <Alert {...props} variant={msg.type}>{msg.text}</Alert>
         ) : null
       }

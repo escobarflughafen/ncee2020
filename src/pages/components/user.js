@@ -8,6 +8,7 @@ import axios from 'axios'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 import SVG from '../../utils/svg'
+import { MsgAlert } from './msg'
 
 const loginService = async credentials => {
   const url = `http://${document.domain}:${constants.serverPort}/user/login`
@@ -17,12 +18,6 @@ const loginService = async credentials => {
 
 const signupService = async profile => {
   const url = `http://${document.domain}:${constants.serverPort}/user/signup`
-  const res = await axios.post(url, profile)
-  return res
-}
-
-const modifyService = async profile => {
-  const url = `http://${document.domain}:${constants.serverPort}/user/modify`
   const res = await axios.post(url, profile)
   return res
 }
@@ -317,13 +312,12 @@ const LoginForm = (props) => {
       console.log(res)
       setMsg({ type: 'success', text: '登入成功' })
 
-      window.localStorage.clear()
-
       window.localStorage.setItem('user', JSON.stringify(res.data.user))
       window.localStorage.setItem('token', res.data.token)
 
       setTimeout(() => {
-        history.goBack()
+        history.push('/home')
+        history.go()
       }, 1000)
     } catch (err) {
       console.log(err.response)
@@ -347,7 +341,7 @@ const LoginForm = (props) => {
         isValid,
       }) => (
         <div>
-          {(msg.text.length > 0) ? (<Alert variant={msg.type}>{msg.text}</Alert>) : null}
+          <MsgAlert msg={msg} />
           <Form noValidate onSubmit={handleSubmit}>
             <Form.Row>
               <Col xs={12} sm={6}>
@@ -421,11 +415,6 @@ const UserListItem = (props) => {
 const UserCard = (props) => {
   const user = props.user
   const history = useHistory()
-  const [loginAs, setLoginAs] = useState()
-
-  useEffect(() => {
-    setLoginAs(JSON.parse(window.localStorage.getItem('user')))
-  }, [])
 
   return (
     (user) ? (
@@ -445,7 +434,7 @@ const UserCard = (props) => {
                     }}>
                       <b>{user.name}</b>
                     </Button>
-                    <small className="text-info">@{user.username}</small>
+                    <code>@{user.username}</code>
                   </Col>
                 </Row>
                 <Row>
@@ -463,15 +452,9 @@ const UserCard = (props) => {
                   </Col>
                 </Row>
               </Col>
-              {
-                (loginAs) ? (
-                  (loginAs.username === user.username) ? null : (
-                    <Col xs="auto">
-                      <Button variant="success" size="sm">关注</Button>
-                    </Col>
-                  )
-                ) : null
-              }
+              <Col xs="auto">
+                <Button variant="success" size="sm">关注</Button>
+              </Col>
             </Row>
             <Row>
               <Col>

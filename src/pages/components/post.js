@@ -14,6 +14,19 @@ import axios from 'axios'
 import { InstituteCard } from './institute'
 import { MsgAlert } from './msg'
 
+const postRemovalService = async (pid, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${port}/post/toggleremoval`
+  const token = window.localStorage.getItem('token')
+  const auth = (token) ? `bearer ${token}` : null
+
+  const body = {
+    id: pid
+  }
+
+  const res = await axios.post(url, body, { headers: { auth } })
+
+  return res
+}
 
 
 const PostCard = (props) => {
@@ -63,9 +76,9 @@ const PostCard = (props) => {
     },
   );
 
+
   return (
     <>
-
       {(expanded && post.replyTo) ? (
         <ListGroup.Item variant="info">
           <Row>
@@ -92,6 +105,11 @@ const PostCard = (props) => {
       */
       }
       <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post._id}`); history.go() }}>
+        <Row>
+          <Col>
+          <MsgAlert msg={msg} />
+          </Col>
+        </Row>
         <Row>
           <Col xs="auto" className="pr-0">
             <Image width={48} height={48} />
@@ -144,29 +162,48 @@ const PostCard = (props) => {
                         </Col>
                         {
                           (user && !expanded) ? (
-                        <Col xs="auto">
-                          <Dropdown>
-                            <Dropdown.Toggle as={CustomToggle} className="pl-2 pr-2">
-                              <SVG variant="three-dots" />
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu as={CustomMenu}>
-                              <Dropdown.Item eventKey="1"
-                                href="#replytextarea"
-                                onClick={(e) => { e.stopPropagation(); }}
-                              >
-                                回复
+                            <Col xs="auto">
+                              <Dropdown>
+                                <Dropdown.Toggle as={CustomToggle} className="pl-2 pr-2">
+                                  <SVG variant="three-dots" />
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu as={CustomMenu}>
+                                  <Dropdown.Item eventKey="1"
+                                    href={`/post/${post._id}`}
+                                    onClick={(e) => { e.stopPropagation(); }}
+                                  >
+                                    回复
                               </Dropdown.Item>
-                              {
-                                (permit) ?
-                                  (
-                                    <Dropdown.Item eventKey="2">
-                                      删除
-                                    </Dropdown.Item>
-                                  ) : null
-                              }
-                            </Dropdown.Menu>
-                          </Dropdown>
-                        </Col>
+                                  {
+                                    (permit) ?
+                                      (
+                                        <Dropdown.Item
+                                          eventKey="2"
+                                          onClick={async (e) => {
+                                            e.stopPropagation()
+                                            try {
+                                              const res = await postRemovalService(post._id)
+                                              setMsg({ type: 'info', text: '贴文删除成功' })
+                                              setTimeout(() => {
+                                                window.location.reload()
+                                              }, 1000)
+                                            } catch (err) {
+                                              console.log(err)
+                                              setMsg({
+                                                type: 'danger',
+                                                text: (err.response.data) ? err.response.data.msg : ''
+                                              })
+                                            }
+
+                                          }}
+                                        >
+                                          删除
+                                        </Dropdown.Item>
+                                      ) : null
+                                  }
+                                </Dropdown.Menu>
+                              </Dropdown>
+                            </Col>
                           ) : null
                         }
                       </Row>
@@ -271,7 +308,7 @@ const NewPostForm = (props) => {
       })
 
       setTimeout(() => {
-        history.go()
+        window.location.reload()
       }, 1000)
     } catch (err) {
       console.log(err.response)
