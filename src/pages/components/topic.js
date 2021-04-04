@@ -39,7 +39,7 @@ const TopicCard = (props) => {
                   <small>
                     <SVG variant="person" fill />
                     <span className="ml-1">
-                      <UserLink user={topic.host}>{topic.host.name}</UserLink>
+                      <UserLink user={topic.host}>{topic.host.name || `@${topic.host.username}`}</UserLink>
                     </span>
                   </small>
                 </Col>
@@ -166,7 +166,7 @@ const TopicList = (props) => {
                         case '4':
                           setDisplayTopics([...topics.sort((a, b) => {
                             if (a.relatedInstitute) {
-                              if(b.relatedInstitute) {
+                              if (b.relatedInstitute) {
                                 return a.relatedInstitute.data.school_id - b.relatedInstitute.data.school_id
                               } else {
                                 return -1

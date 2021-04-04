@@ -9,17 +9,24 @@ import { Formik } from 'formik'
 import * as Yup from 'yup'
 import SVG from '../../utils/svg'
 import { MsgAlert } from './msg'
+import { makePaginations } from './pagination'
 
 const loginService = async credentials => {
   const url = `http://${document.domain}:${constants.serverPort}/user/login`
-  const res = await axios.post(url, credentials)
-  return res
+  return await axios.post(url, credentials)
 }
 
 const signupService = async profile => {
   const url = `http://${document.domain}:${constants.serverPort}/user/signup`
-  const res = await axios.post(url, profile)
-  return res
+  return await axios.post(url, profile)
+}
+
+const modifyUserService = async profile => {
+  const url = `http://${document.domain}:${constants.serverPort}/user/modify`
+  const token = window.localStorage.getItem('token')
+  const auth = (token) ? `bearer ${token}` : null
+
+  return await axios.post(url, profile, { headers: { auth } })
 }
 
 const loginSchema = Yup.object().shape({
@@ -45,45 +52,78 @@ const signupValidator = Yup.object().shape({
   about: Yup.string().max(1000, '个人简介过长，请控制在1000字内'),
 })
 
+const modifyValidator = Yup.object().shape({
+  username: Yup.string()
+    .min(4, '需要至少4个字符')
+    .max(16, '用户名过长，最多16个字符')
+    .nullable(true),
+  password: Yup.string()
+    .min(6, '需要至少6位字符')
+    .max(32, '密码过长，最多32个字符')
+    .nullable(true),
+  name: Yup.string().max(20, '姓名过长，最多20个字符').nullable(true),
+  hint: Yup.string().max(100, '提示过长').nullable(true),
+  year: Yup.string().required('需要选择考生的届次').nullable(true),
+  province: Yup.string().required('需要选择考生的省份').nullable(true),
+  city: Yup.string().required('需要选择考生的城市').nullable(true),
+  about: Yup.string().max(1000, '个人简介过长，请控制在1000字内').nullable(true),
+})
+
 const SignupForm = (props) => {
   const [msg, setMsg] = useState({
     type: '',
     text: ''
   })
 
+  const [loginAs, setLoginAs] = useState(JSON.parse(window.localStorage.getItem('user')))
+
   const resetMsg = () => setMsg({ type: '', text: '' })
+  const history = useHistory()
 
   const handleSubmit = async (body) => {
     resetMsg()
     console.log(body)
     try {
-      const res = await signupService(body)
-      setMsg({ type: 'success', text: res.data.msg })
+      const res = (props.modify) ? await modifyUserService(body) : await signupService(body)
+      setMsg({ type: 'success', text: `${res.data.msg}\n${JSON.stringify(body)}` })
       console.log(res.status)
+      if (props.modify) {
+        window.localStorage.setItem('user', JSON.stringify(res.data.user))
+      }
+      setTimeout(() => { history.push(`/user/${body.username}`); history.go() }, 1000)
     } catch (err) {
-      setMsg({ type: 'danger', text: err.response.data.msg })
+      setMsg({ type: 'danger', text: `${err.response.data.msg}\n${JSON.stringify(body)}` })
       console.log(err)
     }
   }
 
   return (
     <div>
-      {(msg.text.length > 0) ? (<Alert variant={msg.type}>{msg.text}</Alert>) : null}
+      <MsgAlert msg={msg} />
       <Formik
         onSubmit={handleSubmit}
         initialValues={
-          {
+          (props.modify) ? {
+            username: loginAs.username,
+            password: '',
+            name: loginAs.name,
+            hint: loginAs.hint,
+            year: loginAs.year,
+            province: loginAs.region.province,
+            city: loginAs.region.city,
+            about: loginAs.about
+          } : {
             username: '',
             password: '',
             name: '',
             hint: '',
-            year: '2021',
-            province: '44',
-            city: '4401',
+            year: '',
+            province: '',
+            city: '',
             about: ''
           }
         }
-        validationSchema={signupValidator}
+        validationSchema={(props.modify) ? modifyValidator : signupValidator}
       >
         {
           ({
@@ -98,7 +138,7 @@ const SignupForm = (props) => {
           }) => (
             <Form noValidate onSubmit={handleSubmit}>
               <Form.Row>
-                <Col xs={12} sm={4}>
+                <Col xs={12}>
                   <Form.Group>
                     <InputGroup hasValidation>
                       <InputGroup.Prepend>
@@ -118,7 +158,7 @@ const SignupForm = (props) => {
                     </InputGroup>
                   </Form.Group>
                 </Col>
-                <Col xs={12} sm={4}>
+                <Col xs={12} sm={6}>
                   <Form.Group>
                     <InputGroup hasValidation>
                       <InputGroup.Prepend>
@@ -139,7 +179,7 @@ const SignupForm = (props) => {
                     </InputGroup>
                   </Form.Group>
                 </Col>
-                <Col xs={12} sm={4}>
+                <Col xs={12} sm={6}>
                   <Form.Group>
                     <InputGroup hasValidation>
                       <InputGroup.Prepend>
@@ -220,6 +260,7 @@ const SignupForm = (props) => {
                         isValid={touched.province && !errors.province}
                         isInvalid={!!errors.province}
                       >
+                        <option value=''>...</option>
                         {
                           constants.regions.map((r) => (<option value={r.region_id}>{r.region_name}</option>))
                         }
@@ -241,6 +282,7 @@ const SignupForm = (props) => {
                         isValid={touched.city && !errors.city}
                         isInvalid={!!errors.city}
                       >
+                        <option value=''>...</option>
                         {
                           constants.cities
                             .filter(city => city.city_id.slice(0, 2) === values.province)
@@ -277,8 +319,8 @@ const SignupForm = (props) => {
               <Form.Row>
                 <Col xs="auto">
                   <Button type="submit" variant="success">
-                    提交注册
-                </Button>
+                    {(props.modify) ? '修改个人信息' : '注册'}
+                  </Button>
                 </Col>
                 <Col xs="auto">
                   <Button
@@ -401,20 +443,10 @@ const LoginForm = (props) => {
 
 }
 
-const UserListItem = (props) => {
-  const user = props.user
-  const history = useHistory()
-
-  return (
-    <>
-
-    </>
-  )
-}
-
 const UserCard = (props) => {
   const user = props.user
   const history = useHistory()
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
 
   return (
     (user) ? (
@@ -428,35 +460,25 @@ const UserCard = (props) => {
               <Col>
                 <Row>
                   <Col>
-                    <Button variant="link" className="p-0" onClick={(e) => {
-                      history.push(`/user/${user.username}`)
-                      history.go()
-                    }}>
+                    <a href={`/user/${user.username}`}>
                       <b>{user.name}</b>
-                    </Button>
-                    <code>@{user.username}</code>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs="auto">
-                    <p>
-                      {
-                        (user.region) ? (
-                          <small>
-                            <SVG variant="location" className="pr-1" />
-                            {constants.regions.find(r => r.region_id === user.region.province).region_name}, {constants.cities.find(c => c.city_id === user.region.city).city_name}
-                          </small>
-                        ) : null
-                      }
-                    </p>
+                    </a>
+                    <br />
+                      <small className="text-info">@{user.username}</small>
                   </Col>
                 </Row>
               </Col>
               <Col xs="auto">
-                <Button variant="success" size="sm">关注</Button>
+                {
+                  (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
+                    (<Button style={{ width: 48 }} size="sm" variant="info">已关注</Button>)
+                    :
+                    (<Button style={{ width: 48 }} size="sm" variant="outline-info">关注</Button>)
+                  ) : null
+                }
               </Col>
             </Row>
-            <Row>
+            <Row className="mt-2">
               <Col>
                 <a href={`/user/${user.username}/following`}>
                   {user.following.length} 关注中
@@ -468,12 +490,9 @@ const UserCard = (props) => {
                     </a>
               </Col>
             </Row>
-            <Row>
+            <Row className="mt-1">
               <Col>
-                <p>
-                  <hr className="m-1" />
                   {user.about}
-                </p>
               </Col>
             </Row>
           </Col>
@@ -482,6 +501,61 @@ const UserCard = (props) => {
     ) : null
   )
 
+}
+
+const UserListItem = (props) => {
+  const user = props.user
+  const history = useHistory()
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
+
+  return (
+    <>
+      <ListGroup.Item action>
+        {(user) ? (
+          <>
+            <Row>
+              <Col xs="auto" className="pr-0">
+                <Image width={48} height={48} />
+              </Col>
+              <Col>
+                <Row>
+                  <Col>
+                    <Row>
+                      <Col>
+                        <a href={`/user/${user.username}`}>
+                          <b>{user.name}</b>
+                        </a>
+                        <br />
+                        <small className="text-info">@{user.username}</small>
+                      </Col>
+                    </Row>
+                  </Col>
+                  <Col xs="auto">
+                    {
+                      (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
+                        (<Button style={{ width: 48 }} size="sm" variant="info">已关注</Button>)
+                        :
+                        (<Button style={{ width: 48 }} size="sm" variant="outline-info">关注</Button>)
+                      ) : null
+                    }
+                  </Col>
+                </Row>
+                {
+                  (user.about) ? (
+                    <Row className="">
+                      <Col>
+                        {user.about}
+                      </Col>
+                    </Row>
+                  ) : null
+                }
+              </Col>
+            </Row>
+          </>
+        ) : null}
+      </ListGroup.Item>
+    </>
+  )
 }
 
 
@@ -498,7 +572,7 @@ const UserLink = (props) => {
   return (
     <>
       <OverlayTrigger rootClose trigger="click" placement="auto" overlay={UserPopover}>
-        <Button size="sm" variant="link" className="p-0 align-baseline"  onClick={
+        <Button size="sm" variant="link" className="p-0 align-baseline" onClick={
           (e) => {
             e.stopPropagation()
           }
@@ -509,6 +583,45 @@ const UserLink = (props) => {
 }
 
 const UserList = (props) => {
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
+  const [users, setUsers] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const userPerPage = props.userPerPage || 20
+
+  useEffect(() => { setUsers(props.users) }, [props.users])
+
+  return (
+    <>
+      <ListGroup variant="flush">
+        <ListGroup.Item>
+          <Row>
+            <Col>
+              <span className="annotation">
+                共 {users.length} 名用户
+              </span>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+        {
+          (users.length) ? (
+            <>
+              {
+                (users.slice((currentPage - 1) * userPerPage, (currentPage) * userPerPage).map((user) => {
+                  return (<UserListItem user={user} />)
+                }))
+              }
+              <ListGroup.Item>
+                {makePaginations(currentPage, setCurrentPage, Math.ceil(users.length / userPerPage), 4)}
+              </ListGroup.Item>
+            </>
+          ) : null
+        }
+      </ListGroup>
+    </>
+  )
 
 }
 
@@ -516,4 +629,4 @@ const UserNav = (props) => {
 
 }
 
-export { SignupForm, LoginForm, UserCard, UserLink, UserListItem }
+export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList }

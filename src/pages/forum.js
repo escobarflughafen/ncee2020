@@ -75,6 +75,7 @@ const ListPage = (props) => {
 
     const handleQuery = async () => {
       console.log(queryTags)
+      setMsg({type: 'info', text: '搜索中...'})
       const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
       try {
         const res = await axios.post(url, {
@@ -222,9 +223,13 @@ const ListPage = (props) => {
                 <Nav.Item>
                   <NavLink to={`${url}/filter`} className="nav-link" activeClassName="active">筛选</NavLink>
                 </Nav.Item>
+                {
+                  /*
                 <Nav.Item>
                   <NavLink to={`${url}/reply`} className="nav-link" activeClassName="active">互动</NavLink>
                 </Nav.Item>
+                  */
+                }
               </Nav>
             </Card.Header>
             <Switch>

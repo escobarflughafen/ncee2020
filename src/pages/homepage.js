@@ -20,8 +20,10 @@ const HomePage = (props) => {
   const history = useHistory()
 
   useEffect(() => {
-    if (window.localStorage.getItem('user')) {
-      setUser(JSON.parse(window.localStorage.getItem('user')))
+    const loginAs = window.localStorage.getItem('user')
+    if (loginAs) {
+      setUser(JSON.parse(loginAs))
+      document.title = `${constants.title.homepage} - ${constants.appName}`
     }
   }, [])
 

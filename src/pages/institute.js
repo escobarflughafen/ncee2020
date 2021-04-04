@@ -1053,7 +1053,7 @@ const InstituteTable = (props) => {
                 <span>
                   <SVG variant="sort" />
                 </span>
-                <Col className="ml-auto">
+                <Col>
                   <Form.Control as="select" defaultValue="名称" size="sm" onChange={
                     (e) => {
                       switch (e.target.value) {
@@ -1086,8 +1086,6 @@ const InstituteTable = (props) => {
                     <option>校名</option>
                     <option>地区</option>
                     <option>类别</option>
-                    <option>理科最低分数</option>
-                    <option>文科最低分数</option>
                   </Form.Control>
                 </Col>
               </Row>

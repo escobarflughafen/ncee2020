@@ -10,68 +10,10 @@ import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm } from './components/post'
-import { UserListItem } from './components/user'
+import { UserListItem, UserList, SignupForm, UserCard } from './components/user'
 import axios from 'axios'
+import { MsgAlert } from './components/msg'
 
-const demoUser = {
-  username: 'user',
-  name: 'Gaia',
-  avatar: '',
-  year: '2021',
-  region: {
-    province: '11',
-    city: '1101'
-  },
-  score: 600,
-  about: 'feeling good today',
-  registeredDate: new Date(Date.now()),
-  isAdmin: true,
-  follower: [],
-  following: []
-}
-
-
-const demoUser1 = {
-  username: 'user1',
-  name: 'John Smith',
-  avatar: '',
-  year: '2021',
-  region: {
-    province: '44',
-    city: '4401'
-  },
-  score: 632,
-  about: 'feeling good today',
-  registeredDate: new Date(Date.now()),
-  isAdmin: false,
-  follower: [],
-  following: [demoUser]
-}
-
-const demoUser2 = {
-  username: 'user2',
-  name: 'Alexa',
-  avatar: '',
-  year: '2021',
-  region: {
-    province: '11',
-    city: '1101'
-  },
-  score: 600,
-  about: 'feeling good today',
-  registeredDate: new Date(Date.now()),
-  isAdmin: true,
-  follower: [],
-  following: [demoUser]
-}
-
-const UserList = (props) => {
-  return (
-    <ListGroup variant="flush">
-
-    </ListGroup>
-  )
-}
 
 const UserActivity = (props) => {
   return (
@@ -83,13 +25,14 @@ const UserActivity = (props) => {
 
 const UserHeader = (props) => {
   const user = props.user
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
   return (
     <div className="mb-3">
       <Row>
         <Col xs="auto">
-          <Image height={96} width={96} className="d-md-block d-none"/>
-          <Image height={64} width={64} className="d-none d-md-none d-sm-block"/>
-          <Image height={48} width={48} className="d-sm-none"/>
+          <Image height={96} width={96} className="d-md-block d-none" />
+          <Image height={64} width={64} className="d-none d-md-none d-sm-block" />
+          <Image height={48} width={48} className="d-sm-none" />
         </Col>
         <Col className="pl-0">
           <Row>
@@ -105,27 +48,43 @@ const UserHeader = (props) => {
                 </Col>
               </Row>
               <Row className="text-muted">
-                <Col xs="auto" className="pr-0">
+                <Col xs={12} sm="auto" className="pr-0">
                   <small>
                     <SVG variant="location" className="mr-1" />
+                    <span>
                     {constants.regions.find(r => r.region_id === user.region.province).region_name}, {constants.cities.find(c => c.city_id === user.region.city).city_name}
+                    </span>
                   </small>
                 </Col>
-                <Col xs="auto" className="pr-0">
+                <Col xs={12} sm="auto" className="pr-0">
                   <small>
                     <SVG variant="calendar" className="mr-1" />
-                    {user.registeredDate.toLocaleString('zh', constants.shortDateOptions)} 加入
+                    <span>
+                    {new Date(user.registeredDate).toLocaleDateString('zh', constants.shortDateOptions)} 加入
+                    </span>
                     </small>
                 </Col>
               </Row>
             </Col>
           </Row>
-          <Row>
-            <Col>
-              <hr className="my-1" />
-              {user.about}
-            </Col>
-          </Row>
+          {
+            (user.about) ? (
+              <Row className="mt-3">
+                <Col>
+                  {user.about}
+                </Col>
+              </Row>
+            ) : null
+          }
+        </Col>
+        <Col xs="auto">
+          {
+            (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
+              (<Button style={{ width: 48 }} size="sm" variant="info">已关注</Button>)
+              :
+              (<Button style={{ width: 48 }} size="sm" variant="outline-info">关注</Button>)
+            ) : null
+          }
         </Col>
       </Row>
     </div>
@@ -133,59 +92,100 @@ const UserHeader = (props) => {
 }
 
 
+const fetchUserService = async (username, port = constants.serverPort) => {
+  const url = `http://${document.domain}:${constants.serverPort}/user/${username}/fetch`
+  const res = await axios.post(url, { username })
+  return res
+}
 
 const UserDetail = (props) => {
   const [user, setUser] = useState()
   const { url, path, params } = useRouteMatch()
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
+  const username = useParams().username
+  const [loginAs, setLoginAs] = useState()
 
-  useEffect(() => {
-    const url = '123'
-    setUser({ ...demoUser1 })
-  }, [useParams().username])
+  useEffect(async () => {
+    setLoginAs(JSON.parse(window.localStorage.user))
+    try {
+      const res = await fetchUserService(username)
+      // hint: the setState can be proceed by a callback to synchronize the control of prevstate
+      /*
+      setUser((user) => {
+        console.log(user)
+        return res.data.user
+      })
+      */
+      setUser(res.data.user)
+      document.title = `${res.data.user.username} - ${constants.title.user} - ${constants.appName}`
+    } catch (err) {
+      setMsg({ type: 'danger', text: `找不到用户: ${username}` })
+    }
+
+  }, [username])
 
   return (
     <>
+      <MsgAlert msg={msg} />
       {
         (user) ? (
           <>
             <UserHeader user={user} />
+            <UserListItem user={user} />
+            <UserCard user={user} />
+
             <Router>
               <Card>
                 <Card.Header>
                   <Nav variant="tabs">
                     <Nav.Item>
-                      <NavLink className="nav-link" activeClassName="active" to={`activity`}>
+                      <NavLink className="nav-link p-2" activeClassName="active" to={`activity`}>
                         活动
                       </NavLink>
                     </Nav.Item>
                     <Nav.Item>
-                      <NavLink className="nav-link" activeClassName="active" to={`following`}>
-                        关注中 ({user.following.length})
+                      <NavLink className="nav-link p-2" activeClassName="active" to={`following`}>
+                        关注中
                       </NavLink>
                     </Nav.Item>
                     <Nav.Item>
-                      <NavLink className="nav-link" activeClassName="active" to={`follower`}>
-                        关注者 ({user.follower.length})
+                      <NavLink className="nav-link p-2" activeClassName="active" to={`follower`}>
+                        关注者
                       </NavLink>
                     </Nav.Item>
+                    {
+                      (loginAs && (loginAs._id === user._id)) ? (
+                        <Nav.Item>
+                          <NavLink className="nav-link p-2" activeClassName="active" to={`profile`}>
+                            个人资料
+                      </NavLink>
+                        </Nav.Item>
+                      ) : null
+                    }
                   </Nav>
                 </Card.Header>
-                <Card.Body>
-                  <Switch>
-                    <Route path={`${url}`} exact={true}>
-                      <Redirect to={`${url}/activity`} />
+                <Switch>
+                  <Route path={`${url}`} exact={true}>
+                    <Redirect to={`${url}/activity`} />
+                  </Route>
+                  <Route path={`${url}/activity`}>
+                    123
                     </Route>
-                    <Route path={`${url}/activity`}>
-                      <UserActivity />
-                    </Route>
-                    <Route path={`${url}/following`}>
-                      <UserList users={user.following} />
-                    </Route>
-                    <Route path={`${url}/follower`}>
-                      <UserList users={user.follower} />
-                    </Route>
-                  </Switch>
-                </Card.Body>
+                  <Route path={`${url}/following`}>
+                    <UserList users={user.following} />
+                  </Route>
+                  <Route path={`${url}/follower`}>
+                    <UserList users={user.follower} />
+                  </Route>
+                  <Route path={`${url}/profile`}>
+                    <Card.Body>
+                      <SignupForm modify />
+                    </Card.Body>
+                  </Route>
+                </Switch>
               </Card>
             </Router>
           </>

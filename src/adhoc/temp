@@ -279,3 +279,55 @@ const SignUpForm = (props) => {
     </>
   )
 }
+const demoUser = {
+  username: 'user',
+  name: 'Gaia',
+  avatar: '',
+  year: '2021',
+  region: {
+    province: '11',
+    city: '1101'
+  },
+  score: 600,
+  about: 'feeling good today',
+  registeredDate: new Date(Date.now()),
+  isAdmin: true,
+  follower: [],
+  following: []
+}
+
+
+const demoUser1 = {
+  username: 'user1',
+  name: 'John Smith',
+  avatar: '',
+  year: '2021',
+  region: {
+    province: '44',
+    city: '4401'
+  },
+  score: 632,
+  about: 'feeling good today',
+  registeredDate: new Date(Date.now()),
+  isAdmin: false,
+  follower: [],
+  following: [demoUser]
+}
+
+const demoUser2 = {
+  username: 'user2',
+  name: 'Alexa',
+  avatar: '',
+  year: '2021',
+  region: {
+    province: '11',
+    city: '1101'
+  },
+  score: 600,
+  about: 'feeling good today',
+  registeredDate: new Date(Date.now()),
+  isAdmin: true,
+  follower: [],
+  following: [demoUser]
+}
+

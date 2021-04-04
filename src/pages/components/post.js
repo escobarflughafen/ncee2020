@@ -129,7 +129,7 @@ const PostCard = (props) => {
             <Row>
               <Col>
                 <small>
-                  <UserLink user={post.author}>{post.author.name}</UserLink>
+                  <UserLink user={post.author}>{post.author.name || `@${post.author.username}`}</UserLink>
                   {(host) ? (<SVG variant="person" fill />) : (<></>)}
                   {
                     (expanded) ? null : (
