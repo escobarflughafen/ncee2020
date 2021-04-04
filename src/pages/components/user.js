@@ -29,6 +29,14 @@ const modifyUserService = async profile => {
   return await axios.post(url, profile, { headers: { auth } })
 }
 
+const toggleFollowService = async user => {
+  const url = `http://${document.domain}:${constants.serverPort}/user/togglefollow`
+  const token = window.localStorage.getItem('token')
+  const auth = (token) ? `bearer ${token}` : null
+
+  return await axios.post(url, { user }, { headers: { auth } })
+}
+
 const loginSchema = Yup.object().shape({
   username: Yup.string().required('请输入用户名'),
   password: Yup.string().required('请输入密码')
@@ -447,10 +455,28 @@ const UserCard = (props) => {
   const user = props.user
   const history = useHistory()
   const loginAs = JSON.parse(window.localStorage.getItem('user'))
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
+
+  const handleFollow = async (e) => {
+    e.stopPropagation()
+    try {
+      const res = await toggleFollowService(user._id)
+      setMsg({ type: 'success', text: res.data.msg })
+      window.localStorage.setItem('user', JSON.stringify(res.data.user))
+      setTimeout(() => { history.go() }, 1000)
+    } catch (err) {
+      console.log(err.response)
+      setMsg({ type: 'danger', text: err.response.data.msg })
+    }
+  }
 
   return (
     (user) ? (
       <>
+        <MsgAlert msg={msg} />
         <Row>
           <Col xs="auto" className="pr-0">
             <Image width={48} height={48} />
@@ -464,16 +490,16 @@ const UserCard = (props) => {
                       <b>{user.name}</b>
                     </a>
                     <br />
-                      <small className="text-info">@{user.username}</small>
+                    <small className="text-info">@{user.username}</small>
                   </Col>
                 </Row>
               </Col>
               <Col xs="auto">
                 {
                   (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
-                    (<Button style={{ width: 48 }} size="sm" variant="info">已关注</Button>)
+                    (<Button size="sm" variant="info" onClick={handleFollow}>已关注</Button>)
                     :
-                    (<Button style={{ width: 48 }} size="sm" variant="outline-info">关注</Button>)
+                    (<Button size="sm" variant="outline-info" onClick={handleFollow}>关注</Button>)
                   ) : null
                 }
               </Col>
@@ -492,7 +518,7 @@ const UserCard = (props) => {
             </Row>
             <Row className="mt-1">
               <Col>
-                  {user.about}
+                {user.about}
               </Col>
             </Row>
           </Col>
@@ -507,10 +533,31 @@ const UserListItem = (props) => {
   const user = props.user
   const history = useHistory()
   const loginAs = JSON.parse(window.localStorage.getItem('user'))
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
 
+  const handleFollow = async (e) => {
+    e.stopPropagation()
+    try {
+      const res = await toggleFollowService(user._id)
+      setMsg({ type: 'success', text: res.data.msg })
+      window.localStorage.setItem('user', JSON.stringify(res.data.user))
+      setTimeout(() => { history.go() }, 1000)
+    } catch (err) {
+      console.log(err.response)
+      setMsg({ type: 'danger', text: err.response.data.msg })
+    }
+  }
   return (
     <>
       <ListGroup.Item action>
+        <Row>
+          <Col>
+            <MsgAlert msg={msg} />
+          </Col>
+        </Row>
         {(user) ? (
           <>
             <Row>
@@ -533,9 +580,9 @@ const UserListItem = (props) => {
                   <Col xs="auto">
                     {
                       (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
-                        (<Button style={{ width: 48 }} size="sm" variant="info">已关注</Button>)
+                        (<Button size="sm" variant="info" onClick={handleFollow}>已关注</Button>)
                         :
-                        (<Button style={{ width: 48 }} size="sm" variant="outline-info">关注</Button>)
+                        (<Button size="sm" variant="outline-info" onClick={handleFollow}>关注</Button>)
                       ) : null
                     }
                   </Col>
@@ -629,4 +676,4 @@ const UserNav = (props) => {
 
 }
 
-export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList }
+export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService }

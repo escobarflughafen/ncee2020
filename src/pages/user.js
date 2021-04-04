@@ -10,7 +10,7 @@ import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm } from './components/post'
-import { UserListItem, UserList, SignupForm, UserCard } from './components/user'
+import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService } from './components/user'
 import axios from 'axios'
 import { MsgAlert } from './components/msg'
 
@@ -26,8 +26,26 @@ const UserActivity = (props) => {
 const UserHeader = (props) => {
   const user = props.user
   const loginAs = JSON.parse(window.localStorage.getItem('user'))
+  const history = useHistory()
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
+  const handleFollow = async (e) => {
+    e.stopPropagation()
+    try {
+      const res = await toggleFollowService(user._id)
+      setMsg({ type: 'success', text: res.data.msg })
+      window.localStorage.setItem('user', JSON.stringify(res.data.user))
+      setTimeout(() => { history.go() }, 1000)
+    } catch (err) {
+      console.log(err.response)
+      setMsg({ type: 'danger', text: err.response.data.msg })
+    }
+  }
   return (
     <div className="mb-3">
+      <MsgAlert msg={msg} />
       <Row>
         <Col xs="auto">
           <Image height={96} width={96} className="d-md-block d-none" />
@@ -52,7 +70,7 @@ const UserHeader = (props) => {
                   <small>
                     <SVG variant="location" className="mr-1" />
                     <span>
-                    {constants.regions.find(r => r.region_id === user.region.province).region_name}, {constants.cities.find(c => c.city_id === user.region.city).city_name}
+                      {constants.regions.find(r => r.region_id === user.region.province).region_name}, {constants.cities.find(c => c.city_id === user.region.city).city_name}
                     </span>
                   </small>
                 </Col>
@@ -60,9 +78,9 @@ const UserHeader = (props) => {
                   <small>
                     <SVG variant="calendar" className="mr-1" />
                     <span>
-                    {new Date(user.registeredDate).toLocaleDateString('zh', constants.shortDateOptions)} 加入
+                      {new Date(user.registeredDate).toLocaleDateString('zh', constants.shortDateOptions)} 加入
                     </span>
-                    </small>
+                  </small>
                 </Col>
               </Row>
             </Col>
@@ -80,9 +98,9 @@ const UserHeader = (props) => {
         <Col xs="auto">
           {
             (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
-              (<Button style={{ width: 48 }} size="sm" variant="info">已关注</Button>)
+              (<Button size="sm" variant="info" onClick={handleFollow}>已关注</Button>)
               :
-              (<Button style={{ width: 48 }} size="sm" variant="outline-info">关注</Button>)
+              (<Button size="sm" variant="outline-info" onClick={handleFollow}>关注</Button>)
             ) : null
           }
         </Col>
@@ -134,8 +152,6 @@ const UserDetail = (props) => {
         (user) ? (
           <>
             <UserHeader user={user} />
-            <UserListItem user={user} />
-            <UserCard user={user} />
 
             <Router>
               <Card>
