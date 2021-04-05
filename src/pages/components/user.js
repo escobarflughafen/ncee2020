@@ -175,7 +175,7 @@ const SignupForm = (props) => {
           <Button className="mr-2" variant="warning" disabled={!imageReady} onClick={() => { setImageReady(false); setImageFile(null); setImagePreviewUrl(loginAs.avatar) }}>
             重置
           </Button>
-          <Button variant="secondary" disabled={!imagePreviewUrl} onClick={() => { setImagePreviewUrl(null); setImageFile(null) }}>
+          <Button variant="dark" disabled={!imagePreviewUrl} onClick={() => { setImagePreviewUrl(null); setImageFile(null) }}>
             不使用头像
           </Button>
         </Col>

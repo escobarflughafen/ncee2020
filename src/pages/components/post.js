@@ -34,6 +34,29 @@ const PostContent = (props) => {
 
   return (
     <>
+      {(post) ? (
+        <>
+          <Row>
+            <Col>
+              {post.content}
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6} md={3} className="mb-3">
+              <Image width={144} height={72} />
+            </Col>
+            <Col xs={6} md={3} className="mb-3">
+              <Image width={144} height={72} />
+            </Col>
+            <Col xs={6} md={3} className="mb-3">
+              <Image width={144} height={72} />
+            </Col>
+            <Col xs={6} md={3} className="mb-3">
+              <Image width={144} height={72} />
+            </Col>
+          </Row>
+        </>
+      ) : null}
     </>
   )
 }
@@ -123,7 +146,7 @@ const PostCard = (props) => {
         </Row>
         <Row>
           <Col xs="auto" className="pr-0">
-            <UserAvatar width={48} height={48} user={post.author}/>
+            <UserAvatar width={48} height={48} user={post.author} />
           </Col>
           <Col>
             <Row>
@@ -159,11 +182,7 @@ const PostCard = (props) => {
                 if (visible) {
                   return (
                     <>
-                      <Row>
-                        <Col>
-                          {post.content}
-                        </Col>
-                      </Row>
+                      <PostContent post={post} />
                       <Row>
                         {
                           // TODO: photos
@@ -242,7 +261,7 @@ const PostCard = (props) => {
                   return (
                     <Row>
                       <Col>
-                        <Alert variant="info" onClick={(e) => {e.stopPropagation()}}>
+                        <Alert variant="info" onClick={(e) => { e.stopPropagation() }}>
                           <span className="mr-1">该贴文已被{(postIsRemovedByAuthor) ? ((userIsAuthor) ? '你' : '创作者') : ((userIsAdmin && (post.removed.by._id === user._id)) ? '你' : '管理员')}移除</span>
                           {(visible) ? (<Alert.Link
                             className="mr-1"
@@ -269,7 +288,7 @@ const PostCard = (props) => {
                           {
                             (removedPostVisible) ? (<>
                               <hr />
-                              <span>{post.content}</span>
+                              <PostContent post={post} />
                             </>) : null
                           }
                         </Alert>
@@ -367,7 +386,7 @@ const NewPostForm = (props) => {
       })
 
       setTimeout(() => {
-        window.location.reload()
+        history.go()
       }, 1000)
     } catch (err) {
       console.log(err.response)
@@ -393,7 +412,7 @@ const NewPostForm = (props) => {
           <Form onSubmit={handleSubmit}>
             <Form.Row>
               <Form.Group as={Col} >
-                <Form.Label>回复内容</Form.Label>
+                <Form.Label>添加回复</Form.Label>
                 <Form.Control
                   as="textarea"
                   placeholder="..."
@@ -405,13 +424,29 @@ const NewPostForm = (props) => {
             </Form.Row>
 
             <Form.Group as={Row} controlId="replyTo">
-              <Col></Col>
+              <Col>
+                {/* image preview */}
+                <Row>
+                  <Col xs="auto" className="pr-1">
+                    <Image width={48} height={48} />
+                  </Col>
+                  <Col xs="auto" className="px-1">
+                    <Image width={48} height={48} />
+                  </Col>
+                  <Col xs="auto" className="px-1">
+                    <Image width={48} height={48} />
+                  </Col>
+                  <Col xs="auto" className="px-1">
+                    <Image width={48} height={48} />
+                  </Col>
+                </Row>
+              </Col>
               <Col xs="auto">
                 <ButtonGroup aria-label="reply" size="sm">
                   <Button variant="outline-dark">添加图片</Button>
                   <Button variant="primary" type="submit">
                     发布
-          </Button>
+                  </Button>
                 </ButtonGroup>
               </Col>
             </Form.Group>
