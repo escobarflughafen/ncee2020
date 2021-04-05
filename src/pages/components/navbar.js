@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHis
 import SVG from '../../utils/svg'
 import constants from '../../utils/constants'
 import App from '../../App'
+import { UserAvatar } from './user'
 
 
 const AppNavbar = (props) => {
@@ -45,7 +46,7 @@ const AppNavbar = (props) => {
               (user) ? (
                 <Nav.Item>
                   <Nav.Link onClick={() => { history.push(`/user/${user.username}`); history.go() }}>
-                    <Image className="mr-2" width={24} height={24} src="https://pbs.twimg.com/media/Expl0JbU8AA4Y4o?format=jpg&name=small" />
+                    <UserAvatar className="mr-2" width={24} height={24} user={user} />
                     <b className="text-light">
                       {user.name}
                     </b>

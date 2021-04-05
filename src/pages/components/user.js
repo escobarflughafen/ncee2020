@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, ModalBody, Popover, OverlayTrigger, Image, InputGroup } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, Spinner, ListGroup, ModalBody, Popover, OverlayTrigger, Image, InputGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory } from 'react-router-dom'
 import constants from '../../utils/constants'
@@ -10,6 +10,9 @@ import * as Yup from 'yup'
 import SVG from '../../utils/svg'
 import { MsgAlert } from './msg'
 import { makePaginations } from './pagination'
+import defaultAvatar from '../../resources/default_avatar.png'
+
+const serverUrl = `http://${document.domain}:${constants.serverPort}`
 
 const loginService = async credentials => {
   const url = `http://${document.domain}:${constants.serverPort}/user/login`
@@ -88,13 +91,35 @@ const SignupForm = (props) => {
   const resetMsg = () => setMsg({ type: '', text: '' })
   const history = useHistory()
 
+  const [imagePreviewUrl, setImagePreviewUrl] = useState()
+  const [imageReady, setImageReady] = useState(false)
+  const [imageFile, setImageFile] = useState()
+
+  useEffect(() => { if (loginAs.avatar) { setImagePreviewUrl(`http://${document.domain}:${constants.serverPort}${loginAs.avatar}`) } }, [loginAs])
+
   const handleSubmit = async (body) => {
     resetMsg()
-    console.log(body)
+    var avatarPath
+    if (imageReady && imageFile) {
+      let formData = new FormData();
+      const filename = imageFile.name.split('.')
+
+      formData.append('image', imageFile, `avatar_${loginAs._id}.${filename[filename.length - 1]}`)
+      try {
+        const url = `http://${document.domain}:${constants.serverPort}/image/uploadsingle`
+        const res = await axios.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        avatarPath = res.data.path
+        console.log(res)
+      } catch (err) {
+        console.log(err)
+        setMsg({ type: 'danger', text: "头像上传失败" })
+      }
+    }
+
     try {
-      const res = (props.modify) ? await modifyUserService(body) : await signupService(body)
+      console.log(body)
+      const res = (props.modify) ? await modifyUserService({ ...body, avatarPath }) : await signupService({ ...body, avatarPath })
       setMsg({ type: 'success', text: `${res.data.msg}\n${JSON.stringify(body)}` })
-      console.log(res.status)
       if (props.modify) {
         window.localStorage.setItem('user', JSON.stringify(res.data.user))
       }
@@ -105,9 +130,57 @@ const SignupForm = (props) => {
     }
   }
 
+
+  const handleImage = (e) => {
+    e.preventDefault()
+
+    if (e.target.files[0]) {
+      var reader = new FileReader()
+      var file = e.target.files[0]
+
+      if (file.type.includes('image')) {
+        reader.onloadend = () => {
+          console.log('file:', file)
+          console.log('result:', reader.result)
+          setImagePreviewUrl(reader.result)
+          setImageFile(file)
+          setImageReady(true)
+        }
+
+        reader.readAsDataURL(file)
+      } else {
+        console.log('err: not image')
+        alert('格式错误，请上传图片')
+      }
+    }
+  }
+
   return (
     <div>
       <MsgAlert msg={msg} />
+      <Form.Row className="mb-3">
+        <Col xs="auto">
+          <Image width={96} height={96} src={imagePreviewUrl} />
+        </Col>
+        <Col>
+          <Form.Group>
+            <Form.File
+              id="avatar"
+              name="avatar"
+              label="头像"
+              onChange={handleImage}
+              custom
+            />
+          </Form.Group>
+          <Button className="mr-2" variant="warning" disabled={!imageReady} onClick={() => { setImageReady(false); setImageFile(null); setImagePreviewUrl(loginAs.avatar) }}>
+            重置
+          </Button>
+          <Button variant="secondary" disabled={!imagePreviewUrl} onClick={() => { setImagePreviewUrl(null); setImageFile(null) }}>
+            不使用头像
+          </Button>
+        </Col>
+      </Form.Row>
+      <hr />
       <Formik
         onSubmit={handleSubmit}
         initialValues={
@@ -326,7 +399,7 @@ const SignupForm = (props) => {
               </Form.Row>
               <Form.Row>
                 <Col xs="auto">
-                  <Button type="submit" variant="success">
+                  <Button type="submit" variant="info">
                     {(props.modify) ? '修改个人信息' : '注册'}
                   </Button>
                 </Col>
@@ -479,7 +552,7 @@ const UserCard = (props) => {
         <MsgAlert msg={msg} />
         <Row>
           <Col xs="auto" className="pr-0">
-            <Image width={48} height={48} />
+                <UserAvatar width={48} height={48} user={user} />
           </Col>
           <Col>
             <Row>
@@ -552,7 +625,7 @@ const UserListItem = (props) => {
   }
   return (
     <>
-      <ListGroup.Item action>
+      <ListGroup.Item action onClick={(e) => { e.stopPropagation(); history.push(`/user/${user.username}`); history.go() }}>
         <Row>
           <Col>
             <MsgAlert msg={msg} />
@@ -562,7 +635,7 @@ const UserListItem = (props) => {
           <>
             <Row>
               <Col xs="auto" className="pr-0">
-                <Image width={48} height={48} />
+                <UserAvatar width={48} height={48} user={user} />
               </Col>
               <Col>
                 <Row>
@@ -676,4 +749,12 @@ const UserNav = (props) => {
 
 }
 
-export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService }
+const UserAvatar = (props) => {
+  let { user, src, ...otherprops } = props
+  
+  return (
+    <Image {...otherprops} src={(user.avatar) ? `${serverUrl}${user.avatar}` : defaultAvatar} />
+  )
+}
+
+export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService, UserAvatar }

@@ -9,7 +9,7 @@ import SVG from '../../utils/svg'
 import { makePaginations } from './pagination'
 import { timeStringConverter } from '../../utils/util'
 import { TopicCard, TopicList } from './topic'
-import { UserLink } from './user'
+import { UserLink, UserAvatar } from './user'
 import axios from 'axios'
 import { InstituteCard } from './institute'
 import { MsgAlert } from './msg'
@@ -123,7 +123,7 @@ const PostCard = (props) => {
         </Row>
         <Row>
           <Col xs="auto" className="pr-0">
-            <Image width={48} height={48} src="https://inspiretothrive-inspiretothrive.netdna-ssl.com/wp-content/uploads/2017/03/new-twitter-profile.png"/>
+            <UserAvatar width={48} height={48} user={post.author}/>
           </Col>
           <Col>
             <Row>

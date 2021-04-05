@@ -89,7 +89,7 @@ const ListPage = (props) => {
         }
       } catch (err) {
         console.log(err.response)
-        setMsg({ type: 'danger', text: err.response.data.msg })
+        setMsg({ type: 'danger', text: (err.response)?err.response.data.msg:'未能正确处理请求' })
       }
     }
 

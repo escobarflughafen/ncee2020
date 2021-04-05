@@ -10,10 +10,11 @@ import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm } from './components/post'
-import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService } from './components/user'
+import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService, UserAvatar } from './components/user'
 import axios from 'axios'
 import { MsgAlert } from './components/msg'
 
+const serverUrl = `http://${document.domain}:${constants.serverPort}`
 
 const UserActivity = (props) => {
   return (
@@ -48,9 +49,7 @@ const UserHeader = (props) => {
       <MsgAlert msg={msg} />
       <Row>
         <Col xs="auto">
-          <Image height={96} width={96} className="d-md-block d-none" />
-          <Image height={64} width={64} className="d-none d-md-none d-sm-block" />
-          <Image height={48} width={48} className="d-sm-none" />
+          <UserAvatar width={96} height={96} user={user} />
         </Col>
         <Col className="pl-0">
           <Row>
@@ -127,7 +126,8 @@ const UserDetail = (props) => {
   const [loginAs, setLoginAs] = useState()
 
   useEffect(async () => {
-    setLoginAs(JSON.parse(window.localStorage.user))
+    setLoginAs(JSON.parse(window.localStorage.getItem('user')))
+    
     try {
       const res = await fetchUserService(username)
       // hint: the setState can be proceed by a callback to synchronize the control of prevstate
