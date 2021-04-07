@@ -9,15 +9,19 @@ import SVG from '../utils/svg'
 import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
-import { PostCard, NewPostForm } from './components/post'
-import { LoginForm } from './components/user'
+import { PostCard, NewPostForm, PostList } from './components/post'
+import { LoginForm, UserActivity } from './components/user'
 import axios from 'axios'
-
 
 const HomePage = (props) => {
   const today = new Date()
   const [user, setUser] = useState()
   const history = useHistory()
+  const [posts, setPosts] = useState()
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
 
   useEffect(() => {
     const loginAs = window.localStorage.getItem('user')
@@ -27,6 +31,27 @@ const HomePage = (props) => {
     }
   }, [])
 
+  /*
+  useEffect(async () => {
+    const token = window.localStorage.getItem('token')
+    if (token) {
+      const auth = `bearer ${token}`
+      const url = `http://${document.domain}:${constants.serverPort}/post/fetchfollowedpost`
+
+      try {
+        const res = await axios.post(url, {}, { headers: { auth } })
+        console.log(res)
+        setPosts(res.data.posts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+      } catch (err) {
+        console.log(err.response)
+        setMsg({
+          type: 'danger',
+          text: (err.response.data) ? err.response.data.req : '未能找到关注中用户的贴文'
+        })
+      }
+    }
+  }, [user])
+  */
   return (
     <>
       <div className="container">
@@ -45,7 +70,7 @@ const HomePage = (props) => {
                 <Col className="d-lg-none" xs="auto">
                   <Card.Text>
                     <Button variant="link" className="p-0 text-success" onClick={() => { history.push('/login'); history.go() }}>
-                        登入
+                      登入
                     </Button>
                   </Card.Text>
                 </Col>
@@ -57,99 +82,53 @@ const HomePage = (props) => {
               <Alert variant="info">
                 今天是 <b>{today.toLocaleString('zh', constants.shortDateOptions)}</b>，距离高考还有 <b className="text-primary">{Math.floor((constants.dayOfNCEE.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))}</b> 天
                 </Alert>
-              <Button variant="link" size="sm" className="text-success"
-                onClick={() => {
-                  history.push('/institute')
-                }}
-              >查学校→</Button>
-              <br />
-              <Button variant="link" size="sm" className="text-success"
-                onClick={() => {
-                  history.push('/forum')
-                }}
-              >讨论区→</Button>
-              <br />
-              <Button variant="link" size="sm" className="text-success"
-                onClick={() => {
-                  history.push('/stats')
-                }}
-              >看数据→</Button>
+              {
+                /* 
+                  <Button variant="link" size="sm" className="text-success"
+                    onClick={() => {
+                      history.push('/institute')
+                    }}
+                  >查学校→</Button>
+                  <br />
+                  <Button variant="link" size="sm" className="text-success"
+                    onClick={() => {
+                      history.push('/forum')
+                    }}
+                  >讨论区→</Button>
+                  <br />
+                  <Button variant="link" size="sm" className="text-success"
+                    onClick={() => {
+                      history.push('/stats')
+                    }}
+                  >看数据→</Button>
+                */
+              }
             </p>
           </Card.Text>
-          <Card.Title as="h3">
-            推荐院校
-        </Card.Title>
-          <Card.Text>
-            <Carousel>
-              <Carousel.Item>
-                <Carousel.Caption>
-                  <h3>First slide label</h3>
-                  <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
-                </Carousel.Caption>
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  alt="Second slide"
-                />
-
-                <Carousel.Caption>
-                  <h3>Second slide label</h3>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                </Carousel.Caption>
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  alt="Third slide"
-                />
-
-                <Carousel.Caption>
-                  <h3>Third slide label</h3>
-                  <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
-                </Carousel.Caption>
-              </Carousel.Item>
-            </Carousel>
-          </Card.Text>
-          <Card.Title as="h3">
-            热门话题
-        </Card.Title>
-          <Card.Text>
-            <Carousel>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  alt="First slide"
-                />
-                <Carousel.Caption>
-                  <h3>First slide label</h3>
-                  <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
-                </Carousel.Caption>
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  alt="Second slide"
-                />
-
-                <Carousel.Caption>
-                  <h3>Second slide label</h3>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                </Carousel.Caption>
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  alt="Third slide"
-                />
-
-                <Carousel.Caption>
-                  <h3>Third slide label</h3>
-                  <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
-                </Carousel.Caption>
-              </Carousel.Item>
-            </Carousel>
-          </Card.Text>
+          <Row>
+            {
+              (user) ? (
+                <Col xs={12} lg={12}>
+                  <Card.Title as="h4">
+                    你关注的
+                </Card.Title>
+                  <Card className="mb-3">
+                    <UserActivity users={user.following} />
+                  </Card>
+                </Col>
+              ) : null
+            }
+            <Col xs={12} lg={6}>
+              <Card.Title as="h4">
+                推荐院校
+              </Card.Title>
+            </Col>
+            <Col>
+              <Card.Title as="h4">
+                热门话题
+              </Card.Title>
+            </Col>
+          </Row>
 
         </Card.Body>
       </div>

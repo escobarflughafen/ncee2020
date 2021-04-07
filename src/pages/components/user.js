@@ -11,6 +11,8 @@ import SVG from '../../utils/svg'
 import { MsgAlert } from './msg'
 import { makePaginations } from './pagination'
 import defaultAvatar from '../../resources/default_avatar.png'
+import { PostCard } from './post'
+import { TopicCard } from './topic'
 
 const serverUrl = `http://${document.domain}:${constants.serverPort}`
 
@@ -552,7 +554,7 @@ const UserCard = (props) => {
         <MsgAlert msg={msg} />
         <Row>
           <Col xs="auto" className="pr-0">
-                <UserAvatar width={48} height={48} user={user} />
+            <UserAvatar width={48} height={48} user={user} />
           </Col>
           <Col>
             <Row>
@@ -577,7 +579,7 @@ const UserCard = (props) => {
                 }
               </Col>
             </Row>
-            <Row className="mt-2">
+            <Row className="mt-2" onClick={(e) => {e.stopPropagation()}}>
               <Col>
                 <a href={`/user/${user.username}/following`}>
                   {user.following.length} 关注中
@@ -749,12 +751,80 @@ const UserNav = (props) => {
 
 }
 
+const UserActivity = (props) => {
+  const [contents, setContents] = useState([])
+  const activityPerPage = 12 || props.activityPerPage
+  const [currentPage, setCurrentPage] = useState(1)
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
+
+  useEffect(async () => {
+    const users = (props.users || ((props.user)?[props.user]:null))
+    if (users) {
+      const postUrl = `http://${document.domain}:${constants.serverPort}/post/fetch`
+      const topicUrl = `http://${document.domain}:${constants.serverPort}/forum/fetch`
+
+      try {
+        setMsg({ type: 'info', text: '获取动态中' })
+        const postRes = await axios.post(postUrl, { users })
+        const topicRes = await axios.post(topicUrl, { users })
+
+        const posts = postRes.data.posts
+        const topics = topicRes.data.topics
+        console.log(posts, topics)
+        let contents = [...posts, ...topics].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        setContents(contents)
+        setMsg({ type: '', text: '' })
+      } catch (err) {
+        console.log(err)
+        setMsg({ type: 'danger', text: '获取个人动态失败' })
+      }
+    }
+  }, [props.user, props.users])
+
+  return (
+    <>
+      <ListGroup variant="flush">
+        <ListGroup.Item>
+          <MsgAlert msg={msg} />
+          {(contents.length) ? (
+            <div className="annotation">共 {contents.length} 条动态</div>
+          ) : null}
+        </ListGroup.Item>
+        {
+          (contents.length) ? (
+            contents.slice((currentPage - 1) * activityPerPage, (currentPage) * activityPerPage).map((content) => {
+              if (content.author) {
+                return (<PostCard post={content} detail/>)
+              } else if (content.host) {
+                return (<TopicCard topic={content} />)
+              } else {
+                return (<ListGroup.Item></ListGroup.Item>)
+              }
+            })
+          ) : (
+            <ListGroup.Item>
+              <span className="annotation">这个用户还没有发布过内容</span>
+            </ListGroup.Item>
+          )
+        }
+        <ListGroup.Item>
+          {makePaginations(currentPage, setCurrentPage, Math.ceil(contents.length / activityPerPage), 4)}
+        </ListGroup.Item>
+      </ListGroup>
+    </>
+  )
+}
+
+
 const UserAvatar = (props) => {
   let { user, src, ...otherprops } = props
-  
+
   return (
     <Image {...otherprops} src={(user.avatar) ? `${serverUrl}${user.avatar}` : defaultAvatar} />
   )
 }
 
-export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService, UserAvatar }
+export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService, UserAvatar, UserActivity }

@@ -41,6 +41,8 @@ const PostContent = (props) => {
               {post.content}
             </Col>
           </Row>
+          {/*
+          
           <Row>
             <Col xs={6} md={3} className="mb-3">
               <Image width={144} height={72} />
@@ -55,6 +57,8 @@ const PostContent = (props) => {
               <Image width={144} height={72} />
             </Col>
           </Row>
+          
+          */}
         </>
       ) : null}
     </>
@@ -63,6 +67,7 @@ const PostContent = (props) => {
 
 const PostCard = (props) => {
   const expanded = props.expanded || false
+  const detail = props.detail
   const index = props.index
   const host = props.host
   const setReplyTo = props.setReplyTo
@@ -126,7 +131,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="success">
           <Row>
             <Col>
-              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}><b>{post.relatedTopic.title}</b></Alert.Link>
+              讨论：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}><b>{post.relatedTopic.title}</b></Alert.Link>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -144,6 +149,21 @@ const PostCard = (props) => {
             <MsgAlert msg={msg} />
           </Col>
         </Row>
+        {(detail) ? (
+          <Row className="mb-2 text-black-50">
+            <Col>
+              {(() => {
+                if (post.replyTo) {
+                  return (<small>回复：<b>{post.replyTo.content}</b></small>)
+                } else if (post.relatedInstitute) {
+                  return (<small>院校评价：<b>{post.relatedInstitute.data.name}</b></small>)
+                } else if (post.relatedTopic) {
+                  return (<small>参与讨论：<b>{post.relatedTopic.title}</b></small>)
+                }
+              })()}
+            </Col>
+          </Row>
+        ) : null}
         <Row>
           <Col xs="auto" className="pr-0">
             <UserAvatar width={48} height={48} user={post.author} />
@@ -321,6 +341,7 @@ const PostList = (props) => {
   const postPerPage = props.postPerPage || 12
   const [currentPage, setCurrentPage] = useState(1)
   const paginationNum = props.paginationNum || 3
+  const noIndex = props.noIndex
 
   return (
     <>
@@ -329,7 +350,7 @@ const PostList = (props) => {
           return (
             <PostCard
               post={post}
-              index={(currentPage - 1) * postPerPage + idx + 1}
+              index={(!noIndex) ? (currentPage - 1) * postPerPage + idx + 1 : null}
               expanded={false}
             />
           )

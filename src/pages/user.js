@@ -9,20 +9,13 @@ import SVG from '../utils/svg'
 import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
-import { PostCard, NewPostForm } from './components/post'
-import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService, UserAvatar } from './components/user'
+import { PostCard, NewPostForm, PostList } from './components/post'
+import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService, UserAvatar, UserActivity } from './components/user'
 import axios from 'axios'
 import { MsgAlert } from './components/msg'
 
 const serverUrl = `http://${document.domain}:${constants.serverPort}`
 
-const UserActivity = (props) => {
-  return (
-    <ListGroup variant="flush">
-
-    </ListGroup>
-  )
-}
 
 const UserHeader = (props) => {
   const user = props.user
@@ -159,7 +152,7 @@ const UserDetail = (props) => {
                   <Nav variant="tabs">
                     <Nav.Item>
                       <NavLink className="nav-link p-2" activeClassName="active" to={`activity`}>
-                        活动
+                        动态
                       </NavLink>
                     </Nav.Item>
                     <Nav.Item>
@@ -188,8 +181,8 @@ const UserDetail = (props) => {
                     <Redirect to={`${url}/activity`} />
                   </Route>
                   <Route path={`${url}/activity`}>
-                    123
-                    </Route>
+                    <UserActivity user={user._id} limit={500}/>
+                  </Route>
                   <Route path={`${url}/following`}>
                     <UserList users={user.following} />
                   </Route>
