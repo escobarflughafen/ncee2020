@@ -13,6 +13,9 @@ import { UserLink, UserAvatar } from './user'
 import axios from 'axios'
 import { InstituteCard } from './institute'
 import { MsgAlert } from './msg'
+import default_avatar from '../../resources/default_avatar.png'
+
+const serverUrl = `http://${document.domain}:${constants.serverPort}`
 
 const togglePostRemovalService = async (pid, port = constants.serverPort) => {
   const url = `http://${document.domain}:${port}/post/toggleremoval`
@@ -28,6 +31,28 @@ const togglePostRemovalService = async (pid, port = constants.serverPort) => {
   return res
 }
 
+const PostImage = (props) => {
+  const {src ,...otherProps} = props
+  return (
+    <Col xs={6} lg={3} {...otherProps}>
+      <a style={{
+        backgroundImage: `url(${src})`,
+        ...imageStyle,
+      }}
+        className="mb-3 img-thumbnail d-block"
+      ></a>
+    </Col>
+  )
+}
+
+const imageStyle = {
+  backgroundSize: 'cover',
+  backgroundColor: 'rgba(0,0,0,0)',
+  backgroundPosition: 'center center',
+  width: '100%',
+  paddingTop: "30%",
+  paddingBottom: "30%"
+}
 const PostContent = (props) => {
   const [post, setPost] = useState()
   useEffect(() => { setPost(props.post) }, [props.post])
@@ -41,24 +66,11 @@ const PostContent = (props) => {
               {post.content}
             </Col>
           </Row>
-          {/*
-          
-          <Row>
-            <Col xs={6} md={3} className="mb-3">
-              <Image width={144} height={72} />
-            </Col>
-            <Col xs={6} md={3} className="mb-3">
-              <Image width={144} height={72} />
-            </Col>
-            <Col xs={6} md={3} className="mb-3">
-              <Image width={144} height={72} />
-            </Col>
-            <Col xs={6} md={3} className="mb-3">
-              <Image width={144} height={72} />
-            </Col>
+          <Row id={`photos-${post._id}`} className="mt-3">
+            {
+              post.photos.map((path) => <PostImage onClick={(e) => {e.stopPropagation()}} src={`${serverUrl}${path}`} />)
+            }
           </Row>
-          
-          */}
         </>
       ) : null}
     </>
@@ -122,7 +134,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="info">
           <Row>
             <Col>
-              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><strong>{post.replyTo.content}</strong></Alert.Link>
+              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}>{post.replyTo.content}</Alert.Link>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -131,7 +143,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="success">
           <Row>
             <Col>
-              讨论：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}><strong>{post.relatedTopic.title}</strong></Alert.Link>
+              讨论：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}>{post.relatedTopic.title}</Alert.Link>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -151,7 +163,7 @@ const PostCard = (props) => {
         </Row>
         {(detail) ? (
           <Row className="mb-2 text-muted">
-            <Col onClick={(e)=>{e.stopPropagation()}} xs="auto">
+            <Col onClick={(e) => { e.stopPropagation() }} xs="auto">
               {(() => {
                 if (post.replyTo) {
                   return (<small>回复：<strong><a className="text-dark" href={`/post/${post.replyTo._id}`}>{post.replyTo.content}</a></strong></small>)
@@ -377,18 +389,73 @@ const NewPostForm = (props) => {
   const [replyTo, setReplyTo] = useState((props.reply) ? id : null)
   const [region, setRegion] = useState()
   const [tags, setTags] = useState()
-  const [photos, setPhotos] = useState()
+
+  const [photos, setPhotos] = useState([])
+  const maxPhotoCount = 4
+  const [reachedPhotoCountLimit, setReachedPhotoCountLimit] = useState(false)
+  const [photoPreviews, setPhotoPreviews] = useState([])
 
   const history = useHistory()
+
+  const handlePhotos = async (e) => {
+    e.preventDefault()
+    setMsg({ type: '', text: '' })
+
+    if (photos.length >= maxPhotoCount) {
+      return setMsg({ type: 'warning', text: '已达到图片上传张数限制' })
+    }
+
+    if (e.target.files) {
+      var reader = new FileReader()
+      var photo = e.target.files[0]
+
+      if (photo.type.includes('image')) {
+        reader.onloadend = () => {
+          console.log('result', reader.result)
+          if (photos.length == 3) {
+            setReachedPhotoCountLimit(true)
+          }
+          setPhotoPreviews([...photoPreviews, reader.result])
+          setPhotos([...photos, photo])
+        }
+
+        reader.readAsDataURL(photo)
+      } else {
+        setMsg({ type: 'warning', text: '格式有误，请上传图片' })
+      }
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     // add here to prevent logout activity
-    const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
     setMsg({
       type: '',
       text: ''
     })
+    const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
+    if (!token) {
+      return setMsg({ type: 'danger', text: '登入信息失效，请重新登入' })
+    }
+
+    // handling photo upload
+    var uploadedPhotos = []
+    if (photos.length) {
+      const uploadURL = `http://${document.domain}:${constants.serverPort}/image/upload`
+      let formData = new FormData()
+      photos.forEach((photoFile) => formData.append('images', photoFile))
+
+      try {
+        const res = await axios.post(uploadURL, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        console.log(res.data)
+        uploadedPhotos = [...res.data.path]
+      } catch (err) {
+        console.log(err)
+        setMsg({type:'danger', text:'failed to upload photos'})
+      }
+    }
+
+
     const url = `http://${document.domain}:${constants.serverPort}/post/newpost`
     const body = {
       content: content,
@@ -397,7 +464,7 @@ const NewPostForm = (props) => {
       region: region,
       replyTo: replyTo,
       tags: tags,
-      photos: photos
+      photos: uploadedPhotos
     }
     try {
       const res = await axios.post(url, body, { headers: { auth: token } })
@@ -413,7 +480,7 @@ const NewPostForm = (props) => {
       console.log(err.response)
       setMsg({
         type: 'danger',
-        text: (err.response.data) ? err.response.data.msg : ''
+        text: err.response?.data?.msg || '贴文发布失败'
       })
     }
   }
@@ -446,32 +513,45 @@ const NewPostForm = (props) => {
 
             <Form.Group as={Row} controlId="replyTo">
               <Col>
-                {/* image preview */}
-                <Row>
-                  <Col xs="auto" className="pr-1">
-                    <Image width={48} height={48} />
-                  </Col>
-                  <Col xs="auto" className="px-1">
-                    <Image width={48} height={48} />
-                  </Col>
-                  <Col xs="auto" className="px-1">
-                    <Image width={48} height={48} />
-                  </Col>
-                  <Col xs="auto" className="px-1">
-                    <Image width={48} height={48} />
-                  </Col>
-                </Row>
+                <Form.File
+                  id="photos"
+                  name="photos"
+                  label={`添加图片(${photos.length})`}
+                  size="sm"
+                  onChange={handlePhotos}
+                  custom
+                  disabled={reachedPhotoCountLimit}
+                />
               </Col>
               <Col xs="auto">
-                <ButtonGroup aria-label="reply" size="sm">
-                  <Button variant="outline-dark">添加图片</Button>
+                <ButtonGroup aria-label="reply">
                   <Button variant="primary" type="submit">
                     发布
                   </Button>
                 </ButtonGroup>
               </Col>
             </Form.Group>
-
+            <Form.Group as={Row} controlId="preview">
+              {
+                photoPreviews.map((photo, idx) => {
+                  return (
+                    <Col xs={6} lg={3}>
+                      <div style={{
+                        backgroundImage: `url(${photo})`,
+                        ...imageStyle
+                      }}
+                        className="mb-3 img-thumbnail"
+                        onClick={() => {
+                          setPhotos([...photos.filter((p, i) => i != idx)])
+                          setPhotoPreviews([...photoPreviews.filter((p, i) => i != idx)])
+                          setReachedPhotoCountLimit(false)
+                        }}
+                      ></div>
+                    </Col>
+                  )
+                })
+              }
+            </Form.Group>
           </Form>
         </>
       ) : (
@@ -480,7 +560,6 @@ const NewPostForm = (props) => {
     </div>
   )
 }
-
 
 
 export { PostCard, PostList, NewPostForm };

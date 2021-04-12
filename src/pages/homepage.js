@@ -35,7 +35,7 @@ const HomePage = (props) => {
       console.log(err)
       setMsg({
         type: 'danger',
-        text: err.response.data.msg
+        text: err.response?.data?.msg
       })
     }
 

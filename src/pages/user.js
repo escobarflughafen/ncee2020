@@ -66,23 +66,27 @@ const UserHeader = (props) => {
               </Row>
               <UserInteractInfo user={user} className="mt-2" onClick={(e) => { e.stopPropagation() }} />
             </Col>
+            <Col xs="auto">
+              <FollowButton
+                user={user}
+                variant="info"
+                onFollow={setMsg} />
+            </Col>
           </Row>
           {
             (user.about) ? (
               <Row className="mt-2">
-                <Col>
+                <Col style={{
+                  maxHeight: '4.5rem',
+                  overflowY: 'scroll',
+                }}>
                   {user.about}
                 </Col>
               </Row>
             ) : null
           }
         </Col>
-        <Col xs="auto">
-          <FollowButton
-            user={user}
-            variant="info"
-            onFollow={setMsg} />
-        </Col>
+
       </Row>
     </div>
   )

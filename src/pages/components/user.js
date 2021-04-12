@@ -103,10 +103,9 @@ const SignupForm = (props) => {
     resetMsg()
     var avatarPath
     if (imageReady && imageFile) {
-      let formData = new FormData();
-      const filename = imageFile.name.split('.')
+      let formData = new FormData()
 
-      formData.append('image', imageFile, `avatar_${loginAs?._id || body.username}.${filename[filename.length - 1]}`)
+      formData.append('image', imageFile) //, `avatar_${loginAs?._id || body.username}.${filename[filename.length - 1]}`)
       try {
         const url = `http://${document.domain}:${constants.serverPort}/image/uploadsingle`
         const res = await axios.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -125,7 +124,7 @@ const SignupForm = (props) => {
       if (props.modify) {
         window.localStorage.setItem('user', JSON.stringify(res.data.user))
       }
-      setTimeout(() => { history.push(`/user/${body.username}`); history.go() }, 1000)
+      //setTimeout(() => { history.push(`/user/${body.username}`); history.go() }, 1000)
     } catch (err) {
       setMsg({ type: 'danger', text: `${err.response.data.msg}\n${JSON.stringify(body)}` })
       console.log(err)
@@ -675,8 +674,7 @@ const UserLink = (props) => {
 
   const UserPopover = (
     <Popover onClick={(e) => { e.stopPropagation() }} >
-      <Popover.Content>w
-        :w
+      <Popover.Content>
         <UserCard user={props.user} />
       </Popover.Content>
     </Popover>
