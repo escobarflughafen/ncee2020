@@ -35,12 +35,13 @@ const HomePage = (props) => {
       console.log(err)
       setMsg({
         type: 'danger',
-        text: err.response?.data?.msg
+        text: err.response.data.msg
       })
     }
 
   }, [])
 
+  /*
   useEffect(async () => {
     const url = `http://${document.domain}:${constants.serverPort}/institute/recommended`
     try{
@@ -51,10 +52,11 @@ const HomePage = (props) => {
       console.log(err)
       setMsg({
         type: 'danger',
-        text: err.response.data.msg
+        text: err.response?.data?.msg
       })
     }
-  })
+  }, [])
+  */
 
   useEffect(() => {
     const loginAs = window.localStorage.getItem('user')

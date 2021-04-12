@@ -32,14 +32,14 @@ const togglePostRemovalService = async (pid, port = constants.serverPort) => {
 }
 
 const PostImage = (props) => {
-  const {src ,...otherProps} = props
+  const { src, imgClassName, ...otherProps } = props
   return (
     <Col xs={6} lg={3} {...otherProps}>
       <a style={{
         backgroundImage: `url(${src})`,
         ...imageStyle,
       }}
-        className="mb-3 img-thumbnail d-block"
+        className={`img-thumbnail d-block ${imgClassName}`}
       ></a>
     </Col>
   )
@@ -49,10 +49,12 @@ const imageStyle = {
   backgroundSize: 'cover',
   backgroundColor: 'rgba(0,0,0,0)',
   backgroundPosition: 'center center',
+  borderWidth: '0.3',
   width: '100%',
   paddingTop: "30%",
   paddingBottom: "30%"
 }
+
 const PostContent = (props) => {
   const [post, setPost] = useState()
   useEffect(() => { setPost(props.post) }, [props.post])
@@ -66,9 +68,13 @@ const PostContent = (props) => {
               {post.content}
             </Col>
           </Row>
-          <Row id={`photos-${post._id}`} className="mt-3">
+          <Row id={`photos-${post._id}`} className="mt-2 mb-1 px-3">
             {
-              post.photos.map((path) => <PostImage onClick={(e) => {e.stopPropagation()}} src={`${serverUrl}${path}`} />)
+              post.photos.map((path, idx) => <PostImage
+                onClick={(e) => { e.stopPropagation() }}
+                src={`${serverUrl}${path}`}
+                style={{padding: 2}}
+              />)
             }
           </Row>
         </>
@@ -451,7 +457,7 @@ const NewPostForm = (props) => {
         uploadedPhotos = [...res.data.path]
       } catch (err) {
         console.log(err)
-        setMsg({type:'danger', text:'failed to upload photos'})
+        setMsg({ type: 'danger', text: 'failed to upload photos' })
       }
     }
 
@@ -531,16 +537,16 @@ const NewPostForm = (props) => {
                 </ButtonGroup>
               </Col>
             </Form.Group>
-            <Form.Group as={Row} controlId="preview">
+            <Form.Group as={Row} controlId="preview" className="px-3">
               {
                 photoPreviews.map((photo, idx) => {
                   return (
-                    <Col xs={6} lg={3}>
+                    <Col xs={6} lg={3} className="p-1">
                       <div style={{
                         backgroundImage: `url(${photo})`,
                         ...imageStyle
                       }}
-                        className="mb-3 img-thumbnail"
+                        className="img-thumbnail d-block"
                         onClick={() => {
                           setPhotos([...photos.filter((p, i) => i != idx)])
                           setPhotoPreviews([...photoPreviews.filter((p, i) => i != idx)])
@@ -562,4 +568,4 @@ const NewPostForm = (props) => {
 }
 
 
-export { PostCard, PostList, NewPostForm };
+export { PostCard, PostList, NewPostForm, PostImage};
