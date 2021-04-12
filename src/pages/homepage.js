@@ -22,6 +22,39 @@ const HomePage = (props) => {
     type: '',
     text: ''
   })
+  const [trends, setTrends] = useState([])
+  const [institutes, setInstitutes] = useState([])
+
+  useEffect(async () => {
+    const url = `http://${document.domain}:${constants.serverPort}/forum/trends`
+    try {
+      const res = await axios.post(url)
+      console.log(res.data)
+      setTrends(res.data.trends)
+    } catch (err) {
+      console.log(err)
+      setMsg({
+        type: 'danger',
+        text: err.response.data.msg
+      })
+    }
+
+  }, [])
+
+  useEffect(async () => {
+    const url = `http://${document.domain}:${constants.serverPort}/institute/recommended`
+    try{
+      const res = await axios.post(url)
+      console.log(res.data)
+      setInstitutes(res.data.institutes)
+    } catch(err) {
+      console.log(err)
+      setMsg({
+        type: 'danger',
+        text: err.response.data.msg
+      })
+    }
+  })
 
   useEffect(() => {
     const loginAs = window.localStorage.getItem('user')
@@ -80,53 +113,75 @@ const HomePage = (props) => {
           <Card.Text>
             <p>
               <Alert variant="info">
-                今天是 <b>{today.toLocaleString('zh', constants.shortDateOptions)}</b>，距离高考还有 <b className="text-primary">{Math.floor((constants.dayOfNCEE.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))}</b> 天
+                今天是 <strong>{today.toLocaleString('zh', constants.shortDateOptions)}</strong>，距离高考还有 <b className="text-primary">{Math.floor((constants.dayOfNCEE.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))}</b> 天
                 </Alert>
               {
-                /* 
-                  <Button variant="link" size="sm" className="text-success"
-                    onClick={() => {
-                      history.push('/institute')
-                    }}
-                  >查学校→</Button>
-                  <br />
-                  <Button variant="link" size="sm" className="text-success"
-                    onClick={() => {
-                      history.push('/forum')
-                    }}
-                  >讨论区→</Button>
-                  <br />
-                  <Button variant="link" size="sm" className="text-success"
-                    onClick={() => {
-                      history.push('/stats')
-                    }}
-                  >看数据→</Button>
-                */
+                (!user) ? (
+                  <>
+                    <Button variant="link" size="sm" className="text-success"
+                      onClick={() => {
+                        history.push('/institute')
+                      }}
+                    >查学校→</Button>
+                    <br />
+                    <Button variant="link" size="sm" className="text-success"
+                      onClick={() => {
+                        history.push('/forum')
+                      }}
+                    >讨论区→</Button>
+                    <br />
+                    <Button variant="link" size="sm" className="text-success"
+                      onClick={() => {
+                        history.push('/stats')
+                      }}
+                    >看数据→</Button>
+                  </>
+                ) : null
               }
             </p>
           </Card.Text>
           <Row>
             {
               (user) ? (
-                <Col xs={12} lg={12}>
-                  <Card.Title as="h4">
-                    你关注的
-                </Card.Title>
-                  <Card className="mb-3">
-                    <UserActivity users={user.following} />
-                  </Card>
+                <Col xs={12} lg={6} className="">
+                  <CardGroup>
+
+                    <Card className="mb-3">
+                      <Card.Header>
+                        <strong>
+                          你关注的
+                      </strong>
+                      </Card.Header>
+                      <UserActivity users={user.following} limit={400} />
+                    </Card>
+                  </CardGroup>
                 </Col>
               ) : null
             }
-            <Col xs={12} lg={6}>
-              <Card.Title as="h4">
-                推荐院校
-              </Card.Title>
-            </Col>
-            <Col>
-              <Card.Title as="h4">
-                热门话题
-              </Card.Title>
+            <Col xs={12} lg={(user) ? 6 : 12} className="">
+              <Row>
+                <Col xs={12} lg={(user) ? 12 : 6}>
+                  <Card className="mb-3">
+                    <Card.Header>
+                      <strong>
+                        热门讨论
+                      </strong>
+                    </Card.Header>
+                    <TopicList topics={trends} viewMode={'紧凑'} trends />
+                  </Card>
+                </Col>
+                <Col xs={12} lg={(user) ? 12 : 6}>
+                  <Card className="mb-3">
+                    <Card.Header>
+                      <strong>
+                        推荐院校
+                      </strong>
+                    </Card.Header>
+                    <ListGroup variant="flush">
+                    </ListGroup>
+                  </Card>
+                </Col>
+              </Row>
             </Col>
           </Row>
 

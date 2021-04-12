@@ -31,7 +31,7 @@ const TopicCard = (props) => {
         <Col>
           <Row>
             <Col className="">
-              <a className=""><b>{topic.title}</b></a>
+              <a className=""><strong>{topic.title}</strong></a>
             </Col>
             <Col xs="auto">
               <Row>
@@ -73,7 +73,7 @@ const TopicCard = (props) => {
           </Row>
           <Row className={(viewMode === '紧凑') ? "d-none" : ""}>
             <Col>
-              <small className="text-black-50">
+              <small className="text-muted">
                 <span className="mr-1 d-inline-block">{topic.viewCount}次浏览・</span>
                 <span className="mr-1 d-inline-block">{topic.posts.length}条回复・</span>
                 <span className="mr-1 d-inline-block">创建于 {timeStringConverter(topic.createdAt)}・</span>
@@ -103,102 +103,110 @@ const TopicList = (props) => {
   return (
     <>
       <ListGroup variant="flush">
-        <ListGroup.Item>
-          <Row className="ml-auto">
-            <Col>
-              <small className="d-none d-sm-inline text-black-50">
-                {
-                  (displayTopics.length > 0) ? (
-                    <>
-                      共 {displayTopics.length} 条讨论，第 {(currentPage - 1) * topicPerPage + 1}~{(currentPage * topicPerPage) > displayTopics.length ? displayTopics.length : currentPage * topicPerPage} 项
+        {
+          (props.trends) ? null : (
+            <ListGroup.Item>
+              <Row className="ml-auto">
+                <Col>
+                  <small className="d-none d-sm-inline text-muted">
+                    {
+                      (displayTopics.length > 0) ? (
+                        <>
+                          共 {displayTopics.length} 条讨论，第 {(currentPage - 1) * topicPerPage + 1}~{(currentPage * topicPerPage) > displayTopics.length ? displayTopics.length : currentPage * topicPerPage} 项
                     </>
-                  ) : (<>未能找到符合条件的讨论</>)
-                }
-              </small>
-            </Col>
-            <Col xs="auto">
-              <Row>
-                <SVG variant="column-gap" />
-                <Col className="pl-2">
-                  <FormControl
-                    as="select"
-                    size="sm"
-                    value={viewMode}
-                    onChange={e => { setViewMode(e.target.value) }}>
-                    <option>详细</option>
-                    <option>紧凑</option>
-                  </FormControl>
+                      ) : (<>未能找到符合条件的讨论</>)
+                    }
+                  </small>
                 </Col>
-              </Row>
+                <Col xs="auto">
+                  <Row>
+                    <SVG variant="column-gap" />
+                    <Col className="pl-2">
+                      <FormControl
+                        as="select"
+                        size="sm"
+                        value={viewMode}
+                        onChange={e => { setViewMode(e.target.value) }}>
+                        <option>详细</option>
+                        <option>紧凑</option>
+                      </FormControl>
+                    </Col>
+                  </Row>
 
-            </Col>
-            <Col xs="auto">
-              <Row>
-                <SVG variant="sort" />
-                <Col className="pl-2">
-                  <FormControl
-                    as="select"
-                    size="sm"
-                    onChange={(e) => {
-                      switch (e.target.value) {
-                        case '0':
-                          setDisplayTopics([...topics.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated))])
-                          break;
-                        case '1':
-                          setDisplayTopics([...topics.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))])
-                          break;
-                        case '2':
-                          setDisplayTopics([...topics.sort((a, b) => b.posts.length - a.posts.length)])
-                          break;
-                        case '3':
-                          setDisplayTopics([...topics.sort((a, b) => {
-                            if (a.region) {
-                              if (b.region) {
-                                return a.region.localeCompare(b.region)
-                              } else {
-                                return -1
-                              }
-                            } else {
-                              return 1
-                            }
-                          })])
-                          break;
-                        case '4':
-                          setDisplayTopics([...topics.sort((a, b) => {
-                            if (a.relatedInstitute) {
-                              if (b.relatedInstitute) {
-                                return a.relatedInstitute.data.school_id - b.relatedInstitute.data.school_id
-                              } else {
-                                return -1
-                              }
-                            } else {
-                              return 1
-                            }
-                          })])
-                        default:
-                          return
-                      }
-                    }}
-                  >
-                    <option value={0}>最后回复</option>
-                    <option value={1}>最新发起</option>
-                    <option value={2}>回复数量</option>
-                    <option value={3}>地区</option>
-                    <option value={4}>相关院校</option>
-                  </FormControl>
+                </Col>
+                <Col xs="auto">
+                  <Row>
+                    <SVG variant="sort" />
+                    <Col className="pl-2">
+                      <FormControl
+                        as="select"
+                        size="sm"
+                        onChange={(e) => {
+                          switch (e.target.value) {
+                            case '0':
+                              setDisplayTopics([...topics.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated))])
+                              break;
+                            case '1':
+                              setDisplayTopics([...topics.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))])
+                              break;
+                            case '2':
+                              setDisplayTopics([...topics.sort((a, b) => b.posts.length - a.posts.length)])
+                              break;
+                            case '3':
+                              setDisplayTopics([...topics.sort((a, b) => {
+                                if (a.region) {
+                                  if (b.region) {
+                                    return a.region.localeCompare(b.region)
+                                  } else {
+                                    return -1
+                                  }
+                                } else {
+                                  return 1
+                                }
+                              })])
+                              break;
+                            case '4':
+                              setDisplayTopics([...topics.sort((a, b) => {
+                                if (a.relatedInstitute) {
+                                  if (b.relatedInstitute) {
+                                    return a.relatedInstitute.data.school_id - b.relatedInstitute.data.school_id
+                                  } else {
+                                    return -1
+                                  }
+                                } else {
+                                  return 1
+                                }
+                              })])
+                            default:
+                              return
+                          }
+                        }}
+                      >
+                        <option value={0}>最后回复</option>
+                        <option value={1}>最新发起</option>
+                        <option value={2}>回复数量</option>
+                        <option value={3}>地区</option>
+                        <option value={4}>相关院校</option>
+                      </FormControl>
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
-            </Col>
-          </Row>
-        </ListGroup.Item>
+            </ListGroup.Item>
+          )
+        }
         {displayTopics.slice((currentPage - 1) * topicPerPage, (currentPage) * topicPerPage).map((topic) => {
           return (
             <TopicCard topic={topic} viewMode={viewMode} />
           )
         })}
-        <ListGroup.Item>
-          {makePaginations(currentPage, setCurrentPage, Math.ceil(topics.length / topicPerPage), 4)}
-        </ListGroup.Item>
+        {
+          (props.trends) ? null : (
+            <ListGroup.Item>
+              {makePaginations(currentPage, setCurrentPage, Math.ceil(topics.length / topicPerPage), 4)}
+            </ListGroup.Item>
+          )
+        }
       </ListGroup>
 
     </>

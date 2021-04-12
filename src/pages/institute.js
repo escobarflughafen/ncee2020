@@ -516,7 +516,7 @@ const InstituteTabs = (props) => {
           <Col>
             <Row>
               <Col>
-                <p><b>分数相近院校</b></p>
+                <p><strong>分数相近院校</strong></p>
               </Col>
               <Col xs="auto">
                 <FormControl

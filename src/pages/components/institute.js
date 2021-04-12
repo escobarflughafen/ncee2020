@@ -22,6 +22,11 @@ const Labels = (props) => {
               <Button variant={["primary", "secondary", "success", "info"][idx % 4]}
                 className="mr-1 py-0 px-1"
                 size="sm"
+                style={{
+                  borderRadius: '0.25rem',
+                  fontWeight: '600',
+                  fontSize: '80%'
+                }}
                 onClick={(e) => {
                   history.push({
                     pathname: '/institute',
@@ -207,7 +212,7 @@ const InstituteSelector = (props) => {
                     }}
                   >
                     <small>
-                      {idx + 1}. <b>{i.name}</b> [{i.id}]
+                      {idx + 1}. <strong>{i.name}</strong> [{i.id}]
                   </small>
                   </ListGroup.Item>
                 ))

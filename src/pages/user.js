@@ -10,7 +10,7 @@ import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm, PostList } from './components/post'
-import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService, UserAvatar, UserActivity } from './components/user'
+import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService, UserAvatar, UserActivity, FollowButton, UserInteractInfo } from './components/user'
 import axios from 'axios'
 import { MsgAlert } from './components/msg'
 
@@ -25,18 +25,7 @@ const UserHeader = (props) => {
     type: '',
     text: ''
   })
-  const handleFollow = async (e) => {
-    e.stopPropagation()
-    try {
-      const res = await toggleFollowService(user._id)
-      setMsg({ type: 'success', text: res.data.msg })
-      window.localStorage.setItem('user', JSON.stringify(res.data.user))
-      setTimeout(() => { history.go() }, 1000)
-    } catch (err) {
-      console.log(err.response)
-      setMsg({ type: 'danger', text: err.response.data.msg })
-    }
-  }
+
   return (
     <div className="mb-3">
       <MsgAlert msg={msg} />
@@ -50,9 +39,9 @@ const UserHeader = (props) => {
               <Row>
                 <Col>
                   <div>
-                    <b>
+                    <strong>
                       <big>{user.name}</big>
-                    </b>
+                    </strong>
                   </div>
                   <span className="text-info">@{user.username}</span>
                 </Col>
@@ -75,11 +64,12 @@ const UserHeader = (props) => {
                   </small>
                 </Col>
               </Row>
+              <UserInteractInfo user={user} className="mt-2" onClick={(e) => { e.stopPropagation() }} />
             </Col>
           </Row>
           {
             (user.about) ? (
-              <Row className="mt-3">
+              <Row className="mt-2">
                 <Col>
                   {user.about}
                 </Col>
@@ -88,13 +78,10 @@ const UserHeader = (props) => {
           }
         </Col>
         <Col xs="auto">
-          {
-            (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
-              (<Button size="sm" variant="info" onClick={handleFollow}>已关注</Button>)
-              :
-              (<Button size="sm" variant="outline-info" onClick={handleFollow}>关注</Button>)
-            ) : null
-          }
+          <FollowButton
+            user={user}
+            variant="info"
+            onFollow={setMsg} />
         </Col>
       </Row>
     </div>
@@ -120,7 +107,7 @@ const UserDetail = (props) => {
 
   useEffect(async () => {
     setLoginAs(JSON.parse(window.localStorage.getItem('user')))
-    
+
     try {
       const res = await fetchUserService(username)
       // hint: the setState can be proceed by a callback to synchronize the control of prevstate
@@ -147,7 +134,7 @@ const UserDetail = (props) => {
             <UserHeader user={user} />
 
             <Router>
-              <Card>
+              <Card className="mb-3">
                 <Card.Header>
                   <Nav variant="tabs">
                     <Nav.Item>
@@ -181,7 +168,7 @@ const UserDetail = (props) => {
                     <Redirect to={`${url}/activity`} />
                   </Route>
                   <Route path={`${url}/activity`}>
-                    <UserActivity user={user._id} limit={500}/>
+                    <UserActivity user={user._id} />
                   </Route>
                   <Route path={`${url}/following`}>
                     <UserList users={user.following} />

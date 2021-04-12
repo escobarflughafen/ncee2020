@@ -23,7 +23,7 @@ const AppNavbar = (props) => {
 
       <Navbar className="bg-dark" variant="dark" expand="lg">
         <Navbar.Brand href="#" onClick={() => { history.push('/'); history.go() }}>
-          高校录取分数线
+          高校查询系统
       </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">

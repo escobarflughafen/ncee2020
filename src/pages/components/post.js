@@ -122,7 +122,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="info">
           <Row>
             <Col>
-              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><b>{post.replyTo.content}</b></Alert.Link>
+              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}><strong>{post.replyTo.content}</strong></Alert.Link>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -131,7 +131,7 @@ const PostCard = (props) => {
         <ListGroup.Item variant="success">
           <Row>
             <Col>
-              讨论：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}><b>{post.relatedTopic.title}</b></Alert.Link>
+              讨论：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}><strong>{post.relatedTopic.title}</strong></Alert.Link>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -150,15 +150,15 @@ const PostCard = (props) => {
           </Col>
         </Row>
         {(detail) ? (
-          <Row className="mb-2 text-black-50">
-            <Col>
+          <Row className="mb-2 text-muted">
+            <Col onClick={(e)=>{e.stopPropagation()}} xs="auto">
               {(() => {
                 if (post.replyTo) {
-                  return (<small>回复：<b>{post.replyTo.content}</b></small>)
+                  return (<small>回复：<strong><a className="text-dark" href={`/post/${post.replyTo._id}`}>{post.replyTo.content}</a></strong></small>)
                 } else if (post.relatedInstitute) {
-                  return (<small>院校评价：<b>{post.relatedInstitute.data.name}</b></small>)
+                  return (<small>院校评价：<strong><a className="text-dark" href={`/institute/${post.relatedInstitute.data.school_id}/discuss`}>{post.relatedInstitute.data.name}</a></strong></small>)
                 } else if (post.relatedTopic) {
-                  return (<small>参与讨论：<b>{post.relatedTopic.title}</b></small>)
+                  return (<small>参与讨论：<strong><a className="text-dark" href={`/forum/${post.relatedTopic._id}`}>{post.relatedTopic.title}</a></strong></small>)
                 }
               })()}
             </Col>

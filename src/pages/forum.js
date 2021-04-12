@@ -450,7 +450,7 @@ const TopicPage = (props) => {
                   <small>{constants.topicTypes.find(t => t.id === topic.category).name}</small>
                 </Col>
                 <Col>
-                  <b>{topic.title}</b>
+                  <strong>{topic.title}</storng>
                 </Col>
               </Row>
             </Card.Header>
@@ -474,7 +474,7 @@ const TopicPage = (props) => {
                   </Col>
                   <Col sm="auto">
                     <small>
-                      <span className="d-inline-block">由 <a href={`/user/${topic.host.username}`}><b>{topic.host.name}</b></a> 在 {new Date(topic.createdAt).toLocaleDateString('zh')} 发起</span>
+                      <span className="d-inline-block">由 <a href={`/user/${topic.host.username}`}><strong>{topic.host.name}</strong></a> 在 {new Date(topic.createdAt).toLocaleDateString('zh')} 发起</span>
                     ・
                     <span className="d-inline-block">{topic.posts.length} 条回复</span>
                     ・

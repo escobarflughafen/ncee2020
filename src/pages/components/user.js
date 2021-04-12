@@ -8,7 +8,7 @@ import axios from 'axios'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 import SVG from '../../utils/svg'
-import { MsgAlert } from './msg'
+import { MsgAlert, MsgListItem } from './msg'
 import { makePaginations } from './pagination'
 import defaultAvatar from '../../resources/default_avatar.png'
 import { PostCard } from './post'
@@ -97,7 +97,7 @@ const SignupForm = (props) => {
   const [imageReady, setImageReady] = useState(false)
   const [imageFile, setImageFile] = useState()
 
-  useEffect(() => { if (loginAs.avatar) { setImagePreviewUrl(`http://${document.domain}:${constants.serverPort}${loginAs.avatar}`) } }, [loginAs])
+  useEffect(() => { if (loginAs?.avatar) { setImagePreviewUrl(`http://${document.domain}:${constants.serverPort}${loginAs.avatar}`) } }, [loginAs])
 
   const handleSubmit = async (body) => {
     resetMsg()
@@ -106,7 +106,7 @@ const SignupForm = (props) => {
       let formData = new FormData();
       const filename = imageFile.name.split('.')
 
-      formData.append('image', imageFile, `avatar_${loginAs._id}.${filename[filename.length - 1]}`)
+      formData.append('image', imageFile, `avatar_${loginAs?._id || body.username}.${filename[filename.length - 1]}`)
       try {
         const url = `http://${document.domain}:${constants.serverPort}/image/uploadsingle`
         const res = await axios.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -526,6 +526,36 @@ const LoginForm = (props) => {
 
 }
 
+const FollowButton = (props) => {
+  const { user, onFollow, onClick, variant, ...otherProps } = props
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
+  const history = useHistory()
+
+  const handleFollow = async (e) => {
+    e.stopPropagation()
+    try {
+      const res = await toggleFollowService(user._id)
+      if (onFollow) {
+        onFollow({ type: 'success', text: res.data.msg })
+      }
+      window.localStorage.setItem('user', JSON.stringify(res.data.user))
+      setTimeout(() => { onFollow({type:'', text:''}) }, 1000)
+    } catch (err) {
+      console.log(err.response)
+      if (onFollow) {
+        onFollow({ type: 'danger', text: err.response.data.msg })
+      }
+    }
+  }
+
+
+  return (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
+    (<Button {...otherProps} variant={`${variant}`} onClick={handleFollow}>已关注</Button>)
+    :
+    (<Button {...otherProps} variant={`outline-${variant}`} onClick={handleFollow}>关注</Button>)
+  ) : null
+}
+
 const UserCard = (props) => {
   const user = props.user
   const history = useHistory()
@@ -534,19 +564,6 @@ const UserCard = (props) => {
     type: '',
     text: ''
   })
-
-  const handleFollow = async (e) => {
-    e.stopPropagation()
-    try {
-      const res = await toggleFollowService(user._id)
-      setMsg({ type: 'success', text: res.data.msg })
-      window.localStorage.setItem('user', JSON.stringify(res.data.user))
-      setTimeout(() => { history.go() }, 1000)
-    } catch (err) {
-      console.log(err.response)
-      setMsg({ type: 'danger', text: err.response.data.msg })
-    }
-  }
 
   return (
     (user) ? (
@@ -562,7 +579,7 @@ const UserCard = (props) => {
                 <Row>
                   <Col>
                     <a href={`/user/${user.username}`}>
-                      <b>{user.name}</b>
+                      <strong>{user.name}</strong>
                     </a>
                     <br />
                     <small className="text-info">@{user.username}</small>
@@ -570,27 +587,14 @@ const UserCard = (props) => {
                 </Row>
               </Col>
               <Col xs="auto">
-                {
-                  (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
-                    (<Button size="sm" variant="info" onClick={handleFollow}>已关注</Button>)
-                    :
-                    (<Button size="sm" variant="outline-info" onClick={handleFollow}>关注</Button>)
-                  ) : null
-                }
+                <FollowButton
+                  user={user}
+                  size="sm"
+                  variant="info"
+                  onFollow={setMsg} />
               </Col>
             </Row>
-            <Row className="mt-2" onClick={(e) => {e.stopPropagation()}}>
-              <Col>
-                <a href={`/user/${user.username}/following`}>
-                  {user.following.length} 关注中
-                    </a>
-              </Col>
-              <Col>
-                <a href={`/user/${user.username}/follower`}>
-                  {user.follower.length} 关注者
-                    </a>
-              </Col>
-            </Row>
+            <UserInteractInfo size="sm" user={user} className="mt-2" onClick={(e) => { e.stopPropagation() }} />
             <Row className="mt-1">
               <Col>
                 {user.about}
@@ -613,18 +617,6 @@ const UserListItem = (props) => {
     text: ''
   })
 
-  const handleFollow = async (e) => {
-    e.stopPropagation()
-    try {
-      const res = await toggleFollowService(user._id)
-      setMsg({ type: 'success', text: res.data.msg })
-      window.localStorage.setItem('user', JSON.stringify(res.data.user))
-      setTimeout(() => { history.go() }, 1000)
-    } catch (err) {
-      console.log(err.response)
-      setMsg({ type: 'danger', text: err.response.data.msg })
-    }
-  }
   return (
     <>
       <ListGroup.Item action onClick={(e) => { e.stopPropagation(); history.push(`/user/${user.username}`); history.go() }}>
@@ -645,7 +637,7 @@ const UserListItem = (props) => {
                     <Row>
                       <Col>
                         <a href={`/user/${user.username}`}>
-                          <b>{user.name}</b>
+                          <strong>{user.name}</strong>
                         </a>
                         <br />
                         <small className="text-info">@{user.username}</small>
@@ -653,13 +645,11 @@ const UserListItem = (props) => {
                     </Row>
                   </Col>
                   <Col xs="auto">
-                    {
-                      (loginAs && (loginAs._id != user._id)) ? ((loginAs.following.find(f => (f === user._id) || (f._id === user._id))) ?
-                        (<Button size="sm" variant="info" onClick={handleFollow}>已关注</Button>)
-                        :
-                        (<Button size="sm" variant="outline-info" onClick={handleFollow}>关注</Button>)
-                      ) : null
-                    }
+                    <FollowButton
+                      user={user}
+                      size="sm"
+                      variant="info"
+                      onFollow={setMsg} />
                   </Col>
                 </Row>
                 {
@@ -685,7 +675,8 @@ const UserLink = (props) => {
 
   const UserPopover = (
     <Popover onClick={(e) => { e.stopPropagation() }} >
-      <Popover.Content>
+      <Popover.Content>w
+        :w
         <UserCard user={props.user} />
       </Popover.Content>
     </Popover>
@@ -698,7 +689,7 @@ const UserLink = (props) => {
           (e) => {
             e.stopPropagation()
           }
-        }><b>{props.children}</b></Button>
+        }><strong>{props.children}</strong:></Button>
       </OverlayTrigger>
     </>
   )
@@ -747,8 +738,33 @@ const UserList = (props) => {
 
 }
 
-const UserNav = (props) => {
-
+const UserInteractInfo = (props) => {
+  const { user, size, ...otherProps } = props
+  const history = useHistory()
+  return (
+    <Row {...otherProps}>
+      <Col xs="auto">
+        <Button
+          onClick={() => { history.push(`/user/${user.username}/following`); history.go() }}
+          variant="link"
+          size={size}
+          className="p-0 text-dark align-baseline"
+        >
+          <strong>{user.following.length}</strong> <span className="text-muted">关注中</span>
+        </Button>
+      </Col>
+      <Col xs="auto">
+        <Button
+          onClick={() => { history.push(`/user/${user.username}/follower`); history.go() }}
+          variant="link"
+          size={size}
+          className="p-0 text-dark align-baseline"
+        >
+          <strong>{user.follower.length}</strong> <span className="text-muted">关注者</span>
+        </Button>
+      </Col>
+    </Row>
+  )
 }
 
 const UserActivity = (props) => {
@@ -760,16 +776,17 @@ const UserActivity = (props) => {
     text: ''
   })
 
+  const [refresh, setRefresh] = useState(false)
   useEffect(async () => {
-    const users = (props.users || ((props.user)?[props.user]:null))
+    const users = (props.users || ((props.user) ? [props.user] : null))
     if (users) {
       const postUrl = `http://${document.domain}:${constants.serverPort}/post/fetch`
       const topicUrl = `http://${document.domain}:${constants.serverPort}/forum/fetch`
 
       try {
         setMsg({ type: 'info', text: '获取动态中' })
-        const postRes = await axios.post(postUrl, { users })
-        const topicRes = await axios.post(topicUrl, { users })
+        const postRes = await axios.post(postUrl, { users, limit: props.limit })
+        const topicRes = await axios.post(topicUrl, { users, limit: props.limit })
 
         const posts = postRes.data.posts
         const topics = topicRes.data.topics
@@ -777,27 +794,41 @@ const UserActivity = (props) => {
         let contents = [...posts, ...topics].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         setContents(contents)
         setMsg({ type: '', text: '' })
+        setRefresh(false)
       } catch (err) {
         console.log(err)
-        setMsg({ type: 'danger', text: '获取个人动态失败' })
+        setRefresh(false)
+        setMsg({ type: 'danger', text: '获取动态失败' })
       }
     }
-  }, [props.user, props.users])
+  }, [props.user, props.users, refresh])
 
   return (
     <>
       <ListGroup variant="flush">
+        <MsgListItem msg={msg} />
         <ListGroup.Item>
-          <MsgAlert msg={msg} />
-          {(contents.length) ? (
-            <div className="annotation">共 {contents.length} 条动态</div>
-          ) : null}
+          <Row>
+            <Col>
+              {(contents.length && !props.limit) ? (
+                <div>
+                  <div className="">共 {contents.length} 条动态</div>
+                  <div className="annotation">{`第 ${(currentPage - 1) * activityPerPage + 1}~${currentPage * activityPerPage} 条`}</div>
+                </div>
+              ) : null}
+            </Col>
+            <Col xs="auto">
+              <Button variant="success" size="sm" onClick={() => { setRefresh(true) }}>
+                刷新
+                </Button>
+            </Col>
+          </Row>
         </ListGroup.Item>
         {
           (contents.length) ? (
             contents.slice((currentPage - 1) * activityPerPage, (currentPage) * activityPerPage).map((content) => {
               if (content.author) {
-                return (<PostCard post={content} detail/>)
+                return (<PostCard post={content} detail />)
               } else if (content.host) {
                 return (<TopicCard topic={content} />)
               } else {
@@ -806,7 +837,7 @@ const UserActivity = (props) => {
             })
           ) : (
             <ListGroup.Item>
-              <span className="annotation">这个用户还没有发布过内容</span>
+              <span className="annotation">没有新动态</span>
             </ListGroup.Item>
           )
         }
@@ -818,13 +849,22 @@ const UserActivity = (props) => {
   )
 }
 
+const avatarStyle = {
+  borderRadius: '.2rem',
+}
 
 const UserAvatar = (props) => {
-  let { user, src, ...otherprops } = props
+  let { user, src, style, ...otherprops } = props
 
   return (
-    <Image {...otherprops} src={(user.avatar) ? `${serverUrl}${user.avatar}` : defaultAvatar} />
+    <Image {...otherprops}
+      style={{
+        ...style,
+        ...avatarStyle
+      }}
+      src={(user.avatar) ? `${serverUrl}${user.avatar}` : defaultAvatar}
+    />
   )
 }
 
-export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService, UserAvatar, UserActivity }
+export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService, UserAvatar, UserActivity, FollowButton, UserInteractInfo }

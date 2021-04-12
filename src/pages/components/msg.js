@@ -18,4 +18,22 @@ const MsgAlert = (props) => {
 }
 
 
-export { MsgAlert }
+const MsgListItem = (props) => {
+  const msg = props.msg || { type: '', text: '' }
+
+  return (
+    <>
+      {
+        (msg.type && msg.text && msg.text.length > 0) ? (
+          <ListGroup.Item>
+            <Alert {...props} variant={msg.type} className={`${props.className} m-0`}>{msg.text}</Alert>
+          </ListGroup.Item>
+        ) : null
+      }
+    </>
+  )
+
+}
+
+
+export { MsgAlert, MsgListItem }
