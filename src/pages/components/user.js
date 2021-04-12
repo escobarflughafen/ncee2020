@@ -689,7 +689,7 @@ const UserLink = (props) => {
           (e) => {
             e.stopPropagation()
           }
-        }><strong>{props.children}</strong:></Button>
+        }><strong>{props.children}</strong></Button>
       </OverlayTrigger>
     </>
   )

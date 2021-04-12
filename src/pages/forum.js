@@ -450,7 +450,7 @@ const TopicPage = (props) => {
                   <small>{constants.topicTypes.find(t => t.id === topic.category).name}</small>
                 </Col>
                 <Col>
-                  <strong>{topic.title}</storng>
+                  <strong>{topic.title}</strong>
                 </Col>
               </Row>
             </Card.Header>
