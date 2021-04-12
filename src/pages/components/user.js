@@ -538,7 +538,7 @@ const FollowButton = (props) => {
         onFollow({ type: 'success', text: res.data.msg })
       }
       window.localStorage.setItem('user', JSON.stringify(res.data.user))
-      setTimeout(() => { onFollow({type:'', text:''}) }, 1000)
+      setTimeout(() => { onFollow({ type: '', text: '' }) }, 1000)
     } catch (err) {
       console.log(err.response)
       if (onFollow) {
@@ -595,7 +595,11 @@ const UserCard = (props) => {
             </Row>
             <UserInteractInfo size="sm" user={user} className="mt-2" onClick={(e) => { e.stopPropagation() }} />
             <Row className="mt-1">
-              <Col>
+              <Col style={{
+                maxHeight: '3rem',
+                overflowY: 'scroll',
+              }}
+              >
                 {user.about}
               </Col>
             </Row>
@@ -654,7 +658,11 @@ const UserListItem = (props) => {
                 {
                   (user.about) ? (
                     <Row className="">
-                      <Col>
+                      <Col style={{
+                        maxHeight: '3rem',
+                        overflowY: 'scroll',
+                      }}
+                      >
                         {user.about}
                       </Col>
                     </Row>

@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../../style.css'
 import React, { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup, ListGroupItem } from 'react-bootstrap'
+import { Alert, Modal, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup, ListGroupItem } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation, useParams } from 'react-router-dom'
 import constants from '../../utils/constants'
@@ -31,16 +31,53 @@ const togglePostRemovalService = async (pid, port = constants.serverPort) => {
   return res
 }
 
+const ImageModal = (props) => {
+  const { src, onClick, ...otherProps } = props
+  return (
+    <Modal
+      {...otherProps}
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+      onClick={(e) => { e.stopPropagation() }}
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-vcenter">
+          查看图片
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Image className="w-100" src={src} />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.onHide}>关闭</Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
+
 const PostImage = (props) => {
   const { src, imgClassName, ...otherProps } = props
+
+  const [modalShow, setModalShow] = useState(false)
   return (
-    <Col xs={6} lg={3} {...otherProps}>
-      <a style={{
+    <Col xs={6} lg={3} {...otherProps} onClick={(e) => {
+      e.stopPropagation()
+      if (props.onClick) {
+        return props.onClick(e)
+      }
+      setModalShow(true)
+    }}>
+      <div style={{
         backgroundImage: `url(${src})`,
         ...imageStyle,
       }}
         className={`img-thumbnail d-block ${imgClassName}`}
-      ></a>
+      ></div>
+      <ImageModal
+        size="lg"
+        show={modalShow}
+        onHide={() => { setModalShow(false); console.log(modalShow) }}
+        src={src} />
     </Col>
   )
 }
@@ -71,9 +108,8 @@ const PostContent = (props) => {
           <Row id={`photos-${post._id}`} className="mt-2 mb-1 px-3">
             {
               post.photos.map((path, idx) => <PostImage
-                onClick={(e) => { e.stopPropagation() }}
                 src={`${serverUrl}${path}`}
-                style={{padding: 2}}
+                style={{ padding: 2 }}
               />)
             }
           </Row>
@@ -439,8 +475,8 @@ const NewPostForm = (props) => {
       type: '',
       text: ''
     })
-    const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
-    if (!token) {
+    const auth = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
+    if (!auth) {
       return setMsg({ type: 'danger', text: '登入信息失效，请重新登入' })
     }
 
@@ -473,7 +509,7 @@ const NewPostForm = (props) => {
       photos: uploadedPhotos
     }
     try {
-      const res = await axios.post(url, body, { headers: { auth: token } })
+      const res = await axios.post(url, body, { headers: { auth } })
       setMsg({
         type: 'success',
         text: res.data.msg
@@ -568,4 +604,4 @@ const NewPostForm = (props) => {
 }
 
 
-export { PostCard, PostList, NewPostForm, PostImage, imageStyle};
+export { PostCard, PostList, NewPostForm, PostImage, imageStyle, ImageModal };
