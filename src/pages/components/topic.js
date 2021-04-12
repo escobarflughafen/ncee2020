@@ -10,6 +10,7 @@ import { makePaginations } from './pagination'
 import { UserLink } from './user'
 import { MsgAlert } from './msg'
 import { InstituteSelector } from './institute'
+import {PostImage, imageStyle} from './post'
 
 const TopicCard = (props) => {
   const history = useHistory()
@@ -229,12 +230,68 @@ const NewTopicForm = (props) => {
   const token = (window.localStorage.getItem('token')) ? `bearer ${window.localStorage.getItem('token')}` : null
   const history = useHistory()
 
+
+  const [photos, setPhotos] = useState([])
+  const [photoPreviews, setPhotoPreviews] = useState([])
+  const maxPhotoCount = 4
+  const [reachedPhotoCountLimit, setReachedPhotoCountLimit] = useState(false)
+
+  const handlePhotos = async (e) => {
+    e.preventDefault()
+    setMsg({ type: '', text: '' })
+
+    if (photos.length >= maxPhotoCount) {
+      return setMsg({ type: 'warning', text: '已达到图片上传张数限制' })
+    }
+
+    if (e.target.files) {
+      var reader = new FileReader()
+      var photo = e.target.files[0]
+
+      if (photo.type.includes('image')) {
+        reader.onloadend = () => {
+          console.log('result', reader.result)
+          if (photos.length == 3) {
+            setReachedPhotoCountLimit(true)
+          }
+          setPhotoPreviews([...photoPreviews, reader.result])
+          setPhotos([...photos, photo])
+        }
+
+        reader.readAsDataURL(photo)
+      } else {
+        setMsg({ type: 'warning', text: '格式有误，请上传图片' })
+      }
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setMsg({ type: '', text: '' })
-    const url = `http://${document.domain}:${constants.serverPort}/forum/newtopic`
+
     const token = window.localStorage.getItem('token')
     const auth = (token) ? `bearer ${token}` : null
+    if (!auth) {
+      return setMsg({ type: 'danger', text: '登入信息失效，请重新登入' })
+    }
+
+    var uploadedPhotos = []
+    if (photos.length) {
+      const uploadURL = `http://${document.domain}:${constants.serverPort}/image/upload`
+      let formData = new FormData()
+      photos.forEach((photoFile) => formData.append('images', photoFile))
+
+      try {
+        const res = await axios.post(uploadURL, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        console.log(res.data)
+        uploadedPhotos = [...res.data.path]
+      } catch (err) {
+        console.log(err)
+        setMsg({ type: 'danger', text: 'failed to upload photos' })
+      }
+    }
+
+    const url = `http://${document.domain}:${constants.serverPort}/forum/newtopic`
     const body = {
       title: title,
       category: category,
@@ -242,6 +299,7 @@ const NewTopicForm = (props) => {
       relatedInstitute: relatedInstitute,
       region: region,
       tags: tags,
+      photos: uploadedPhotos,
     }
     try {
       const res = await axios.post(url, body, { headers: { auth } })
@@ -317,7 +375,7 @@ const NewTopicForm = (props) => {
                   />
                 </Form.Group>
               </Form.Row>
-              <Form.Row className="mb-3">
+              <Form.Row>
                 <Col>
                   <InputGroup size="sm">
                     <InputGroup.Prepend>
@@ -335,14 +393,6 @@ const NewTopicForm = (props) => {
                     </Form.Control>
                   </InputGroup>
                 </Col>
-                <Col xs="auto">
-                  <Button
-                    variant="outline-dark"
-                    size="sm"
-                  >上传图片</Button>
-                </Col>
-              </Form.Row>
-              <Form.Row controlId="replyTo">
                 <Col>
                   {
                     (props.relatedInstitute) ? null : (
@@ -361,9 +411,43 @@ const NewTopicForm = (props) => {
                     )
                   }
                 </Col>
-                <Col xs="auto">
-                  <Button variant="success" type="submit" size="sm">发布</Button>
+              </Form.Row>
+              <Form.Row controlId="replyTo">
+                <Col>
+                  <Form.File
+                    id="photos"
+                    name="photos"
+                    label={`添加图片(${photos.length})`}
+                    size="sm"
+                    onChange={handlePhotos}
+                    custom
+                    disabled={reachedPhotoCountLimit}
+                  />
                 </Col>
+                <Col xs="auto">
+                  <Button variant="success" type="submit">发布</Button>
+                </Col>
+              </Form.Row>
+              <Form.Row className="mt-2">
+                {
+                  photoPreviews.map((photo, idx) => {
+                    return (
+                      <Col xs={6} lg={3} className="p-1">
+                        <div style={{
+                          backgroundImage: `url(${photo})`,
+                          ...imageStyle
+                        }}
+                          className="img-thumbnail d-block"
+                          onClick={() => {
+                            setPhotos([...photos.filter((p, i) => i != idx)])
+                            setPhotoPreviews([...photoPreviews.filter((p, i) => i != idx)])
+                            setReachedPhotoCountLimit(false)
+                          }}
+                        ></div>
+                      </Col>
+                    )
+                  })
+                }
               </Form.Row>
             </Form>
           </>

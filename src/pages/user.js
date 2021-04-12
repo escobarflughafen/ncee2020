@@ -16,7 +16,6 @@ import { MsgAlert } from './components/msg'
 
 const serverUrl = `http://${document.domain}:${constants.serverPort}`
 
-
 const UserHeader = (props) => {
   const user = props.user
   const loginAs = JSON.parse(window.localStorage.getItem('user'))
@@ -91,7 +90,6 @@ const UserHeader = (props) => {
     </div>
   )
 }
-
 
 const fetchUserService = async (username, port = constants.serverPort) => {
   const url = `http://${document.domain}:${constants.serverPort}/user/${username}/fetch`

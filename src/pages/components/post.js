@@ -397,9 +397,9 @@ const NewPostForm = (props) => {
   const [tags, setTags] = useState()
 
   const [photos, setPhotos] = useState([])
+  const [photoPreviews, setPhotoPreviews] = useState([])
   const maxPhotoCount = 4
   const [reachedPhotoCountLimit, setReachedPhotoCountLimit] = useState(false)
-  const [photoPreviews, setPhotoPreviews] = useState([])
 
   const history = useHistory()
 
@@ -568,4 +568,4 @@ const NewPostForm = (props) => {
 }
 
 
-export { PostCard, PostList, NewPostForm, PostImage};
+export { PostCard, PostList, NewPostForm, PostImage, imageStyle};

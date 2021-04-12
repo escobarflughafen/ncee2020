@@ -124,7 +124,7 @@ const SignupForm = (props) => {
       if (props.modify) {
         window.localStorage.setItem('user', JSON.stringify(res.data.user))
       }
-      //setTimeout(() => { history.push(`/user/${body.username}`); history.go() }, 1000)
+      setTimeout(() => { history.push(`/user/${body.username}`); history.go() }, 1000)
     } catch (err) {
       setMsg({ type: 'danger', text: `${err.response.data.msg}\n${JSON.stringify(body)}` })
       console.log(err)
@@ -811,7 +811,7 @@ const UserActivity = (props) => {
               {(contents.length && !props.limit) ? (
                 <div>
                   <div className="">共 {contents.length} 条动态</div>
-                  <div className="annotation">{`第 ${(currentPage - 1) * activityPerPage + 1}~${currentPage * activityPerPage} 条`}</div>
+                  <div className="annotation">{`第 ${(currentPage - 1) * activityPerPage + 1}~${Math.min(currentPage * activityPerPage, contents.length)} 条`}</div>
                 </div>
               ) : null}
             </Col>
