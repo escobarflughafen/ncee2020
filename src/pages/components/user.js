@@ -861,7 +861,7 @@ const avatarStyle = {
 
 const UserAvatar = (props) => {
   let { user, src, style, ...otherprops } = props
-
+  const history = useHistory()
   return (
     <Image {...otherprops}
       style={{
@@ -869,6 +869,11 @@ const UserAvatar = (props) => {
         ...avatarStyle
       }}
       src={(user.avatar) ? `${serverUrl}${user.avatar}` : defaultAvatar}
+      onClick={(e) => {
+        e.stopPropagation()
+        history.push(`/user/${user.username}`)
+        history.go()
+      }}
     />
   )
 }

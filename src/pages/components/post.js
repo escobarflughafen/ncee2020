@@ -38,7 +38,8 @@ const ImageModal = (props) => {
       {...otherProps}
       aria-labelledby="contained-modal-title-vcenter"
       centered
-      onClick={(e) => { e.stopPropagation() }}
+      onClick={(e) => { e.stopPropagation(); props.onHide() }}
+
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
@@ -265,10 +266,19 @@ const PostCard = (props) => {
                       <Row>
                         <Col>
                           {
-                            expanded && (
+                            expanded ? (
                               <small className="text-grey d-none d-sm-block">
                                 {new Date(post.createdAt).toString()}
                               </small>
+                            ) : (
+                              <Button variant="link" className="p-0 align-baseline" size="sm" onClick={(e) => {
+                                e.stopPropagation()
+                                history.push(`/post/${post._id}#replytextarea`)
+                                history.go()
+                              }}>
+                                <SVG variant="chat" className="mr-2" />
+                                {post.replies.length}
+                              </Button>
                             )
                           }
                         </Col>
@@ -286,7 +296,7 @@ const PostCard = (props) => {
                                         href={`/post/${post._id}`}
                                         onClick={(e) => { e.stopPropagation(); }}
                                       >
-                                        回复
+                                        回复 ({post.replies.length})
                                       </Dropdown.Item>
                                     )
                                   }
@@ -447,10 +457,9 @@ const NewPostForm = (props) => {
       return setMsg({ type: 'warning', text: '已达到图片上传张数限制' })
     }
 
-    if (e.target.files) {
+    if (e.target.files?.length) {
       var reader = new FileReader()
       var photo = e.target.files[0]
-
       if (photo.type.includes('image')) {
         reader.onloadend = () => {
           console.log('result', reader.result)
