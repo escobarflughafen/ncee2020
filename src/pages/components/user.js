@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, Spinner, ListGroup, ModalBody, Popover, OverlayTrigger, Image, InputGroup } from 'react-bootstrap'
+import { Modal, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, Spinner, ListGroup, ModalBody, Popover, OverlayTrigger, Image, InputGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory } from 'react-router-dom'
 import constants from '../../utils/constants'
@@ -47,10 +47,11 @@ const loginSchema = Yup.object().shape({
   password: Yup.string().required('请输入密码')
 })
 
+const usernameRegex = /^([0-9]|[a-z]|[A-Z]|_){4,16}$/
+
 const signupValidator = Yup.object().shape({
   username: Yup.string()
-    .min(4, '需要至少4个字符')
-    .max(16, '用户名过长，最多16个字符')
+    .matches(usernameRegex, '用户名应只由数字、字母和下划线组成，最少4位，最多16位')
     .required('请输入用户名'),
   password: Yup.string()
     .min(6, '需要至少6位字符')
@@ -59,7 +60,7 @@ const signupValidator = Yup.object().shape({
   name: Yup.string().max(20, '姓名过长，最多20个字符'),
   hint: Yup.string()
     .max(100, '提示过长'),
-  year: Yup.string().required('需要选择考生的届次'),
+  year: Yup.string().matches(/^20[0-9][0-9]$/).required('需要选择考生的届次'),
   province: Yup.string().required('需要选择考生的省份'),
   city: Yup.string().required('需要选择考生的城市'),
   about: Yup.string().max(1000, '个人简介过长，请控制在1000字内'),
@@ -67,8 +68,7 @@ const signupValidator = Yup.object().shape({
 
 const modifyValidator = Yup.object().shape({
   username: Yup.string()
-    .min(4, '需要至少4个字符')
-    .max(16, '用户名过长，最多16个字符')
+    .matches(usernameRegex, '用户名应只由数字、字母和下划线组成，最少4位，最多16位')
     .nullable(true),
   password: Yup.string()
     .min(6, '需要至少6位字符')
@@ -76,7 +76,7 @@ const modifyValidator = Yup.object().shape({
     .nullable(true),
   name: Yup.string().max(20, '姓名过长，最多20个字符').nullable(true),
   hint: Yup.string().max(100, '提示过长').nullable(true),
-  year: Yup.string().required('需要选择考生的届次').nullable(true),
+  year: Yup.string().matches(/^20[0-9][0-9]$/).required('需要选择考生的届次').nullable(true),
   province: Yup.string().required('需要选择考生的省份').nullable(true),
   city: Yup.string().required('需要选择考生的城市').nullable(true),
   about: Yup.string().max(1000, '个人简介过长，请控制在1000字内').nullable(true),
@@ -124,7 +124,7 @@ const SignupForm = (props) => {
       if (props.modify) {
         window.localStorage.setItem('user', JSON.stringify(res.data.user))
       }
-      setTimeout(() => { history.push(`/user/${body.username}`); history.go() }, 1000)
+      setTimeout(() => { history.push(`/login`); history.go() }, 1000)
     } catch (err) {
       setMsg({ type: 'danger', text: `${err.response.data.msg}\n${JSON.stringify(body)}` })
       console.log(err)
@@ -309,6 +309,7 @@ const SignupForm = (props) => {
                         isValid={touched.year && !errors.year}
                         isInvalid={!!errors.year}
                       >
+                        <option value={null}>...</option>
                         {
                           [
                             '2021',
@@ -787,7 +788,7 @@ const UserActivity = (props) => {
     const users = (props.users || ((props.user) ? [props.user] : null))
     if (users) {
       const postUrl = `http://${document.domain}:${constants.serverPort}/post/fetch`
-      const topicUrl = `http://${document.domain}:${constants.serverPort}/forum/fetch`
+      const topicUrl = `http://${document.domain}:${constants.serverPort}/topic/fetch`
 
       try {
         setMsg({ type: 'info', text: '获取动态中' })
@@ -859,22 +860,78 @@ const avatarStyle = {
   borderRadius: '.2rem',
 }
 
-const UserAvatar = (props) => {
-  let { user, src, style, ...otherprops } = props
-  const history = useHistory()
+
+const AvatarModal = (props) => {
+  const { user, src, onClick, onHide, ...otherProps } = props // src is to filter out 
+
+  const handleAvatarSubmit = () => {
+
+  }
+
   return (
-    <Image {...otherprops}
-      style={{
-        ...style,
-        ...avatarStyle
-      }}
-      src={(user.avatar) ? `${serverUrl}${user.avatar}` : defaultAvatar}
-      onClick={(e) => {
-        e.stopPropagation()
-        history.push(`/user/${user.username}`)
-        history.go()
-      }}
-    />
+    <Modal
+      {...otherProps}
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+      onClick={(e) => { e.stopPropagation(); onHide()}}
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-vcenter">
+          用户头像
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Row>
+          <Col>
+          </Col>
+          <Col xs="auto"></Col>
+        </Row>
+        <Image
+          className="w-100"
+          src={(user.avatar) ? `${serverUrl}${user.avatar}` : defaultAvatar}
+        />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={onHide}>关闭</Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
+
+const UserAvatar = (props) => {
+  let { user, src, style, withModal, ...otherprops } = props
+  const history = useHistory()
+  const [modalShow, setModalShow] = useState(false)
+
+  return (
+    <>
+      <Image {...otherprops}
+        style={{
+          ...style,
+          ...avatarStyle
+        }}
+        src={(user.avatar) ? `${serverUrl}${user.avatar}` : defaultAvatar}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (withModal) {
+            setModalShow(true)
+          } else {
+            history.push(`/user/${user.username}`)
+            history.go()
+          }
+        }}
+      />
+      {
+        withModal && (
+          <AvatarModal
+            size="md"
+            user={user}
+            show={modalShow}
+            onHide={() => { setModalShow(false); }}
+          />
+        )
+      }
+    </>
   )
 }
 

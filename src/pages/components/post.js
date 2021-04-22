@@ -32,14 +32,13 @@ const togglePostRemovalService = async (pid, port = constants.serverPort) => {
 }
 
 const ImageModal = (props) => {
-  const { src, onClick, ...otherProps } = props
+  const { src, onClick, onHide, ...otherProps } = props
   return (
     <Modal
       {...otherProps}
       aria-labelledby="contained-modal-title-vcenter"
       centered
-      onClick={(e) => { e.stopPropagation(); props.onHide() }}
-
+      onClick={(e) => { e.stopPropagation(); onHide() }}
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
@@ -50,7 +49,7 @@ const ImageModal = (props) => {
         <Image className="w-100" src={src} />
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>关闭</Button>
+        <Button onClick={onHide}>关闭</Button>
       </Modal.Footer>
     </Modal>
   )
@@ -77,7 +76,7 @@ const PostImage = (props) => {
       <ImageModal
         size="lg"
         show={modalShow}
-        onHide={() => { setModalShow(false); console.log(modalShow) }}
+        onHide={() => { setModalShow(false); }}
         src={src} />
     </Col>
   )
@@ -94,160 +93,20 @@ const imageStyle = {
 }
 
 const PostContent = (props) => {
-  const [post, setPost] = useState()
-  useEffect(() => { setPost(props.post) }, [props.post])
-
-  return (
-    <>
-      {(post) ? (
-        <>
-          <Row>
-            <Col>
-              {post.content}
-            </Col>
-          </Row>
-          <Row id={`photos-${post._id}`} className="mt-2 mb-1 px-3">
-            {
-              post.photos.map((path, idx) => <PostImage
-                src={`${serverUrl}${path}`}
-                style={{ padding: 2 }}
-              />)
-            }
-          </Row>
-        </>
-      ) : null}
-    </>
-  )
-}
-
-const PostCard = (props) => {
-  const expanded = props.expanded || false
-  const detail = props.detail
-  const index = props.index
-  const host = props.host
-  const setReplyTo = props.setReplyTo
-
-  const [removedPostVisible, setRemovedPostVisible] = useState(false)
-
   const post = props.post
-  const [msg, setMsg] = useState({ type: '', text: '' })
-  const history = useHistory()
 
-  // custom dropdown
-  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-    <a
-      href=""
-      ref={ref}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onClick(e);
-      }}
-    >
-      {children}
-    </a>
-  ));
+  const [removed, setRemoved] = useState(post?.removed.status)
+  const [visible, setVisible] = useState(false)
+  const [content, setContent] = useState(post?.content)
+  const [photos, setPhotos] = useState(post?.photos)
 
-  const CustomMenu = React.forwardRef(
-    ({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
-      const [value, setValue] = useState('');
+  const user = JSON.parse(window.localStorage.getItem('user'))
 
-      return (
-        <div
-          ref={ref}
-          style={style}
-          className={className}
-          aria-labelledby={labeledBy}
-        >
-          <ul className="list-unstyled">
-            {React.Children.toArray(children).filter(
-              (child) =>
-                !value || child.props.children.toLowerCase().startsWith(value),
-            )}
-          </ul>
-        </div>
-      );
-    },
-  );
+  const handleContentRetrieve = () => {
+    const url = `${serverUrl}/post/`
+  }
 
-
-  return (
-    <>
-      {(expanded && post.replyTo) ? (
-        <ListGroup.Item variant="info">
-          <Row>
-            <Col>
-              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}>{post.replyTo.content}</Alert.Link>
-            </Col>
-          </Row>
-        </ListGroup.Item>
-      ) : null}
-      {(expanded && post.relatedTopic) ? (
-        <ListGroup.Item variant="success">
-          <Row>
-            <Col>
-              讨论：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}>{post.relatedTopic.title}</Alert.Link>
-            </Col>
-          </Row>
-        </ListGroup.Item>
-      ) : null}
-      {
-        /*
-      (expanded && post.relatedInstitute) ? (
-        <InstituteCard institute={post.relatedInstitute} />
-      ) : null
-      */
-      }
-      <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post._id}`); history.go() }}>
-        <Row>
-          <Col>
-            <MsgAlert msg={msg} />
-          </Col>
-        </Row>
-        {(detail) ? (
-          <Row className="mb-2 text-muted">
-            <Col onClick={(e) => { e.stopPropagation() }} xs="auto">
-              {(() => {
-                if (post.replyTo) {
-                  return (<small>回复：<strong><a className="text-dark" href={`/post/${post.replyTo._id}`}>{post.replyTo.content}</a></strong></small>)
-                } else if (post.relatedInstitute) {
-                  return (<small>院校评价：<strong><a className="text-dark" href={`/institute/${post.relatedInstitute.data.school_id}/discuss`}>{post.relatedInstitute.data.name}</a></strong></small>)
-                } else if (post.relatedTopic) {
-                  return (<small>参与讨论：<strong><a className="text-dark" href={`/forum/${post.relatedTopic._id}`}>{post.relatedTopic.title}</a></strong></small>)
-                }
-              })()}
-            </Col>
-          </Row>
-        ) : null}
-        <Row>
-          <Col xs="auto" className="pr-0">
-            <UserAvatar width={48} height={48} user={post.author} />
-          </Col>
-          <Col>
-            <Row>
-              <Col>
-                <small>
-                  <UserLink user={post.author}>{post.author.name || `@${post.author.username}`}</UserLink>
-                  {(host) ? (<SVG variant="person" fill />) : (<></>)}
-                  {
-                    (expanded) ? null : (
-                      <span className="d-inline-block">
-                        ・{timeStringConverter(post.createdAt)}
-                      </span>
-                    )
-                  }
-                </small>
-              </Col>
-              <Col xs="auto">
-                {
-                  (index) ? (
-                    <code>
-                      #{index}
-                    </code>
-                  ) : null
-                }
-              </Col>
-            </Row>
+  /*
             {
               (() => {
                 const user = JSON.parse(window.localStorage.getItem('user'))
@@ -382,19 +241,238 @@ const PostCard = (props) => {
                 }
               })()
             }
+            */
+  return (
+    <>
+      {
+        (() => {
+          if (removed) {
+            return (
+              <>
+                <Row>
+                  <Col>
+                    <Alert variant="info" onClick={(e) => { e.stopPropagation() }}>
+                      <span className="mr-1">该贴文已被移除</span>
+                    </Alert>
+                  </Col>
+                </Row>
+              </>
+            )
+          }
+          return (
+            <>
+              <Row>
+                <Col>
+                  {content}
+                </Col>
+              </Row>
+              {
+                (post.photos?.length) ? (
+                  <Row id={`photos-${post._id}`} className="mt-2 mb-1 px-3">
+                    {
+                      photos.map((path, idx) => <PostImage
+                        src={`${serverUrl}${path}`}
+                        style={{ padding: 2 }}
+                      />)
+                    }
+                  </Row>
+                ) : null
+              }
+            </>
+          )
+        })()
+      }
+    </>
+  )
+}
+
+const PostCard = (props) => {
+  const expanded = props.expanded || false
+  const detail = props.detail
+  const index = props.index
+  const host = props.host
+  const setReplyTo = props.setReplyTo
+
+  const [removedPostVisible, setRemovedPostVisible] = useState(false)
+
+  const post = props.post
+  const [msg, setMsg] = useState({ type: '', text: '' })
+  const history = useHistory()
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
+
+  // custom dropdown
+  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+    <a
+      href=""
+      ref={ref}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick(e);
+      }}
+    >
+      {children}
+    </a>
+  ));
+
+  const CustomMenu = React.forwardRef(
+    ({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
+      const [value, setValue] = useState('');
+
+      return (
+        <div
+          ref={ref}
+          style={style}
+          className={className}
+          aria-labelledby={labeledBy}
+        >
+          <ul className="list-unstyled">
+            {React.Children.toArray(children).filter(
+              (child) =>
+                !value || child.props.children.toLowerCase().startsWith(value),
+            )}
+          </ul>
+        </div>
+      );
+    },
+  );
+
+
+  return (
+    <>
+      { /*
+      (expanded && post.replyTo) ? (
+        
+        <ListGroup.Item variant="info">
+          <Row>
+            <Col>
+              回复：<Alert.Link className="text-dark" onClick={() => { history.push(`/post/${post.replyTo._id}`); history.go() }}>{post.replyTo.content}</Alert.Link>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+      ) : null
+      */}
+      {(expanded && post.relatedTopic) ? (
+        <ListGroup.Item variant="success">
+          <Row>
+            <Col>
+              讨论：<Alert.Link className="text-dark" onClick={() => { history.push(`/forum/${post.relatedTopic._id}`); history.go() }}>{post.relatedTopic.title}</Alert.Link>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+      ) : null}
+      <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post._id}`); history.go() }}>
+        <Row>
+          <Col>
+            <MsgAlert msg={msg} />
           </Col>
         </Row>
-        {
-          (expanded) ? (
-            <Row className="d-block d-sm-none">
+        {(detail) ? (
+          <Row className="mb-2 text-muted">
+            <Col onClick={(e) => { e.stopPropagation() }} xs="auto">
+              {(() => {
+                if (post.replyTo) {
+                  return (<small>回复：<strong><a className="text-dark" href={`/post/${post.replyTo._id}`}>{post.replyTo.content}</a></strong></small>)
+                } else if (post.relatedInstitute) {
+                  return (<small>院校评价：<strong><a className="text-dark" href={`/institute/${post.relatedInstitute.data.school_id}/discuss`}>{post.relatedInstitute.data.name}</a></strong></small>)
+                } else if (post.relatedTopic) {
+                  return (<small>参与讨论：<strong><a className="text-dark" href={`/forum/${post.relatedTopic._id}`}>{post.relatedTopic.title}</a></strong></small>)
+                }
+              })()}
+            </Col>
+          </Row>
+        ) : null}
+        <Row>
+          <Col xs="auto" className="pr-0">
+            <UserAvatar width={48} height={48} user={post.author} />
+          </Col>
+          <Col>
+            <Row>
               <Col>
+                <small>
+                  <UserLink user={post.author}>{post.author.name || `@${post.author.username}`}</UserLink>
+                  {(host) ? (<SVG variant="person" fill />) : (<></>)}
+                  {
+                    (expanded) ? null : (
+                      <span className="d-inline-block">
+                        ・{timeStringConverter(post.createdAt)}
+                      </span>
+                    )
+                  }
+                </small>
+              </Col>
+              <Col xs="auto">
+                {
+                  (index) ? (
+                    <code>
+                      #{index}
+                    </code>
+                  ) : null
+                }
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <PostContent post={post} />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+        <Row>
+          {
+            (expanded) ? (
+              <Col xs="auto">
                 <small className="text-grey">
                   {new Date(post.createdAt).toString()}
                 </small>
               </Col>
-            </Row>
-          ) : null
-        }
+            ) : null
+          }
+          <Col></Col>
+          <Col xs="auto">
+            <Dropdown>
+              <Dropdown.Toggle as={CustomToggle} className="pl-2 pr-2">
+                <SVG variant="three-dots" />
+              </Dropdown.Toggle>
+              <Dropdown.Menu as={CustomMenu}>
+                <Dropdown.Item eventKey="1"
+                  href={`/post/${post?._id}`}
+                  onClick={(e) => { e.stopPropagation(); }}
+                >
+                  回复 ({post.replies.length})
+                </Dropdown.Item>
+
+                {
+                  (loginAs?._id === post.author._id) ?
+                    (
+                      <Dropdown.Item
+                        eventKey="2"
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          try {
+                            const res = await togglePostRemovalService(post._id)
+                            setMsg({ type: 'info', text: res.data.msg })
+                            setTimeout(() => {
+                              window.location.reload()
+                            }, 1000)
+                          } catch (err) {
+                            console.log(err)
+                            setMsg({
+                              type: 'danger',
+                              text: (err.response.data) ? err.response.data.msg : ''
+                            })
+                          }
+
+                        }}
+                      >
+                        {(post.removed.status) ? '恢复' : '移除'}
+                      </Dropdown.Item>
+                    ) : null
+                }
+              </Dropdown.Menu>
+            </Dropdown>
+          </Col>
+        </Row>
       </ListGroup.Item>
     </>
   )
@@ -507,7 +585,7 @@ const NewPostForm = (props) => {
     }
 
 
-    const url = `http://${document.domain}:${constants.serverPort}/post/newpost`
+    const url = `http://${document.domain}:${constants.serverPort}/post/new`
     const body = {
       content: content,
       relatedInstitute: relatedInstitute,

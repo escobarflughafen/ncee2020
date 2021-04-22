@@ -291,7 +291,7 @@ const NewTopicForm = (props) => {
       }
     }
 
-    const url = `http://${document.domain}:${constants.serverPort}/forum/newtopic`
+    const url = `http://${document.domain}:${constants.serverPort}/topic/`
     const body = {
       title: title,
       category: category,

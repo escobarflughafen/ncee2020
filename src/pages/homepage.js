@@ -26,7 +26,7 @@ const HomePage = (props) => {
   const [institutes, setInstitutes] = useState([])
 
   useEffect(async () => {
-    const url = `http://${document.domain}:${constants.serverPort}/forum/trends`
+    const url = `http://${document.domain}:${constants.serverPort}/topic/trends`
     try {
       const res = await axios.post(url)
       console.log(res.data)
@@ -35,7 +35,7 @@ const HomePage = (props) => {
       console.log(err)
       setMsg({
         type: 'danger',
-        text: err.response.data.msg
+        text: err.response?.data?.msg
       })
     }
 
@@ -154,7 +154,7 @@ const HomePage = (props) => {
                           你关注的
                       </strong>
                       </Card.Header>
-                      <UserActivity users={user.following} limit={400} />
+                      <UserActivity users={[...user.following, user._id]} limit={400} />
                     </Card>
                   </CardGroup>
                 </Col>

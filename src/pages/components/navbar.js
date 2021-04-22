@@ -31,9 +31,13 @@ const AppNavbar = (props) => {
             <Nav.Item>
               <Nav.Link onClick={() => { history.push('/'); history.go() }}>{constants.title.homepage}</Nav.Link>
             </Nav.Item>
+            {
+              /*
             <Nav.Item>
               <Nav.Link onClick={() => { history.push('/stats'); history.go() }}>{constants.title.stats}</Nav.Link>
             </Nav.Item>
+              */
+            }
             <Nav.Item>
               <Nav.Link onClick={() => { history.push('/institute'); history.go() }}>{constants.title.institute}</Nav.Link>
             </Nav.Item>

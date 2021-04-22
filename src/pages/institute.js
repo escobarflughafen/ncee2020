@@ -18,7 +18,7 @@ import { Bar, Line } from 'react-chartjs-2'
 const fetchAllInstitutesInfo = async (cb, port = constants.serverPort) => {
   const url = `http://${document.domain}:${port}/institute/getallinfo`
   try {
-    let req = axios.post(url, {
+    let req = axios.get(url, {
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
@@ -48,9 +48,9 @@ const queryInstitutesInfo = async (queryParams, cb, port = constants.serverPort)
 }
 
 const fetchInstituteInfo = async (instituteId, cb, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${port}/institute/${instituteId}/getinfo`
+  const url = `http://${document.domain}:${port}/institute/${instituteId}/`
   try {
-    let req = axios.post(url, {
+    let req = axios.get(url, {
       headers: {
         'Access-Control-Allow-Origin': '*'
       }
@@ -63,9 +63,9 @@ const fetchInstituteInfo = async (instituteId, cb, port = constants.serverPort) 
 }
 
 const fetchInstituteMajors = async (instituteId, cb, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${port}/institute/${instituteId}/fetchmajors`
+  const url = `http://${document.domain}:${port}/institute/${instituteId}/majors`
   try {
-    let req = axios.post(url, {
+    let req = axios.get(url, {
       headers: {
         'Access-Control-Allow-Origin': '*'
       }
@@ -105,9 +105,9 @@ const fetchInstitutesWithinScoreRange = async (instituteId, type, region, cb, ra
 
 
 const fetchInstituteEnrollData = async (instituteId, cb, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${port}/institute/${instituteId}/fetchenrolldata`
+  const url = `http://${document.domain}:${port}/institute/${instituteId}/enroll`
   try {
-    let req = axios.post(url, {
+    let req = axios.get(url, {
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
@@ -565,7 +565,7 @@ const InstituteTabs = (props) => {
   }, [])
 
   useEffect(() => {
-    const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
+    const url = `http://${document.domain}:${constants.serverPort}/topic/fetch`
     console.log(institute._id)
     axios.post(url, {
       queryParams: {

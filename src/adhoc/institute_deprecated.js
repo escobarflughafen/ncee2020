@@ -136,9 +136,9 @@ const Faculty = (props) => {
 }
 
 const fetchInstituteInfo = async (instituteId, cb, port = constants.serverPort) => {
-    const url = `http://localhost:${port}/institute/${instituteId}/getinfo`
+    const url = `http://localhost:${port}/institute/${instituteId}`
     try {
-        let req = axios.post(url, {
+        let req = axios.get(url, {
             headers: {
                 'Access-Control-Allow-Origin': '*'
             }

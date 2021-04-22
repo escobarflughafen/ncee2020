@@ -15,14 +15,11 @@ import { MsgAlert } from './components/msg'
 import axios from 'axios'
 
 const fetchTopicService = async (id, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${port}/forum/${id}/fetch`
+  const url = `http://${document.domain}:${port}/topic/${id}/`
   const token = window.localStorage.getItem('token')
   const auth = (token) ? `bearer ${token}` : null
 
-  const body = {
-    id
-  }
-  const res = await axios.post(url, body, { headers: { auth } })
+  const res = await axios.get(url,  { headers: { auth } })
   return res
 }
 
@@ -76,7 +73,7 @@ const ListPage = (props) => {
     const handleQuery = async () => {
       console.log(queryTags)
       setMsg({type: 'info', text: '搜索中...'})
-      const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
+      const url = `http://${document.domain}:${constants.serverPort}/topic/fetch`
       try {
         const res = await axios.post(url, {
           queryTags
@@ -119,7 +116,7 @@ const ListPage = (props) => {
     const { url, path, params } = useRouteMatch()
 
     useEffect(() => {
-      const url = `http://${document.domain}:${constants.serverPort}/forum/fetch`
+      const url = `http://${document.domain}:${constants.serverPort}/topic/fetch`
       axios.post(url).then((res) => {
         console.log(res)
         setTopics(res.data.topics)
@@ -489,7 +486,6 @@ const TopicPage = (props) => {
                     post={post}
                     index={(currentPage - 1) * postPerPage + idx + 1}
                     host={post.author._id === topic.host._id}
-                    expanded={false}
                   />)
                 }
               )}

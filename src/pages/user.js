@@ -30,7 +30,7 @@ const UserHeader = (props) => {
       <MsgAlert msg={msg} />
       <Row>
         <Col xs="auto">
-          <UserAvatar width={96} height={96} user={user} />
+          <UserAvatar width={96} height={96} user={user} withModal />
         </Col>
         <Col className="pl-0">
           <Row>
@@ -92,8 +92,8 @@ const UserHeader = (props) => {
 }
 
 const fetchUserService = async (username, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${constants.serverPort}/user/${username}/fetch`
-  const res = await axios.post(url, { username })
+  const url = `http://${document.domain}:${constants.serverPort}/user/${username}/`
+  const res = await axios.get(url)
   return res
 }
 

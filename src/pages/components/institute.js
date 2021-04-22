@@ -91,17 +91,12 @@ const InstituteCard = (props) => {
             <Col>
               <Nav fill onClick={(e) => { e.stopPropagation(); }}>
                 <Nav.Item>
-                  <Nav.Link onClick={(e) => { alert(1234) }}>
-                    <SVG variant="star" />
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link>
+                  <Nav.Link onClick={(e) => { history.push(`/institute/${i.id}/discuss`);history.go() }}>
                     <SVG variant="chat" />
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link>
+                  <Nav.Link onClick={(e) => {history.push(`/forum/`); history.go()}}>
                     <SVG variant="share" />
                   </Nav.Link>
                 </Nav.Item>
@@ -154,7 +149,7 @@ const InstituteSelector = (props) => {
       console.log('fetching instituteIndices from localStorage')
       setIndices(JSON.parse(localStorage))
     } else {
-      axios.post(url).then((res) => {
+      axios.get(url).then((res) => {
         console.log(res.data)
         console.log('instituteIndices fetched, setting into localStorage')
         window.localStorage.setItem('instituteIndices', JSON.stringify(res.data.institutes))

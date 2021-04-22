@@ -11,17 +11,14 @@ import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm } from './components/post'
 import axios from 'axios'
+import { InstituteCard } from './components/institute'
 
 const fetchPostService = async (id, port = constants.serverPort) => {
-  const url = `http://${document.domain}:${port}/post/${id}/fetch`
+  const url = `http://${document.domain}:${port}/post/${id}/`
   const token = window.localStorage.getItem('token')
   const auth = (token) ? `bearer ${token}` : null
 
-  const body = {
-    id
-  }
-
-  const res = await axios.post(url, body, { headers: { auth } })
+  const res = await axios.get(url, { headers: { auth } })
   return res
 }
 
@@ -67,7 +64,7 @@ const PostView = (props) => {
         <>
           <div>
             <Row className="mb-3">
-              <Col>
+              <Col xs="auto">
                 <Button
                   variant="outline-success"
                   size="sm"
@@ -76,12 +73,24 @@ const PostView = (props) => {
                   }}
                 >←返回</Button>
               </Col>
+              {(post.relatedInstitute) ? (
+                <Col>
+                  <h4>院校评价</h4>
+                </Col>
+              ) : null}
             </Row>
             <Card>
               <ListGroup variant="flush">
+                {(post.relatedInstitute) ? (
+                  <InstituteCard institute={post.relatedInstitute} />
+                ) : null}
+                {(post.replyTo) ? (
+                  <PostCard post={post.replyTo} />
+                ) : null}
                 <PostCard
                   post={post}
-                  expanded={true}
+                  expanded
+                  detail
                 />
                 <ListGroup.Item>
                   {
