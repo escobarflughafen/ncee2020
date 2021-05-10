@@ -12,6 +12,7 @@ import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm, PostList } from './components/post'
 import { LoginForm, UserActivity } from './components/user'
 import axios from 'axios'
+import { InstituteCard } from './components/institute'
 
 const HomePage = (props) => {
   const today = new Date()
@@ -23,12 +24,12 @@ const HomePage = (props) => {
     text: ''
   })
   const [trends, setTrends] = useState([])
-  const [institutes, setInstitutes] = useState([])
+  const [institutes, setInstitutes] = useState()
 
   useEffect(async () => {
     const url = `http://${document.domain}:${constants.serverPort}/topic/trends`
     try {
-      const res = await axios.post(url)
+      const res = await axios.get(url)
       console.log(res.data)
       setTrends(res.data.trends)
     } catch (err) {
@@ -41,8 +42,16 @@ const HomePage = (props) => {
 
   }, [])
 
-  /*
   useEffect(async () => {
+    const allInstitutes = JSON.parse(window.localStorage.getItem('allInstitutes'))
+    if (allInstitutes) {
+      let randArr1 = [...(new Set([...Array(100)].map(v => Math.floor(Math.random() * 150))))]
+      let randArr2 = [...(new Set([...Array(100)].map(v => Math.floor(Math.random() * 150 + 50))))]
+      let randArr = [...(new Set([...randArr1, ...randArr2]))].slice(0,10)
+      console.log(randArr)
+      setInstitutes([...allInstitutes.filter((i, idx) => randArr.includes(idx))])
+    }
+    /*
     const url = `http://${document.domain}:${constants.serverPort}/institute/recommended`
     try{
       const res = await axios.post(url)
@@ -55,8 +64,9 @@ const HomePage = (props) => {
         text: err.response?.data?.msg
       })
     }
+    */
   }, [])
-  */
+
 
   useEffect(() => {
     const loginAs = window.localStorage.getItem('user')
@@ -64,6 +74,11 @@ const HomePage = (props) => {
       setUser(JSON.parse(loginAs))
       document.title = `${constants.title.homepage} - ${constants.appName}`
     }
+  }, [])
+
+
+  useEffect(() => {
+
   }, [])
 
   /*
@@ -132,11 +147,6 @@ const HomePage = (props) => {
                       }}
                     >讨论区→</Button>
                     <br />
-                    <Button variant="link" size="sm" className="text-success"
-                      onClick={() => {
-                        history.push('/stats')
-                      }}
-                    >看数据→</Button>
                   </>
                 ) : null
               }
@@ -180,6 +190,11 @@ const HomePage = (props) => {
                       </strong>
                     </Card.Header>
                     <ListGroup variant="flush">
+                      {
+                        (institutes?.map(i => (
+                          <InstituteCard institute={i} size="sm"/>
+                        )))
+                      }
                     </ListGroup>
                   </Card>
                 </Col>

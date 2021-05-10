@@ -93,12 +93,17 @@ const imageStyle = {
 }
 
 const PostContent = (props) => {
-  const post = props.post
 
-  const [removed, setRemoved] = useState(post?.removed.status)
+  const [removed, setRemoved] = useState(props.removed)
   const [visible, setVisible] = useState(false)
-  const [content, setContent] = useState(post?.content)
-  const [photos, setPhotos] = useState(post?.photos)
+  const [content, setContent] = useState(props.content)
+  const [photos, setPhotos] = useState(props.photos)
+
+  useEffect(() => {
+    setRemoved(props.removed)
+    setContent(props.content)
+    setPhotos(props.photos)
+  }, [props.removed, props.content, props.photos])
 
   const user = JSON.parse(window.localStorage.getItem('user'))
 
@@ -267,8 +272,8 @@ const PostContent = (props) => {
                 </Col>
               </Row>
               {
-                (post.photos?.length) ? (
-                  <Row id={`photos-${post._id}`} className="mt-2 mb-1 px-3">
+                (photos?.length) ? (
+                  <Row id={`photos-${Math.random() * 100000}`} className="mt-2 mb-1 px-3">
                     {
                       photos.map((path, idx) => <PostImage
                         src={`${serverUrl}${path}`}
@@ -295,7 +300,9 @@ const PostCard = (props) => {
 
   const [removedPostVisible, setRemovedPostVisible] = useState(false)
 
-  const post = props.post
+  const [post, setPost] = useState({ ...props.post })
+  useEffect(() => { setPost({ ...props.post }) }, [props.post])
+
   const [msg, setMsg] = useState({ type: '', text: '' })
   const history = useHistory()
   const loginAs = JSON.parse(window.localStorage.getItem('user'))
@@ -361,6 +368,7 @@ const PostCard = (props) => {
           </Row>
         </ListGroup.Item>
       ) : null}
+
       <ListGroup.Item action={!expanded} onClick={(expanded) ? null : () => { history.push(`/post/${post._id}`); history.go() }}>
         <Row>
           <Col>
@@ -374,7 +382,7 @@ const PostCard = (props) => {
                 if (post.replyTo) {
                   return (<small>回复：<strong><a className="text-dark" href={`/post/${post.replyTo._id}`}>{post.replyTo.content}</a></strong></small>)
                 } else if (post.relatedInstitute) {
-                  return (<small>院校评价：<strong><a className="text-dark" href={`/institute/${post.relatedInstitute.data.school_id}/discuss`}>{post.relatedInstitute.data.name}</a></strong></small>)
+                  return (<small>院校评价：<strong><a className="text-dark" href={`/institute/${post.relatedInstitute.id}/discuss`}>{post.relatedInstitute.name || post.relatedInstitute.data?.name}</a></strong></small>)
                 } else if (post.relatedTopic) {
                   return (<small>参与讨论：<strong><a className="text-dark" href={`/forum/${post.relatedTopic._id}`}>{post.relatedTopic.title}</a></strong></small>)
                 }
@@ -413,7 +421,15 @@ const PostCard = (props) => {
             </Row>
             <Row>
               <Col>
-                <PostContent post={post} />
+                {
+                  (post.content || post.photos) ? (
+                    <PostContent
+                      content={post.content}
+                      photos={post.photos}
+                      removed={props.removed}
+                    />
+                  ) : null
+                }
               </Col>
             </Row>
           </Col>

@@ -19,7 +19,7 @@ const fetchTopicService = async (id, port = constants.serverPort) => {
   const token = window.localStorage.getItem('token')
   const auth = (token) ? `bearer ${token}` : null
 
-  const res = await axios.get(url,  { headers: { auth } })
+  const res = await axios.get(url, { headers: { auth } })
   return res
 }
 
@@ -72,7 +72,7 @@ const ListPage = (props) => {
 
     const handleQuery = async () => {
       console.log(queryTags)
-      setMsg({type: 'info', text: '搜索中...'})
+      setMsg({ type: 'info', text: '搜索中...' })
       const url = `http://${document.domain}:${constants.serverPort}/topic/fetch`
       try {
         const res = await axios.post(url, {
@@ -86,7 +86,7 @@ const ListPage = (props) => {
         }
       } catch (err) {
         console.log(err.response)
-        setMsg({ type: 'danger', text: (err.response)?err.response.data.msg:'未能正确处理请求' })
+        setMsg({ type: 'danger', text: (err.response) ? err.response.data.msg : '未能正确处理请求' })
       }
     }
 
@@ -430,7 +430,10 @@ const TopicPage = (props) => {
                 }}
               >←返回</Button>
             </Col>
-            <Col className="mb-0" xs="auto">
+            <Col xs="auto" className="">
+              <Button size="sm" variant="danger"><strong>结束讨论</strong></Button>
+            </Col>
+            <Col className="pl-0" xs="auto">
               <Button
                 variant="info"
                 size="sm"
@@ -482,11 +485,13 @@ const TopicPage = (props) => {
               </ListGroup.Item>
               {topic.posts.slice((currentPage - 1) * postPerPage, currentPage * postPerPage).map(
                 (post, idx) => {
-                  return (<PostCard
+                  return (
+                  <PostCard
                     post={post}
                     index={(currentPage - 1) * postPerPage + idx + 1}
                     host={post.author._id === topic.host._id}
-                  />)
+                  />
+                  )
                 }
               )}
               <ListGroup.Item>

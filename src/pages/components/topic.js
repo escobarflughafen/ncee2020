@@ -459,4 +459,24 @@ const NewTopicForm = (props) => {
   )
 }
 
+const TopicCloseModal = (props) => {
+  
+  return (
+    <>
+    
+    </>
+  )
+}
+
+const TopicCloseButton = (props) => {
+  const {size, ...otherProps} = props
+
+  return (
+    <>
+    
+    </>
+  )
+}
+
+
 export { TopicCard, TopicList, NewTopicForm };

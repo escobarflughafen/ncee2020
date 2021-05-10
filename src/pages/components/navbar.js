@@ -21,7 +21,7 @@ const AppNavbar = (props) => {
   return (
     <Router>
 
-      <Navbar className="bg-dark" variant="dark" expand="lg">
+      <Navbar className="bg-dark" variant="dark" expand="md">
         <Navbar.Brand href="#" onClick={() => { history.push('/'); history.go() }}>
           高校查询系统
       </Navbar.Brand>
@@ -44,7 +44,7 @@ const AppNavbar = (props) => {
             <Nav.Item>
               <Nav.Link onClick={() => { history.push('/forum'); history.go() }}>{constants.title.forum}</Nav.Link>
             </Nav.Item >
-          </Nav >
+          </Nav>
           <Nav>
             {
               (user) ? (

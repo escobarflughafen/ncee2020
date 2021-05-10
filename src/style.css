@@ -26,3 +26,14 @@
 small{
   color: rgba(0.0.0.0.4)
 }
+
+
+.blur {
+  
+  font-weight: 600;
+}
+
+.blur::before{
+  filter: blur(1px);
+  z-index: -1;
+}
