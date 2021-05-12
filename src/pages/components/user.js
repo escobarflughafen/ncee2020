@@ -828,7 +828,7 @@ const UserActivity = (props) => {
             <Col xs="auto">
               <Button variant="success" size="sm" onClick={() => { setRefresh(true) }}>
                 刷新
-                </Button>
+              </Button>
             </Col>
           </Row>
         </ListGroup.Item>
@@ -941,6 +941,7 @@ const NotificationCard = (props) => {
   useEffect(() => {
     setNotification(props.notification)
   }, [props.notification])
+
   const [relatedPost, setRelatedPost] = useState()
 
   useEffect(async () => {
@@ -950,7 +951,7 @@ const NotificationCard = (props) => {
       console.log(res)
       setRelatedPost(res.data.post)
     }
-  }, [props.notification])
+  }, [props.notification, notification])
 
   const info = {
     'reply': '回复了你的贴文',
@@ -985,7 +986,7 @@ const NotificationCard = (props) => {
         <Row>
           <Col>
             {
-              (relatedPost) ? (
+              (notification.relatedPost && relatedPost) ? (
                 <ListGroup className="card" variant="flush">
                   <PostCard post={relatedPost} />
                 </ListGroup>
@@ -996,7 +997,7 @@ const NotificationCard = (props) => {
                 <ListGroup className="card" variant="flush">
                   <UserListItem user={notification.from} />
                 </ListGroup>
-              ): null
+              ) : null
             }
           </Col>
         </Row>
@@ -1011,6 +1012,10 @@ const NotificationList = (props) => {
     type: '',
     text: ''
   })
+  const notificationPerPage = 12 || props.notificationPerPage
+  const [currentPage, setCurrentPage] = useState(1)
+  const [refresh, setRefresh] = useState(false)
+
   useEffect(async () => {
     setMsg({
       type: 'info',
@@ -1018,6 +1023,7 @@ const NotificationList = (props) => {
     })
     const url = `http://${document.domain}:${constants.serverPort}/user/notifications`
     const token = window.localStorage.getItem('token')
+
     if (token) {
       const auth = `bearer ${token}`
       try {
@@ -1048,19 +1054,45 @@ const NotificationList = (props) => {
         text: '请登入'
       })
     }
-  }, [])
+
+    setRefresh(false)
+  }, [refresh])
 
   return (
     <>
       <ListGroup variant="flush">
         <MsgListItem msg={msg} />
+        <ListGroup.Item>
+          <Row>
+            <Col>
+              {
+                (notifications?.length) ? (
+                  <div>
+                    <div className="">共 {notifications.length} 条消息</div>
+                    <div className="annotation">{`第 ${(currentPage - 1) * notificationPerPage + 1}~${Math.min(currentPage * notificationPerPage, notifications.length)} 条`}</div>
+                  </div>
+                ) : null
+              }
+            </Col>
+            <Col xs="auto">
+              <Button variant="success" size="sm" onClick={() => { setRefresh(true) }}>
+                刷新
+              </Button>
+            </Col>
+          </Row>
+        </ListGroup.Item>
         {
-          (notifications.map((notification, idx) => {
-            return (
-              <NotificationCard notification={notification} />
-            )
-          }))
+          (notifications
+            .slice((currentPage - 1) * notificationPerPage, (currentPage) * notificationPerPage)
+            .map((notification, idx) => {
+              return (
+                <NotificationCard notification={notification} />
+              )
+            }))
         }
+        <ListGroup.Item>
+          {makePaginations(currentPage, setCurrentPage, Math.ceil(notifications.length / notificationPerPage), 4)}
+        </ListGroup.Item>
       </ListGroup>
     </>
   )
