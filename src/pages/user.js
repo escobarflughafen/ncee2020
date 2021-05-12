@@ -10,7 +10,7 @@ import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm, PostList } from './components/post'
-import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService, UserAvatar, UserActivity, FollowButton, UserInteractInfo } from './components/user'
+import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService, UserAvatar, UserActivity, FollowButton, UserInteractInfo, NotificationList } from './components/user'
 import axios from 'axios'
 import { MsgAlert } from './components/msg'
 
@@ -106,6 +106,7 @@ const UserDetail = (props) => {
   })
   const username = useParams().username
   const [loginAs, setLoginAs] = useState()
+  //const [noticeCount, setNoticeCount] = useState(parseInt(window.localStorage.getItem('noticecount')))
 
   useEffect(async () => {
     setLoginAs(JSON.parse(window.localStorage.getItem('user')))
@@ -120,12 +121,22 @@ const UserDetail = (props) => {
       })
       */
       setUser(res.data.user)
-      document.title = `${res.data.user.username} - ${constants.title.user} - ${constants.appName}`
+      document.title = `${res.data.user.name} - ${constants.title.user} - ${constants.appName}`
     } catch (err) {
       setMsg({ type: 'danger', text: `找不到用户: ${username}` })
     }
 
   }, [username])
+
+  /*
+  useEffect(async () => {
+    if (loginAs && user) {
+      setInterval(() => {
+        setNoticeCount(parseInt(window.localStorage.getItem('noticecount')))
+      }, 5000)
+    }
+  }, [loginAs, user])
+  */
 
   return (
     <>
@@ -144,6 +155,24 @@ const UserDetail = (props) => {
                         动态
                       </NavLink>
                     </Nav.Item>
+                    {
+                      (loginAs && (loginAs._id === user._id)) ? (
+                        <Nav.Item>
+                          <NavLink className="nav-link p-2" activeClassName="active" to={`notifications`}>
+                            消息
+                            {
+                              /*
+                              (noticeCount > 0) ? (
+                                <Badge variant="info" className="ml-1">
+                                  {noticeCount}
+                                </Badge>
+                              ) : null
+                              */
+                            }
+                          </NavLink>
+                        </Nav.Item>
+                      ) : null
+                    }
                     <Nav.Item>
                       <NavLink className="nav-link p-2" activeClassName="active" to={`following`}>
                         关注中
@@ -159,7 +188,7 @@ const UserDetail = (props) => {
                         <Nav.Item>
                           <NavLink className="nav-link p-2" activeClassName="active" to={`profile`}>
                             个人资料
-                      </NavLink>
+                          </NavLink>
                         </Nav.Item>
                       ) : null
                     }
@@ -177,6 +206,9 @@ const UserDetail = (props) => {
                   </Route>
                   <Route path={`${url}/follower`}>
                     <UserList users={user.follower} />
+                  </Route>
+                  <Route path={`${url}/notifications`}>
+                    <NotificationList />
                   </Route>
                   <Route path={`${url}/profile`}>
                     <Card.Body>

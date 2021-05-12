@@ -221,6 +221,7 @@ const ListPage = (props) => {
                   <NavLink to={`${url}/filter`} className="nav-link" activeClassName="active">筛选</NavLink>
                 </Nav.Item>
                 {
+                  // TODO: modify this part
                   /*
                 <Nav.Item>
                   <NavLink to={`${url}/reply`} className="nav-link" activeClassName="active">互动</NavLink>
@@ -431,7 +432,11 @@ const TopicPage = (props) => {
               >←返回</Button>
             </Col>
             <Col xs="auto" className="">
-              <Button size="sm" variant="danger"><strong>结束讨论</strong></Button>
+              {
+                (topic.closed.status) ? null : (
+                  <Button size="sm" variant="danger"><strong>结束讨论</strong></Button>
+                )
+              }
             </Col>
             <Col className="pl-0" xs="auto">
               <Button
@@ -452,6 +457,23 @@ const TopicPage = (props) => {
                 <Col>
                   <strong>{topic.title}</strong>
                 </Col>
+                <Col xs="auto">
+                  {
+                    (topic.closed.status) ? (
+                      <Badge variant="danger">
+                        <strong>
+                          已结束
+                        </strong>
+                      </Badge>
+                    ) : (
+                        <Badge variant="success">
+                          <strong>
+                            进行中
+                          </strong>
+                        </Badge>
+                      )
+                  }
+                </Col>
               </Row>
             </Card.Header>
             <ListGroup variant="flush">
@@ -462,7 +484,7 @@ const TopicPage = (props) => {
               }
               <ListGroup.Item>
                 <Row>
-                  <Col xs={12} sm="auto" className="mr-sm-auto">
+                  <Col>
                     {
                       (topic.region) ? (
                         <small>
@@ -472,7 +494,7 @@ const TopicPage = (props) => {
                       ) : (<></>)
                     }
                   </Col>
-                  <Col sm="auto">
+                  <Col xs={12} sm="auto">
                     <small>
                       <span className="d-inline-block">由 <a href={`/user/${topic.host.username}`}><strong>{topic.host.name}</strong></a> 在 {new Date(topic.createdAt).toLocaleDateString('zh')} 发起</span>
                     ・
@@ -486,11 +508,11 @@ const TopicPage = (props) => {
               {topic.posts.slice((currentPage - 1) * postPerPage, currentPage * postPerPage).map(
                 (post, idx) => {
                   return (
-                  <PostCard
-                    post={post}
-                    index={(currentPage - 1) * postPerPage + idx + 1}
-                    host={post.author._id === topic.host._id}
-                  />
+                    <PostCard
+                      post={post}
+                      index={(currentPage - 1) * postPerPage + idx + 1}
+                      host={post.author._id === topic.host._id}
+                    />
                   )
                 }
               )}

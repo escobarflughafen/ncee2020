@@ -1,9 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useState, useEffect } from 'react'
-import { Modal, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, Spinner, ListGroup, ModalBody, Popover, OverlayTrigger, Image, InputGroup } from 'react-bootstrap'
+import { Modal, Badge, Alert, Form, FormControl, Button, Card, Nav, Tab, Row, Col, Table, Spinner, ListGroup, ModalBody, Popover, OverlayTrigger, Image, InputGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory } from 'react-router-dom'
 import constants from '../../utils/constants'
+import { timeStringConverter } from '../../utils/util'
 import axios from 'axios'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
@@ -692,7 +693,7 @@ const UserLink = (props) => {
   return (
     <>
       <OverlayTrigger rootClose trigger="click" placement="auto" overlay={UserPopover}>
-        <Button size="sm" variant="link" className="p-0 align-baseline" onClick={
+        <Button size={(props.size) ? props.size : 'sm'} variant="link" className={`${props.className} p-0 align-baseline`} onClick={
           (e) => {
             e.stopPropagation()
           }
@@ -873,7 +874,7 @@ const AvatarModal = (props) => {
       {...otherProps}
       aria-labelledby="contained-modal-title-vcenter"
       centered
-      onClick={(e) => { e.stopPropagation(); onHide()}}
+      onClick={(e) => { e.stopPropagation(); onHide() }}
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
@@ -935,4 +936,135 @@ const UserAvatar = (props) => {
   )
 }
 
-export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService, UserAvatar, UserActivity, FollowButton, UserInteractInfo }
+const NotificationCard = (props) => {
+  const [notification, setNotification] = useState(props.notification)
+  useEffect(() => {
+    setNotification(props.notification)
+  }, [props.notification])
+  const [relatedPost, setRelatedPost] = useState()
+
+  useEffect(async () => {
+    if (notification.relatedPost) {
+      const url = `http://${document.domain}:${constants.serverPort}/post/${notification.relatedPost}`
+      const res = await axios.get(url)
+      console.log(res)
+      setRelatedPost(res.data.post)
+    }
+  }, [props.notification])
+
+  const info = {
+    'reply': '回复了你的贴文',
+    'topic': '参与了你发起的讨论',
+    'follow': '关注了你',
+    'unfollow': '不再关注你了'
+  }
+
+  return (
+    <>
+      <ListGroup.Item>
+        <Row className="mb-2">
+          <Col>
+            <UserLink user={notification.from} size="md" className="mr-1">
+              {notification.from.name || notification.from.username}
+            </UserLink>
+            {
+              info[notification.msg]
+            }
+          </Col>
+          <Col xs="auto">
+            {
+              (notification.status.checked) ? null : (
+                <Badge variant="info" className="mr-1">
+                  新消息
+                </Badge>
+              )
+            }
+            <small className="text-black-50">{timeStringConverter(notification.time)}</small>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            {
+              (relatedPost) ? (
+                <ListGroup className="card" variant="flush">
+                  <PostCard post={relatedPost} />
+                </ListGroup>
+              ) : null
+            }
+            {
+              (notification.msg == 'follow' || notification.msg == 'unfollow') ? (
+                <ListGroup className="card" variant="flush">
+                  <UserListItem user={notification.from} />
+                </ListGroup>
+              ): null
+            }
+          </Col>
+        </Row>
+      </ListGroup.Item>
+    </>
+  )
+}
+
+const NotificationList = (props) => {
+  const [notifications, setNotifications] = useState([])
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
+  useEffect(async () => {
+    setMsg({
+      type: 'info',
+      text: '消息获取中...'
+    })
+    const url = `http://${document.domain}:${constants.serverPort}/user/notifications`
+    const token = window.localStorage.getItem('token')
+    if (token) {
+      const auth = `bearer ${token}`
+      try {
+        const res = await axios.get(url, { headers: { auth } })
+        console.log(res)
+        setNotifications([...res.data.notifications])
+        if (res.data.notifications?.length) {
+          setMsg({
+            type: '',
+            text: ''
+          })
+        } else {
+          setMsg({
+            type: 'info',
+            text: '你还没有收到消息'
+          })
+        }
+      } catch (err) {
+        setMsg({
+          type: 'danger',
+          text: '获取用户消息失败'
+        })
+        console.log(err)
+      }
+    } else {
+      setMsg({
+        type: 'danger',
+        text: '请登入'
+      })
+    }
+  }, [])
+
+  return (
+    <>
+      <ListGroup variant="flush">
+        <MsgListItem msg={msg} />
+        {
+          (notifications.map((notification, idx) => {
+            return (
+              <NotificationCard notification={notification} />
+            )
+          }))
+        }
+      </ListGroup>
+    </>
+  )
+}
+
+
+export { SignupForm, LoginForm, UserCard, UserLink, UserListItem, UserList, toggleFollowService, UserAvatar, UserActivity, FollowButton, UserInteractInfo, NotificationCard, NotificationList }

@@ -7,16 +7,35 @@ import SVG from '../../utils/svg'
 import constants from '../../utils/constants'
 import App from '../../App'
 import { UserAvatar } from './user'
+import axios from 'axios'
 
 
 const AppNavbar = (props) => {
   const history = useHistory();
 
   const [user, setUser] = useState(JSON.parse(window.localStorage.getItem('user')));
+  const [noticeCount, setNoticeCount] = useState(parseInt(window.localStorage.getItem('noticecount')))
 
   useEffect(() => {
     setUser(JSON.parse(window.localStorage.getItem('user')))
   }, [window.localStorage.getItem('user')])
+
+  useEffect(async () => {
+    var user = JSON.parse(window.localStorage.getItem('user'))
+    if (user) {
+      const url = `http://${document.domain}:${constants.serverPort}/user/noticecount`
+      const res = await axios.post(url, { id: user._id })
+      setNoticeCount(res.data.count)
+      window.localStorage.setItem('noticecount', res.data.count)
+      // loop
+      setInterval(async () => {
+        const res = await axios.post(url, { id: user._id })
+        //console.log(res)
+        setNoticeCount(res.data.count)
+        window.localStorage.setItem('noticecount', res.data.count)
+      }, Math.ceil(Math.random() * 10000 + 5000))
+    }
+  }, [])
 
   return (
     <Router>
@@ -54,6 +73,19 @@ const AppNavbar = (props) => {
                     <b className="text-light">
                       {user.name}
                     </b>
+                    {
+                      (noticeCount > 0) ? (
+                        <Badge
+                          variant="light"
+                          className="ml-1"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            history.push(`/user/${user.username}/notifications`)
+                            history.go()
+                          }}
+                        >{noticeCount}</Badge>
+                      ) : null
+                    }
                   </Nav.Link>
                 </Nav.Item>
               ) : (
