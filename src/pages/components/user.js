@@ -697,7 +697,7 @@ const UserLink = (props) => {
           (e) => {
             e.stopPropagation()
           }
-        }><strong>{props.children}</strong></Button>
+        }><strong>{props.children || (props.user.name || props.user.username)}</strong></Button>
       </OverlayTrigger>
     </>
   )
@@ -1037,7 +1037,7 @@ const NotificationList = (props) => {
           })
         } else {
           setMsg({
-            type: 'info',
+            type: 'secondary',
             text: '你还没有收到消息'
           })
         }

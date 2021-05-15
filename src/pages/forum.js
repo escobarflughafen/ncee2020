@@ -8,11 +8,12 @@ import constants from '../utils/constants'
 import SVG from '../utils/svg'
 import { makePaginations } from './components/pagination'
 import { timeStringConverter } from '../utils/util'
-import { TopicCard, TopicList, NewTopicForm } from './components/topic'
+import { TopicCard, TopicList, NewTopicForm, TopicCloseButton } from './components/topic'
 import { InstituteCard, InstituteSelector } from './components/institute'
 import { PostCard, NewPostForm } from './components/post'
 import { MsgAlert } from './components/msg'
 import axios from 'axios'
+import { UserLink } from './components/user'
 
 const fetchTopicService = async (id, port = constants.serverPort) => {
   const url = `http://${document.domain}:${port}/topic/${id}/`
@@ -72,7 +73,7 @@ const ListPage = (props) => {
 
     const handleQuery = async () => {
       console.log(queryTags)
-      setMsg({ type: 'info', text: '搜索中...' })
+      setMsg({ type: 'info', text: '搜索中' })
       const url = `http://${document.domain}:${constants.serverPort}/topic/fetch`
       try {
         const res = await axios.post(url, {
@@ -388,6 +389,42 @@ const ListPage = (props) => {
   )
 }
 
+const ClosedForm = (props) => {
+  const header = '本讨论已结束，你可以浏览其他用户的发言，或者发起新的讨论' || props.header
+  const user = props.user
+  const message = '' || props.message
+  const timestamp = props.timestamp
+
+  return (
+    <>
+      <Form>
+        <Alert variant="danger">
+          <p>
+            <strong>
+              {header}
+            </strong>
+          </p>
+          <hr />
+          <div>
+            {
+              (user) ? (
+                <UserLink user={user} size="md" />
+              ) : null
+            }
+            留言:
+            <br />
+            <div>
+              {message}
+            </div>
+            <small className="text-muted">
+              {timeStringConverter(timestamp)}
+            </small>
+          </div>
+        </Alert>
+      </Form>
+    </>
+  )
+}
 
 const TopicPage = (props) => {
   const history = useHistory()
@@ -404,6 +441,7 @@ const TopicPage = (props) => {
     text: ''
   })
 
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
 
   useEffect(async () => {
     try {
@@ -431,21 +469,27 @@ const TopicPage = (props) => {
                 }}
               >←返回</Button>
             </Col>
-            <Col xs="auto" className="">
-              {
-                (topic.closed.status) ? null : (
-                  <Button size="sm" variant="danger"><strong>结束讨论</strong></Button>
-                )
-              }
-            </Col>
             <Col className="pl-0" xs="auto">
-              <Button
-                variant="info"
-                size="sm"
-                href="#replytextarea"
-              >
-                回复
-            </Button>
+              <ButtonGroup>
+                {
+                  (topic.closed.status) ? null : (
+                    <>
+                      {
+                        (loginAs?._id === topic.host._id) ? (
+                          <TopicCloseButton size="sm" variant="danger" topic={topic} />
+                        ) : null
+                      }
+                      <Button
+                        variant="dark"
+                        size="sm"
+                        href="#replytextarea"
+                      >
+                        回复
+                </Button>
+                    </>
+                  )
+                }
+              </ButtonGroup>
             </Col>
           </Row>
           <Card>
@@ -466,12 +510,12 @@ const TopicPage = (props) => {
                         </strong>
                       </Badge>
                     ) : (
-                        <Badge variant="success">
-                          <strong>
-                            进行中
+                      <Badge variant="success">
+                        <strong>
+                          进行中
                           </strong>
-                        </Badge>
-                      )
+                      </Badge>
+                    )
                   }
                 </Col>
               </Row>
@@ -520,7 +564,13 @@ const TopicPage = (props) => {
                 {makePaginations(currentPage, setCurrentPage, Math.ceil(topic.posts.length / postPerPage), 4)}
               </ListGroup.Item>
               <ListGroup.Item id="replyform">
-                <NewPostForm relatedTopic={topic._id} />
+                {
+                  (topic.closed?.status) ? (
+                    <ClosedForm user={topic.host} message={topic.closed?.reason} timestamp={topic.closed?.date} />
+                  ) : (
+                    <NewPostForm relatedTopic={topic._id} />
+                  )
+                }
               </ListGroup.Item>
             </ListGroup>
           </Card>

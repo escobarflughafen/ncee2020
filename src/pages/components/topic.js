@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ButtonGroup, ToggleButton, Accordion, Card, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, InputGroup } from 'react-bootstrap'
+import { ButtonGroup, ToggleButton, Accordion, Card, Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, InputGroup, Modal } from 'react-bootstrap'
 import { Tabs, Image, Badge, Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useParams, useRouteMatch, useHistory, useLocation } from 'react-router-dom'
 import constants from '../../utils/constants'
@@ -10,7 +10,9 @@ import { makePaginations } from './pagination'
 import { UserLink } from './user'
 import { MsgAlert } from './msg'
 import { InstituteSelector } from './institute'
-import {PostImage, imageStyle} from './post'
+import { PostImage, imageStyle } from './post'
+import * as Yup from 'yup'
+import { Formik } from 'formik'
 
 const TopicCard = (props) => {
   const history = useHistory()
@@ -49,6 +51,9 @@ const TopicCard = (props) => {
           </Row>
           <Row>
             <Col>
+              <Badge variant={(topic.closed?.status) ? 'danger' : 'success'} className="mr-1">
+                {(topic.closed?.status) ? '已结束' : '进行中'}
+              </Badge>
               {
                 (topic.relatedInstitute) ? (
                   <>
@@ -64,7 +69,7 @@ const TopicCard = (props) => {
               {
                 (topic.region) ? (
                   <>
-                    <Badge variant="success" className="mr-1">
+                    <Badge variant="info" className="mr-1">
                       {constants.regions.find(r => r.region_id === topic.region).region_name}
                     </Badge>
                   </>
@@ -91,6 +96,7 @@ const TopicCard = (props) => {
 const TopicList = (props) => {
   const topics = props.topics
   const [viewMode, setViewMode] = useState(props.viewMode || '详细')
+  const [showClosed, setShowClosed] = useState(props.showClosed || '全部显示')
   const topicPerPage = props.topicPerPage || 12
   const [currentPage, setCurrentPage] = useState(1)
   const [displayTopics, setDisplayTopics] = useState([])
@@ -108,8 +114,8 @@ const TopicList = (props) => {
           (props.trends) ? null : (
             <ListGroup.Item>
               <Row className="ml-auto">
-                <Col>
-                  <small className="d-none d-sm-inline text-muted">
+                <Col className="d-none d-md-block">
+                  <small className="d-inline text-muted">
                     {
                       (displayTopics.length > 0) ? (
                         <>
@@ -133,7 +139,31 @@ const TopicList = (props) => {
                       </FormControl>
                     </Col>
                   </Row>
-
+                </Col>
+                <Col xs="auto">
+                  <Row>
+                    <SVG variant="check-square" />
+                    <Col className="pl-2">
+                      <FormControl
+                        as="select"
+                        size="sm"
+                        onChange={e => {
+                          switch (e.target.value) {
+                            case '进行中':
+                              return setDisplayTopics([...topics.filter((t) => !t.closed?.status)])
+                            case '已结束':
+                              return setDisplayTopics([...topics.filter((t) => t.closed?.status)])
+                            case '全部显示':
+                            default:
+                              return setDisplayTopics([...topics])
+                          }
+                        }}>
+                        <option>全部显示</option>
+                        <option>进行中</option>
+                        <option>已结束</option>
+                      </FormControl>
+                    </Col>
+                  </Row>
                 </Col>
                 <Col xs="auto">
                   <Row>
@@ -459,24 +489,160 @@ const NewTopicForm = (props) => {
   )
 }
 
+
 const TopicCloseModal = (props) => {
-  
+  const [title, setTitle] = useState("")
+  const [reason, setReason] = useState("")
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
+  const topic = props.topic
+  const history = useHistory()
+
+  const closeTopicSchema = Yup.object().shape({
+    title: Yup.string()
+      .equals([topic.title], "标题不一致，请确认输入"),
+    reason: Yup.string()
+      .max(10000, '请不要超过10000个字符')
+      .required('请输入结束此讨论的原因')
+  })
+
+
+
+  const handleSubmit = async (body) => {
+    console.log(body)
+    const url = `http://${document.domain}:${constants.serverPort}/topic/close`
+    const token = window.localStorage.getItem('token')
+    if (!token) {
+      return setMsg({ type: 'danger', text: '用户未登入' })
+    }
+    const auth = `bearer ${token}`
+    try {
+      const res = await axios.post(url, { ...body, id: topic._id }, { headers: { auth } })
+      console.log(res)
+      setMsg({ type: 'success', text: res.data.msg || '讨论已结束' })
+      setTimeout(() => { history.go() }, 1000)
+    } catch (err) {
+      console.log(err.response)
+      setMsg({ type: 'danger', text: err.response?.data.msg || '未能成功处理请求' })
+    }
+  }
+
   return (
-    <>
-    
-    </>
+    <Modal
+      {...props}
+      size="lg"
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>
+          结束讨论
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <MsgAlert msg={msg} />
+        <Formik
+          onSubmit={handleSubmit}
+          validationSchema={closeTopicSchema}
+          initialValues={
+            {
+              title: "",
+              reason: ""
+            }
+          }
+        >
+          {({
+            handleSubmit,
+            handleChange,
+            handleBlur,
+            values,
+            errors,
+            touched,
+            isValid,
+          }) => {
+            return (
+              <Form noValidate onSubmit={handleSubmit}>
+                <Form.Group>
+                  <InputGroup size="sm" hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>
+                        确认标题
+                    </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      as="input"
+                      name="title"
+                      placeholder={props.topic.title}
+                      value={values.title}
+                      onChange={handleChange}
+                      isValid={touched.title && !errors.title}
+                      isInvalid={!!errors.title}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.title}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+                <Form.Group>
+                  <InputGroup size="sm" hasValidation>
+                    <InputGroup.Prepend>
+                      <InputGroup.Text>原因</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
+                      as="textarea"
+                      name="reason"
+                      value={values.reason}
+                      onChange={handleChange}
+                      isValid={touched.reason && !errors.reason}
+                      isInvalid={!!errors.reason}
+                    />
+                  </InputGroup>
+                  <Form.Control.Feedback type="Invalid">
+                    <small className="text-danger">
+                      {errors.reason}
+                    </small>
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Row>
+                  <Col>
+                  </Col>
+                  <Col xs="auto">
+                    <Button type="submit" variant="danger">确认</Button>
+                  </Col>
+                </Row>
+              </Form>
+            )
+          }
+          }
+        </Formik>
+      </Modal.Body>
+    </Modal>
   )
 }
 
 const TopicCloseButton = (props) => {
-  const {size, ...otherProps} = props
+
+  const [modalShow, setModalShow] = useState(false)
 
   return (
     <>
-    
+      <Button {...props} onClick={
+        () => { setModalShow(true) }
+      }>
+        <strong>
+          {props.children || '结束讨论'}
+        </strong>
+      </Button>
+
+      <TopicCloseModal
+        show={modalShow}
+        onHide={() => { setModalShow(false) }}
+        topic={props.topic}
+      />
     </>
   )
 }
 
 
-export { TopicCard, TopicList, NewTopicForm };
+export { TopicCard, TopicList, NewTopicForm, TopicCloseModal, TopicCloseButton };
