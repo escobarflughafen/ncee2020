@@ -1,10 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, ModalBody, Popover, Badge, OverlayTrigger, Image, InputGroup } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, ModalBody, Popover, Badge, OverlayTrigger, Image, InputGroup, ListGroupItem } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useRouteMatch, useHistory } from 'react-router-dom'
 import constants from '../../utils/constants'
-import makePagination from './pagination'
+import { makePaginations } from './pagination'
 import axios from 'axios'
 import SVG from '../../utils/svg'
 
@@ -192,8 +192,40 @@ const InstituteFollowButton = (props) => {
 }
 
 const InstituteList = (props) => {
-  const [currentPage, setCurrentPage] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const institutes = props.institutes
+  const instPerPage = props.instPerPage || 12
 
+
+  return (
+    <ListGroup {...props} variant="flush">
+      <ListGroup.Item>
+        <Row>
+          <Col>
+            <span className="annotation">
+              关注了 {institutes.length} 所院校
+              </span>
+          </Col>
+        </Row>
+      </ListGroup.Item>
+      {
+        /*
+      institutes.map(i=>{
+        return <InstituteCard institute={i} />
+      })
+      */
+      }
+
+      {
+      [...institutes.slice((currentPage - 1) * instPerPage, currentPage * instPerPage)].map((institute) => {
+        return (<InstituteCard institute={institute} />)
+      })
+      }
+      <ListGroup.Item>
+        {makePaginations(currentPage, setCurrentPage, Math.ceil(institutes.length / instPerPage), 4)}
+      </ListGroup.Item>
+    </ListGroup>
+  )
 }
 
 

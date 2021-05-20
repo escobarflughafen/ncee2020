@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../style.css'
 import React, { useState, useEffect } from 'react'
-import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, ButtonGroup, Nav, Tab, Row, Col, Table, InputGroup, Dropdown, DropdownButton, ListGroup, Image, Card, CardGroup, CardDeck, Badge, Tabs, FormGroup, ListGroupItem } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom'
 import constants from '../utils/constants'
@@ -11,6 +11,7 @@ import { timeStringConverter } from '../utils/util'
 import { TopicCard, TopicList } from './components/topic'
 import { PostCard, NewPostForm, PostList } from './components/post'
 import { UserListItem, UserList, SignupForm, UserCard, toggleFollowService, UserAvatar, UserActivity, FollowButton, UserInteractInfo, NotificationList } from './components/user'
+import { InstituteList } from './components/institute'
 import axios from 'axios'
 import { MsgAlert } from './components/msg'
 
@@ -107,6 +108,7 @@ const UserDetail = (props) => {
   const username = useParams().username
   const [loginAs, setLoginAs] = useState()
   //const [noticeCount, setNoticeCount] = useState(parseInt(window.localStorage.getItem('noticecount')))
+  const [followedInstitutes, setFollowedInstitutes] = useState([])
 
   useEffect(async () => {
     setLoginAs(JSON.parse(window.localStorage.getItem('user')))
@@ -128,6 +130,14 @@ const UserDetail = (props) => {
 
   }, [username])
 
+  useEffect(async () => {
+    if (user) {
+      const url = `http://${document.domain}:${constants.serverPort}/institute/following`
+      const res = await axios.post(url, { user: user._id })
+      console.log(res)
+      setFollowedInstitutes([...res.data.institutes])
+    }
+  }, [user])
   /*
   useEffect(async () => {
     if (loginAs && user) {
@@ -203,9 +213,10 @@ const UserDetail = (props) => {
                   </Route>
                   <Route path={`${url}/following`}>
                     <UserList users={user.following} />
+                    <InstituteList institutes={followedInstitutes} className="mt-3" />
                   </Route>
                   <Route path={`${url}/follower`}>
-                    <UserList users={user.follower} />
+                    <UserList users={user.follower} userPerPage={24} />
                   </Route>
                   <Route path={`${url}/notifications`}>
                     <NotificationList />

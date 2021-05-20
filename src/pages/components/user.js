@@ -708,11 +708,10 @@ const UserList = (props) => {
     type: '',
     text: ''
   })
-  const [users, setUsers] = useState([])
+  const users = props.users
   const [currentPage, setCurrentPage] = useState(1)
-  const userPerPage = props.userPerPage || 20
+  const userPerPage = props.userPerPage || 12
 
-  useEffect(() => { setUsers(props.users) }, [props.users])
 
   return (
     <>
@@ -730,7 +729,7 @@ const UserList = (props) => {
           (users.length) ? (
             <>
               {
-                (users.slice((currentPage - 1) * userPerPage, (currentPage) * userPerPage).map((user) => {
+                ([...users.slice((currentPage - 1) * userPerPage, (currentPage) * userPerPage)].map((user) => {
                   return (<UserListItem user={user} />)
                 }))
               }
@@ -784,6 +783,7 @@ const UserActivity = (props) => {
     type: '',
     text: ''
   })
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
 
   const [refresh, setRefresh] = useState(false)
   useEffect(async () => {
@@ -797,12 +797,13 @@ const UserActivity = (props) => {
         setMsg({ type: 'info', text: '获取动态中' })
         const postRes = await axios.post(postUrl, { users, limit: props.limit })
         const topicRes = await axios.post(topicUrl, { users, limit: props.limit })
-        const instRes = await axios.post(instituteUrl, {users, limit: props.limit})
+        const instRes = await axios.post(instituteUrl, { users: [loginAs], limit: props.limit })
         const posts = postRes.data.posts
         const topics = topicRes.data.topics
-        const instituteActivities = instRes.data.activities
+        const instituteActivities = instRes.data
+        console.log(instituteActivities)
         console.log(posts, topics)
-        let contents = [...posts, ...topics].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        let contents = [...posts, ...topics, ...instituteActivities.posts, ...instituteActivities.topics].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         setContents(contents)
         setMsg({ type: '', text: '' })
         setRefresh(false)
@@ -853,7 +854,7 @@ const UserActivity = (props) => {
           )
         }
         <ListGroup.Item>
-          {makePaginations(currentPage, setCurrentPage, Math.ceil(contents.length / activityPerPage), 4)}
+          {makePaginations(currentPage, setCurrentPage, Math.ceil(contents.length / activityPerPage), 3)}
         </ListGroup.Item>
       </ListGroup>
     </>
