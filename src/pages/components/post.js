@@ -399,7 +399,7 @@ const PostCard = (props) => {
               <Col>
                 <small>
                   <UserLink user={post.author}>{post.author.name || `@${post.author.username}`}</UserLink>
-                  {(host) ? (<SVG variant="person" fill />) : (<></>)}
+                  {(host) ? (<SVG variant="person" fill className="align-text-bottom ml-1"/>) : (<></>)}
                   {
                     (expanded) ? null : (
                       <span className="d-inline-block">

@@ -40,7 +40,7 @@ const TopicCard = (props) => {
               <Row>
                 <Col>
                   <small>
-                    <SVG variant="person" fill />
+                    <SVG variant="person" fill className="align-text-bottom"/>
                     <span className="ml-1">
                       <UserLink user={topic.host}>{topic.host.name || `@${topic.host.username}`}</UserLink>
                     </span>

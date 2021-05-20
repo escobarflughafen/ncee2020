@@ -164,7 +164,7 @@ const HomePage = (props) => {
                           你关注的
                       </strong>
                       </Card.Header>
-                      <UserActivity users={[...user.following, user._id]} limit={400} />
+                      <UserActivity users={[...user.following, user._id]} homepage limit={1000} />
                     </Card>
                   </CardGroup>
                 </Col>

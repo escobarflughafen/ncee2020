@@ -778,6 +778,7 @@ const UserInteractInfo = (props) => {
 const UserActivity = (props) => {
   const [contents, setContents] = useState([])
   const activityPerPage = 12 || props.activityPerPage
+  const isHomepage = !!props.homepage
   const [currentPage, setCurrentPage] = useState(1)
   const [msg, setMsg] = useState({
     type: '',
@@ -790,14 +791,16 @@ const UserActivity = (props) => {
     if (users) {
       const postUrl = `http://${document.domain}:${constants.serverPort}/post/fetch`
       const topicUrl = `http://${document.domain}:${constants.serverPort}/topic/fetch`
+      const instituteUrl = `http://${document.domain}:${constants.serverPort}/institute/activity`
 
       try {
         setMsg({ type: 'info', text: '获取动态中' })
         const postRes = await axios.post(postUrl, { users, limit: props.limit })
         const topicRes = await axios.post(topicUrl, { users, limit: props.limit })
-
+        const instRes = await axios.post(instituteUrl, {users, limit: props.limit})
         const posts = postRes.data.posts
         const topics = topicRes.data.topics
+        const instituteActivities = instRes.data.activities
         console.log(posts, topics)
         let contents = [...posts, ...topics].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         setContents(contents)

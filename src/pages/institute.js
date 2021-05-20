@@ -10,7 +10,7 @@ import axios from 'axios'
 import { makePaginations } from './components/pagination'
 import { TopicList, NewTopicForm } from './components/topic'
 import { PostList, NewPostForm } from './components/post'
-import { InstituteCard, Labels } from './components/institute'
+import { InstituteCard, Labels, InstituteFollowButton } from './components/institute'
 import { Bar, Line } from 'react-chartjs-2'
 
 // Utils
@@ -353,7 +353,7 @@ const EnrollTable = (props) => {
                     size="sm"
                     value={selectedMajor}
                     onChange={(e) => { setSelectedMajor(e.target.value) }}
-                  > 
+                  >
                     <option value=''>选择专业...</option>
                     {
                       [...new Set(regionData
@@ -374,14 +374,14 @@ const EnrollTable = (props) => {
                         labels: data.map(d => d.year),
                         datasets: [{
                           label: '最低排名',
-                          data: data.map(d=>d.rank_min)
+                          data: data.map(d => d.rank_min)
                         }]
                       }
                     })()
                   }
                     options={
                       {
-                        
+
                       }
                     } />) : null
               }
@@ -587,16 +587,16 @@ const InstituteTabs = (props) => {
             <Card.Header>
               <Nav variant="tabs">
                 <Nav.Item>
-                  <NavLink to={`general`} className="nav-link" activeClassName="active">概览</NavLink>
+                  <NavLink to={`general`} className="nav-link p-2" activeClassName="active">概览</NavLink>
                 </Nav.Item>
                 <Nav.Item>
-                  <NavLink to={`major`} className="nav-link" activeClassName="active">开设专业</NavLink>
+                  <NavLink to={`major`} className="nav-link p-2" activeClassName="active">开设专业</NavLink>
                 </Nav.Item>
                 <Nav.Item>
-                  <NavLink to={`stats`} className="nav-link" activeClassName="active">数据</NavLink>
+                  <NavLink to={`stats`} className="nav-link p-2" activeClassName="active">数据</NavLink>
                 </Nav.Item>
                 <Nav.Item>
-                  <NavLink to={`discuss`} className="nav-link" activeClassName="active">讨论</NavLink>
+                  <NavLink to={`discuss`} className="nav-link p-2" activeClassName="active">讨论</NavLink>
                 </Nav.Item>
               </Nav>
             </Card.Header>
@@ -721,9 +721,16 @@ const Detail = (props) => {
             <Col>
               <p>
                 <Row>
-                  <Col xs="auto">
+                  <Col>
                     <span className="institute-name-150">
                       {institute.name}
+                      <InstituteFollowButton
+                        instituteId={institute._id}
+                        variant="link"
+                        size="sm"
+                        className="align-text-bottom"
+                      />
+
                       <span className="annotation mx-1" style={{ fontFamily: 'monospace' }}>
                         #{institute.raw.code_enroll}
                       </span>
@@ -1094,7 +1101,7 @@ const InstituteTable = (props) => {
         </Card.Header>
         <ListGroup variant="flush">
           {
-            institutes.slice((currentPage - 1) * instPerPage, currentPage * instPerPage).map((i, idx) => {
+            [...institutes.slice((currentPage - 1) * instPerPage, currentPage * instPerPage)].map((i, idx) => {
               return (
                 <InstituteCard institute={i} />
               )

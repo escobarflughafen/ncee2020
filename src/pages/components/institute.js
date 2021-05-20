@@ -49,8 +49,12 @@ const Labels = (props) => {
 
 const InstituteCard = (props) => {
   const { path, url, params } = useRouteMatch()
-  const i = props.institute
+  const [i, setI] = useState(props.institute)
   const history = useHistory()
+  const token = window.localStorage.getItem('token')
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
+
+  useEffect(() => { setI(props.institute) }, [props.institute])
 
   return (
     <ListGroup.Item action onClick={() => { history.push(`/institute/${i.id}`); history.go() }}>
@@ -91,14 +95,32 @@ const InstituteCard = (props) => {
             <Col>
               <Nav fill onClick={(e) => { e.stopPropagation(); }}>
                 <Nav.Item>
-                  <Nav.Link onClick={(e) => { history.push(`/institute/${i.id}/discuss`);history.go() }}>
+                  <Button
+                    variant="link"
+                    className="align-text-top"
+                    onClick={(e) => { history.push(`/institute/${i.id}/discuss`); history.go() }}
+                  >
                     <SVG variant="chat" />
-                  </Nav.Link>
+                  </Button>
                 </Nav.Item>
+                {
+                  (loginAs && token) ? (
+                    <Nav.Item>
+                      {/*i._id*/}
+                      <InstituteFollowButton
+                        className="align-text-top"
+                        variant="link"
+                        instituteId={i._id} />
+                    </Nav.Item>
+                  ) : null
+                }
                 <Nav.Item>
-                  <Nav.Link onClick={(e) => {history.push(`/forum/`); history.go()}}>
+                  <Button
+                    variant="link"
+                    className="align-text-top"
+                    onClick={(e) => { history.push(`/forum/`); history.go() }}>
                     <SVG variant="share" />
-                  </Nav.Link>
+                  </Button>
                 </Nav.Item>
               </Nav>
             </Col>
@@ -121,9 +143,56 @@ const InstituteCard = (props) => {
   )
 }
 
+
+const InstituteFollowButton = (props) => {
+  const [followed, setFollowed] = useState(false)
+  const instituteId = props.instituteId
+  const [loginAs, setLoginAs] = useState(JSON.parse(window.localStorage.getItem('user')))
+
+  useEffect(async () => {
+    const url = `http://${document.domain}:${constants.serverPort}/institute/isfollowed`
+    const res = await axios.post(url, {
+      user: loginAs._id,
+      institute: props.instituteId
+    })
+    setFollowed(!!res.data.followed)
+  }, [props.instituteId])
+
+  const handleToggleFollow = async (e) => {
+    e.stopPropagation()
+    const token = window.localStorage.getItem('token')
+    const auth = (token) ? `bearer ${token}` : null
+    if (auth) {
+      const url = `http://${document.domain}:${constants.serverPort}/institute/togglefollow`
+      try {
+        const res = await axios.post(url, { id: instituteId }, { headers: { auth } })
+        console.log(res)
+        setFollowed(!followed)
+      } catch (err) {
+        console.log(err.response)
+      }
+    }
+  }
+
+  return (
+    <>
+      <Button
+        {...props}
+        onClick={handleToggleFollow}
+      >
+        {
+          (props.children) || (
+            <SVG variant="star" fill={followed} />
+          )
+        }
+      </Button>
+    </>
+  )
+
+}
+
 const InstituteList = (props) => {
   const [currentPage, setCurrentPage] = useState(0)
-
 
 }
 
@@ -220,4 +289,4 @@ const InstituteSelector = (props) => {
 }
 
 
-export { InstituteCard, InstituteList, Labels, InstituteSelector }
+export { InstituteCard, InstituteList, Labels, InstituteSelector, InstituteFollowButton }
