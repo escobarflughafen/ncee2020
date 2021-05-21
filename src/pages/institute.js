@@ -50,9 +50,12 @@ const queryInstitutesInfo = async (queryParams, cb, port = constants.serverPort)
 const fetchInstituteInfo = async (instituteId, cb, port = constants.serverPort) => {
   const url = `http://${document.domain}:${port}/institute/${instituteId}/`
   try {
+    const token = window.localStorage.getItem('token')
+    const auth = (token) ? `bearer ${token}` : null
     let req = axios.get(url, {
       headers: {
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'auth': auth
       }
     })
     cb(await req.then())
@@ -690,6 +693,7 @@ const Detail = (props) => {
   const history = useHistory()
   const id = useParams().id
   const eventKey = useParams().id
+  const loginAs = JSON.parse(window.localStorage.getItem('user'))
 
   const [institute, setInstitute] = useState()
 
@@ -724,13 +728,16 @@ const Detail = (props) => {
                   <Col>
                     <span className="institute-name-150">
                       {institute.name}
-                      <InstituteFollowButton
-                        instituteId={institute._id}
-                        variant="link"
-                        size="sm"
-                        className="align-text-bottom"
-                      />
-
+                      {
+                        (loginAs) ? (
+                          <InstituteFollowButton
+                            instituteId={institute._id}
+                            variant="link"
+                            size="sm"
+                            className="align-text-bottom"
+                          />
+                        ) : null
+                      }
                       <span className="annotation mx-1" style={{ fontFamily: 'monospace' }}>
                         #{institute.raw.code_enroll}
                       </span>

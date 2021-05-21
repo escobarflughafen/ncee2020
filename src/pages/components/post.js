@@ -382,7 +382,7 @@ const PostCard = (props) => {
                 if (post.replyTo) {
                   return (<small>回复：<strong><a className="text-dark" href={`/post/${post.replyTo._id}`}>{post.replyTo.content}</a></strong></small>)
                 } else if (post.relatedInstitute) {
-                  return (<small>院校评价：<strong><a className="text-dark" href={`/institute/${post.relatedInstitute.id}/discuss`}>{post.relatedInstitute.name || post.relatedInstitute.data?.name}</a></strong></small>)
+                  return (<small>院校评价：<strong><a className="text-dark" href={`/institute/${post.relatedInstitute.data?.school_id||post.relatedInstitute.id}/discuss`}>{post.relatedInstitute.name || post.relatedInstitute.data?.name}</a></strong></small>)
                 } else if (post.relatedTopic) {
                   return (<small>参与讨论：<strong><a className="text-dark" href={`/forum/${post.relatedTopic._id}`}>{post.relatedTopic.title}</a></strong></small>)
                 }

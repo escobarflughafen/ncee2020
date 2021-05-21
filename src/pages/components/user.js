@@ -786,6 +786,7 @@ const UserActivity = (props) => {
   const loginAs = JSON.parse(window.localStorage.getItem('user'))
 
   const [refresh, setRefresh] = useState(false)
+
   useEffect(async () => {
     const users = (props.users || ((props.user) ? [props.user] : null))
     if (users) {
@@ -797,19 +798,19 @@ const UserActivity = (props) => {
         setMsg({ type: 'info', text: '获取动态中' })
         const postRes = await axios.post(postUrl, { users, limit: props.limit })
         const topicRes = await axios.post(topicUrl, { users, limit: props.limit })
-        const instRes = await axios.post(instituteUrl, { users: [loginAs], limit: props.limit })
+        var instituteActivities = {posts: [], topics: []}
+        if (isHomepage) {
+          const instRes = await axios.post(instituteUrl, { users: [loginAs], limit: props.limit })
+          instituteActivities = instRes.data
+        }
         const posts = postRes.data.posts
         const topics = topicRes.data.topics
-        const instituteActivities = instRes.data
-        console.log(instituteActivities)
         console.log(posts, topics)
-        let contents = [...posts, ...topics, ...instituteActivities.posts, ...instituteActivities.topics].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        let contents = [...posts, ...topics, ...instituteActivities?.posts, ...instituteActivities?.topics].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         setContents(contents)
         setMsg({ type: '', text: '' })
-        setRefresh(false)
       } catch (err) {
         console.log(err)
-        setRefresh(false)
         setMsg({ type: 'danger', text: '获取动态失败' })
       }
     }
@@ -830,7 +831,7 @@ const UserActivity = (props) => {
               ) : null}
             </Col>
             <Col xs="auto">
-              <Button variant="success" size="sm" onClick={() => { setRefresh(true) }}>
+              <Button variant="success" size="sm" onClick={() => { setRefresh(!refresh) }}>
                 刷新
               </Button>
             </Col>
@@ -1059,7 +1060,6 @@ const NotificationList = (props) => {
       })
     }
 
-    setRefresh(false)
   }, [refresh])
 
   return (
@@ -1079,7 +1079,7 @@ const NotificationList = (props) => {
               }
             </Col>
             <Col xs="auto">
-              <Button variant="success" size="sm" onClick={() => { setRefresh(true) }}>
+              <Button variant="success" size="sm" onClick={() => { setRefresh(!refresh) }}>
                 刷新
               </Button>
             </Col>

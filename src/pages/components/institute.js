@@ -150,12 +150,14 @@ const InstituteFollowButton = (props) => {
   const [loginAs, setLoginAs] = useState(JSON.parse(window.localStorage.getItem('user')))
 
   useEffect(async () => {
-    const url = `http://${document.domain}:${constants.serverPort}/institute/isfollowed`
-    const res = await axios.post(url, {
-      user: loginAs._id,
-      institute: props.instituteId
-    })
-    setFollowed(!!res.data.followed)
+    if (loginAs) {
+      const url = `http://${document.domain}:${constants.serverPort}/institute/isfollowed`
+      const res = await axios.post(url, {
+        user: loginAs._id,
+        institute: props.instituteId
+      })
+      setFollowed(!!res.data.followed)
+    }
   }, [props.instituteId])
 
   const handleToggleFollow = async (e) => {
@@ -217,9 +219,9 @@ const InstituteList = (props) => {
       }
 
       {
-      [...institutes.slice((currentPage - 1) * instPerPage, currentPage * instPerPage)].map((institute) => {
-        return (<InstituteCard institute={institute} />)
-      })
+        [...institutes.slice((currentPage - 1) * instPerPage, currentPage * instPerPage)].map((institute) => {
+          return (<InstituteCard institute={institute} />)
+        })
       }
       <ListGroup.Item>
         {makePaginations(currentPage, setCurrentPage, Math.ceil(institutes.length / instPerPage), 4)}
