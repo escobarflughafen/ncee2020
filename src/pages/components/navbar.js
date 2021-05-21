@@ -43,7 +43,7 @@ const AppNavbar = (props) => {
       <Navbar className="bg-dark" variant="dark" expand="md">
         <Navbar.Brand href="#" onClick={() => { history.push('/'); history.go() }}>
           高校查询系统
-      </Navbar.Brand>
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">

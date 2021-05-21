@@ -16,7 +16,7 @@ import { InstituteCard } from './components/institute'
 
 const HomePage = (props) => {
   const today = new Date()
-  const [user, setUser] = useState()
+  const user = JSON.parse(window.localStorage.getItem('user'))
   const history = useHistory()
   const [posts, setPosts] = useState()
   const [msg, setMsg] = useState({
@@ -44,42 +44,33 @@ const HomePage = (props) => {
 
   useEffect(async () => {
     const allInstitutes = JSON.parse(window.localStorage.getItem('allInstitutes'))
+    const url = `http://${document.domain}:${constants.servicePort}/recommend`
     if (allInstitutes) {
       let randArr1 = [...(new Set([...Array(100)].map(v => Math.floor(Math.random() * 150))))]
       let randArr2 = [...(new Set([...Array(100)].map(v => Math.floor(Math.random() * 150 + 50))))]
-      let randArr = [...(new Set([...randArr1, ...randArr2]))].slice(0,10)
+      let randArr = [...(new Set([...randArr1, ...randArr2]))].slice(0, 10)
       console.log(randArr)
       setInstitutes([...allInstitutes.filter((i, idx) => randArr.includes(idx))])
     }
-    /*
-    const url = `http://${document.domain}:${constants.serverPort}/institute/recommended`
-    try{
-      const res = await axios.post(url)
-      console.log(res.data)
-      setInstitutes(res.data.institutes)
-    } catch(err) {
-      console.log(err)
-      setMsg({
-        type: 'danger',
-        text: err.response?.data?.msg
-      })
-    }
-    */
-  }, [])
-
-
-  useEffect(() => {
-    const loginAs = window.localStorage.getItem('user')
-    if (loginAs) {
-      setUser(JSON.parse(loginAs))
-      document.title = `${constants.title.homepage} - ${constants.appName}`
+    if (user) {
+      const res = await axios.post(url, { user: user._id }, { header: { 'Content-Type': 'application/json; charset=utf-8' } })
+      console.log(res)
+      if (allInstitutes && res.data.instpred.length) {
+        const randIdx = [...(new Set([...Array(400)].map(v => Math.floor(Math.random() * 20))))].slice(0, 10).sort((a, b) => a - b)
+        console.log(randIdx)
+        let ids = res.data.instpred.slice(0, 20).filter((i, idx) => randIdx.includes(idx)).map(i => i[1])
+        console.log(ids)
+        setInstitutes([...allInstitutes.filter(i => ids.includes(i._id))])
+      }
     }
   }, [])
 
 
   useEffect(() => {
-
+    document.title = `${constants.title.homepage} - ${constants.appName}`
   }, [])
+
+
 
   /*
   useEffect(async () => {
@@ -172,7 +163,7 @@ const HomePage = (props) => {
             }
             <Col xs={12} lg={(user) ? 6 : 12} className="">
               <Row>
-                <Col xs={12} lg={(user) ? 12 : 6}>
+                <Col xs={12}>
                   <Card className="mb-3">
                     <Card.Header>
                       <strong>
@@ -182,22 +173,27 @@ const HomePage = (props) => {
                     <TopicList topics={trends} viewMode={'紧凑'} trends />
                   </Card>
                 </Col>
-                <Col xs={12} lg={(user) ? 12 : 6}>
-                  <Card className="mb-3">
-                    <Card.Header>
-                      <strong>
-                        推荐院校
+                {
+                  (user) ? (
+                    <Col xs={12} lg={(user) ? 12 : 6}>
+                      <Card className="mb-3">
+                        <Card.Header>
+                          <strong>
+                            推荐院校
                       </strong>
-                    </Card.Header>
-                    <ListGroup variant="flush">
-                      {
-                        (institutes?.map(i => (
-                          <InstituteCard institute={i} size="sm"/>
-                        )))
-                      }
-                    </ListGroup>
-                  </Card>
-                </Col>
+                        </Card.Header>
+                        <ListGroup variant="flush">
+                          {
+                            (institutes?.map(i => (
+                              <InstituteCard institute={i} size="sm" />
+                            )))
+                          }
+                        </ListGroup>
+                      </Card>
+                    </Col>
+
+                  ) : null
+                }
               </Row>
             </Col>
           </Row>

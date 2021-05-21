@@ -1,6 +1,7 @@
 
 const constants = {
   serverPort: "3001",
+  servicePort: "3002",
   appName: '高校录取分数线查询',
   title: {
     homepage: "首页",

@@ -441,10 +441,15 @@ const LoginForm = (props) => {
       window.localStorage.setItem('user', JSON.stringify(res.data.user))
       window.localStorage.setItem('token', res.data.token)
 
+      const url = `http://${document.domain}:${constants.serverPort}/institute/getallinfo`
+      const allInstitutes = await axios.get(url)
+      window.localStorage.setItem('allInstitutes', JSON.stringify(allInstitutes.data.institutes))
+
       setTimeout(() => {
         history.push('/home')
         history.go()
       }, 1000)
+
     } catch (err) {
       console.log(err.response)
       setMsg({ type: 'danger', text: err.response.data.msg })
@@ -798,14 +803,13 @@ const UserActivity = (props) => {
         setMsg({ type: 'info', text: '获取动态中' })
         const postRes = await axios.post(postUrl, { users, limit: props.limit })
         const topicRes = await axios.post(topicUrl, { users, limit: props.limit })
-        var instituteActivities = {posts: [], topics: []}
+        var instituteActivities = { posts: [], topics: [] }
         if (isHomepage) {
           const instRes = await axios.post(instituteUrl, { users: [loginAs], limit: props.limit })
           instituteActivities = instRes.data
         }
         const posts = postRes.data.posts
         const topics = topicRes.data.topics
-        console.log(posts, topics)
         let contents = [...posts, ...topics, ...instituteActivities?.posts, ...instituteActivities?.topics].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         setContents(contents)
         setMsg({ type: '', text: '' })
