@@ -433,14 +433,7 @@ const EnrollTable = (props) => {
           <Card.Title>
             投档线预测
             </Card.Title>
-          <Row>
-            <Col xs={6}>
-              <InstitutePredictionForm institute={institute}/>
-            </Col>
-            <Col xs={6}>
-              
-            </Col>
-          </Row>
+          <InstitutePredictionForm institute={institute} />
         </Col>
       </Row>
     </div>
