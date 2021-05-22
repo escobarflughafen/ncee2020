@@ -7,6 +7,9 @@ import constants from '../../utils/constants'
 import { makePaginations } from './pagination'
 import axios from 'axios'
 import SVG from '../../utils/svg'
+import { Formik } from 'formik'
+import * as Yup from 'yup'
+import { MsgAlert, MsgListItem } from './msg'
 
 const Labels = (props) => {
   const { path, url, params } = useRouteMatch()
@@ -322,5 +325,254 @@ const InstituteSelector = (props) => {
   )
 }
 
+const InstitutePredictionForm = (props) => {
+  const institute = props.institute
+  const [indices, setIndices] = useState()
 
-export { InstituteCard, InstituteList, Labels, InstituteSelector, InstituteFollowButton }
+  const [msg, setMsg] = useState({
+    type: '',
+    text: ''
+  })
+
+  useEffect(async () => {
+    const url = `http://${document.domain}:${constants.servicePort}/fetch_indices`
+    const res = await axios.get(url)
+    console.log(res)
+    setIndices(res.data)
+  }, [])
+
+  const schema = Yup.object().shape({
+    last_min: Yup.number().min(0, '最低分为0分').max(750, '最高分为750分').required(),
+    last_min_rank: Yup.number().min(0, '最低排名为0').required(),
+    last_avg: Yup.number().min(0, '最低分为0分').max(750, '最高分为750分').required(),
+    last_avg_rank: Yup.number().min(0, '最低排名为0').required(),
+    id: Yup.number().required(),
+    province_line: Yup.number().min(0, '最低分为0分').max(750, '最高分为750分').required(),
+    major_name: Yup.string().required('请选择专业名称'),
+    major_category: Yup.string().required('请选择专业类别'),
+    major_field: Yup.string().required('请选择专业领域'),
+  })
+  const handleSubmit = async (body) => {
+    console.log(body)
+
+  }
+
+
+  return (
+    <>
+      <MsgAlert msg={msg} />
+      <Formik
+        onSubmit={handleSubmit}
+        initialValues={
+          {
+            id: institute.id,
+            year: 2021,
+            subject: 0,
+            province_line: 500,
+            major_name: '0',
+            major_category: '0',
+            major_field: '0',
+            last_min: 0,
+            last_min_rank: 0,
+            last_avg: 0,
+            last_avg_rank: 0,
+          }
+        }
+        validationSchema={schema}
+      >
+        {
+          ({
+            handleSubmit,
+            handleChange,
+            handleBlur,
+            values,
+            errors,
+            touched,
+            isValid
+          }) => {
+            return (
+              <Form noValidate onSubmit={handleSubmit}>
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>校名</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control type="text" placeholder={institute?.name} readOnly />
+                </InputGroup>
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>年份</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control type="text" placeholder="2021" readOnly />
+                </InputGroup>
+                {
+                  /*
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>省份</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control as="select">
+                  </Form.Control>
+                </InputGroup>
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>批次</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control as="select">
+                  </Form.Control>
+                </InputGroup>
+                   */
+                }
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>科类</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    as="select"
+                    name="subject"
+                    value={values.subject}
+                    onChange={handleChange}
+                  >
+                    {
+                      ['文科', '理科'].map((i, idx) => (
+                        <option value={idx}>{i}</option>
+                      ))
+                    }
+                  </Form.Control>
+                  <InputGroup.Append>
+                    <InputGroup.Text className="text-danger">
+                    {errors.subject}
+                    </InputGroup.Text>
+                  </InputGroup.Append>
+                </InputGroup>
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>省控线</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    type="number"
+                    name="province_line"
+                    value={values.province_line}
+                    onChange={handleChange}
+                  />
+                  <InputGroup.Append>
+                    <InputGroup.Text className="text-danger">
+                    {errors.province_line}
+                    </InputGroup.Text>
+                  </InputGroup.Append>
+                </InputGroup>
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>专业名</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    as="select"
+                    name="major_name"
+                    value={values.major_name}
+                    onChange={handleChange}
+                  >
+                    {
+                      (indices) ? indices.major_name.map(i => (
+                        <option value={i[0]}>{i[1]}</option>
+                      )) : null
+                    }
+                  </Form.Control>
+                  <InputGroup.Append>
+                    <InputGroup.Text className="text-danger">
+                    {errors.major_name}
+                    </InputGroup.Text>
+                  </InputGroup.Append>
+                </InputGroup>
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>专业类别</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    as="select"
+                    name="major_category"
+                    value={values.major_category}
+                    onChange={handleChange}
+                  >
+                    {
+                      (indices) ? indices.major_category.map(i => (
+                        <option value={i[0]}>{i[1]}</option>
+                      )) : null
+                    }
+                  </Form.Control>
+                  <InputGroup.Append>
+                    <InputGroup.Text className="text-danger">
+                    {errors.major_category}
+                    </InputGroup.Text>
+                  </InputGroup.Append>
+                </InputGroup>
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>专业领域</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    as="select"
+                    name="major_field"
+                    value={values.major_field}
+                    onChange={handleChange}
+                  >
+                    {
+                      (indices) ? indices.major_field.map(i => (
+                        <option value={i[0]}>{i[1]}</option>
+                      )) : null
+                    }
+                  </Form.Control>
+                  <InputGroup.Append>
+                    <InputGroup.Text className="text-danger">
+                    {errors.major_field}
+                    </InputGroup.Text>
+                  </InputGroup.Append>
+                </InputGroup>
+                <InputGroup size="sm" className="mb-1">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>去年投档线</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control type="number"
+                    name="last_min"
+                    value={values.last_min}
+                    onChange={handleChange}
+                    placeholder="分数" />
+                  <Form.Control type="number"
+                    name="last_min_rank"
+                    value={values.last_min_rank}
+                    onChange={handleChange}
+                    placeholder="位次" />
+                </InputGroup>
+                <InputGroup size="sm" className="">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>去年平均分</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control type="number"
+                    name="last_avg"
+                    value={values.last_avg}
+                    onChange={handleChange}
+                    placeholder="分数" />
+                  <Form.Control type="number"
+                    name="last_avg_rank"
+                    value={values.last_avg_rank}
+                    onChange={handleChange}
+                    placeholder="位次" />
+                </InputGroup>
+                <p className="text-danger">
+                  <small>
+                  {errors.last_min}
+                  {errors.last_min_rank}
+                  {errors.last_avg}
+                  {errors.last_avg_rank}
+                  </small>
+                </p>
+                <Button type="submit" variant="info">预测</Button>
+              </Form>
+            )
+          }
+        }
+
+      </Formik >
+    </>
+  )
+}
+
+export { InstituteCard, InstituteList, Labels, InstituteSelector, InstituteFollowButton, InstitutePredictionForm }

@@ -40,7 +40,7 @@ const AppNavbar = (props) => {
   return (
     <Router>
 
-      <Navbar className="bg-dark" variant="dark" expand="md">
+      <Navbar className="bg-dark shadow" variant="dark" expand="md">
         <Navbar.Brand href="#" onClick={() => { history.push('/'); history.go() }}>
           高校查询系统
         </Navbar.Brand>

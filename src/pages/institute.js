@@ -10,7 +10,7 @@ import axios from 'axios'
 import { makePaginations } from './components/pagination'
 import { TopicList, NewTopicForm } from './components/topic'
 import { PostList, NewPostForm } from './components/post'
-import { InstituteCard, Labels, InstituteFollowButton } from './components/institute'
+import { InstituteCard, Labels, InstituteFollowButton, InstitutePredictionForm } from './components/institute'
 import { Bar, Line } from 'react-chartjs-2'
 
 // Utils
@@ -168,6 +168,7 @@ const EnrollTable = (props) => {
   const [enroll, setEnroll] = useState()
   const [regionData, setRegionData] = useState([])
   const [selectedMajor, setSelectedMajor] = useState('')
+  const institute = props.institute
 
   useEffect(() => {
     fetchInstituteEnrollData(id, (res) => {
@@ -427,6 +428,21 @@ const EnrollTable = (props) => {
           </Row >
         </Col>
       </Row>
+      <Row>
+        <Col>
+          <Card.Title>
+            投档线预测
+            </Card.Title>
+          <Row>
+            <Col xs={6}>
+              <InstitutePredictionForm institute={institute}/>
+            </Col>
+            <Col xs={6}>
+              
+            </Col>
+          </Row>
+        </Col>
+      </Row>
     </div>
   )
 }
@@ -656,7 +672,7 @@ const InstituteTabs = (props) => {
               </Route>
               <Route path={`${url}/stats`}>
                 <Card.Body>
-                  <EnrollTable iid={id} />
+                  <EnrollTable iid={id} institute={institute} />
                 </Card.Body>
               </Route>
               <Route path={`${url}/discuss`}>

@@ -491,8 +491,6 @@ const NewTopicForm = (props) => {
 
 
 const TopicCloseModal = (props) => {
-  const [title, setTitle] = useState("")
-  const [reason, setReason] = useState("")
   const [msg, setMsg] = useState({
     type: '',
     text: ''
