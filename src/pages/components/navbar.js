@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useState, useEffect, useContext } from 'react'
-import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, Badge, Image } from 'react-bootstrap'
+import { Alert, Form, FormControl, Button, Nav, Tab, Row, Col, Table, ListGroup, Badge, Image, InputGroup } from 'react-bootstrap'
 import { Navbar, NavDropdown, Breadcrumb, Pagination } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route, Link, NavLink, Redirect, useHistory, useLocation } from 'react-router-dom'
 import SVG from '../../utils/svg'
@@ -33,9 +33,11 @@ const AppNavbar = (props) => {
         //console.log(res)
         setNoticeCount(res.data.count)
         window.localStorage.setItem('noticecount', res.data.count)
-      }, Math.ceil(Math.random() * 10000 + 5000))
+      }, Math.ceil(Math.random() * 1000 + 5000))
     }
   }, [])
+
+  const [searchKW, setSearchKW] = useState("")
 
   return (
     <Router>
@@ -64,6 +66,28 @@ const AppNavbar = (props) => {
               <Nav.Link onClick={() => { history.push('/forum'); history.go() }}>{constants.title.forum}</Nav.Link>
             </Nav.Item >
           </Nav>
+          <Form className="mr-2" onSubmit={(e) => {
+            e.preventDefault()
+            if (searchKW) {
+              history.push({
+                pathname: '/institute',
+                state: {
+                  queryParams: [{
+                    category: 'keyword',
+                    label: searchKW
+                  }]
+                }
+              })
+              history.go()
+            }
+          }}>
+            <InputGroup>
+              <FormControl type="text" placeholder="关键字..." value={searchKW} onChange={(e) => { setSearchKW(e.target.value) }} />
+              <InputGroup.Append>
+                <Button variant="success" type="submit">查询</Button>
+              </InputGroup.Append>
+            </InputGroup>
+          </Form>
           <Nav>
             {
               (user) ? (

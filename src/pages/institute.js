@@ -415,6 +415,11 @@ const EnrollTable = (props) => {
                               <td>{score.major_name.split('（')[0]}</td>
                               <td>{score.enroll_batch}</td>
                               <td>{score.score_avg}</td>
+                              {
+                                /*
+                              <td>{(score.score_min != -1) ? (score.score_min) : (score.score_avg - Math.ceil(5 * Math.random()))}</td>
+                                */
+                              }
                               <td>{score.score_min}</td>
                               <td>{score.rank_min}</td>
                             </tr>

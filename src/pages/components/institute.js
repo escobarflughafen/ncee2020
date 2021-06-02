@@ -338,7 +338,11 @@ const InstitutePredictionForm = (props) => {
 
   useEffect(async () => {
     const url = `http://${document.domain}:${constants.servicePort}/fetch_indices`
-    const res = await axios.get(url)
+    const res = await axios.get(url, {
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
+    })
     console.log(res)
     setIndices(res.data)
   }, [])
@@ -355,10 +359,15 @@ const InstitutePredictionForm = (props) => {
     major_category: Yup.string().required('请选择专业类别'),
     major_field: Yup.string().required('请选择专业领域'),
   })
+
   const handleSubmit = async (body) => {
     console.log(body)
     const url = `http://${document.domain}:${constants.servicePort}/predict`
-    const res = await axios.post(url, body)
+    const res = await axios.post(url, body, {
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
+    })
     console.log(res)
     setPredictVal(res.data)
   }
@@ -367,7 +376,7 @@ const InstitutePredictionForm = (props) => {
     <>
       <MsgAlert msg={msg} />
       <Row>
-        <Col>
+        <Col xs={12} md={6} className="mb-3">
           <Formik
             onSubmit={handleSubmit}
             initialValues={
@@ -410,7 +419,7 @@ const InstitutePredictionForm = (props) => {
                       <InputGroup.Prepend>
                         <InputGroup.Text>年份</InputGroup.Text>
                       </InputGroup.Prepend>
-                      <Form.Control type="text" placeholder="2021" readOnly />
+                      <Form.Control type="text" placeholder="2021" readOnly/>
                     </InputGroup>
                     {
                       /*
@@ -572,7 +581,7 @@ const InstitutePredictionForm = (props) => {
                         name="last_province_line"
                         value={values.last_province_line}
                         onChange={handleChange}
-                        />
+                      />
                     </InputGroup>
                     <p className="text-danger">
                       <small>
@@ -591,12 +600,12 @@ const InstitutePredictionForm = (props) => {
 
           </Formik >
         </Col>
-        <Col>
+        <Col xs={12} md={6}>
           <Card>
             <Card.Header>
               <strong>投档线预测</strong>
             </Card.Header>
-            <Card.Body style={{textAlign: 'center'}}>
+            <Card.Body style={{ textAlign: 'center' }}>
               <h4>{predictVal.min && Math.abs(predictVal?.min)}</h4>
             </Card.Body>
             {
